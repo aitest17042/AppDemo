@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HSBC SME Assistant Lock Screen</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-page-id="lock-screen">
+    <div class="workspace-layout" id="workspaceLayout">
+      <div class="app-shell">
+        <div class="phone-frame">
+          <div class="phone-screen lock-screen-screen">
+            <div class="status-bar lock-status-bar">
+              <div id="lockStatusTime">--:--</div>
+              <div class="status-icons">
+                <span class="icon" aria-hidden="true">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 10a6 6 0 1 0-12 0"></path>
+                    <path d="M14.31 6.47a3 3 0 0 0-4.62 0"></path>
+                    <path d="M13 10a1 1 0 0 0-2 0"></path>
+                  </svg>
+                </span>
+                <span class="icon" aria-hidden="true">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h.01"></path>
+                    <path d="M2 8.82a15 15 0 0 1 20 0"></path>
+                    <path d="M5 12.86a10 10 0 0 1 14 0"></path>
+                    <path d="M8.5 16.43a5 5 0 0 1 7 0"></path>
+                  </svg>
+                </span>
+                <span class="battery-group">
+                  <span class="battery-level">85</span>
+                  <span class="icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="7" width="18" height="10" rx="2"></rect>
+                      <path d="M22 11v2"></path>
+                    </svg>
+                  </span>
+                </span>
+              </div>
+            </div>
+
+            <div class="dynamic-island" aria-hidden="true"></div>
+
+            <main class="lock-screen-main">
+              <div class="lock-screen-top">
+                <div class="lock-date" id="lockDate">星期四, 4月23日</div>
+                <div class="lock-time" id="lockTime">--:--</div>
+              </div>
+
+              <div class="notification-stack">
+                <div class="lock-notification" data-target="./index.html" tabindex="0" role="button" aria-label="Open HSBC notification by swiping right">
+                  <div class="notification-swipe-indicator">向右滑動打開</div>
+                  <div class="notification-head">
+                    <div class="notification-app">
+                      <div class="notification-app-icon notification-app-icon-hsbc" aria-hidden="true"></div>
+                      <div>
+                        <div class="notification-app-name">HSBC 匯豐</div>
+                        <div class="notification-app-time">現在</div>
+                      </div>
+                    </div>
+                    <div class="notification-badge">2</div>
+                  </div>
+                  <div class="notification-title">💡 現金流預計及建議</div>
+                  <div class="notification-body">AI: 分析顯示您每月都有恆常日元支出。受中東局勢動盪與國際油價飆升雙重夾擊，日圓兌港元匯率最近大幅波動，建議您考慮使用外匯對沖策略以降低風險，右滑以查看更多資訊。</div>
+                </div>
+
+                <div class="lock-notification" data-target="./index.html" tabindex="0" role="button" aria-label="Open Operations notification by swiping right">
+                  <div class="notification-swipe-indicator">向右滑動打開</div>
+                  <div class="notification-head">
+                    <div class="notification-app">
+                      <div class="notification-app-icon notification-app-icon-ops" aria-hidden="true">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 3v18"></path>
+                          <path d="M3 12h18"></path>
+                        </svg>
+                      </div>
+                      <div>
+                        <div class="notification-app-name">Business Ops</div>
+                        <div class="notification-app-time">1 分鐘前</div>
+                      </div>
+                    </div>
+                    <div class="notification-badge notification-badge-muted">1</div>
+                  </div>
+                  <div class="notification-title">✅ 自動轉帳成功</div>
+                  <div class="notification-body">你已自動轉帳給「我是一間拉面供應商（日本）株式会社」，金額 JPY 150,000 (折合約 HK$ 7,654.50)。</div>
+                </div>
+              </div>
+            </main>
+
+            <div class="home-indicator home-indicator-dark"><div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script defer src="./knowledgeBase.ts"></script>
+    <script defer src="./presenter-navigation.js"></script>
+    <script defer src="./locked-screen.js"></script>
+  </body>
+</html>
