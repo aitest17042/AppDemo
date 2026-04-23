@@ -3,7 +3,7 @@ Object.assign(window, {
     knowledgeBase: [
       {
         trigger: '貸款 / SME Loan',
-        keywords: ['貸款', 'loan', '借錢', '週轉'],
+        keywords: ['我想查詢中小企貸款的最新方案', '貸款', 'loan', '借錢', '週轉'],
         flow: {
           id: 'loan-flow',
           introResponses: [
@@ -512,11 +512,7 @@ Object.assign(window, {
           introResponses: [
             {
               type: 'text',
-              content: '了解。我可以協助您由公司設立到開立匯豐商業戶口的整個流程。'
-            },
-            {
-              type: 'text',
-              content: '我會用 10 個步驟了解您的公司狀況、開戶方式與文件準備情況，再給您下一步建議。'
+              content: '了解。我可以協助您由公司設立到香港商業戶口開立的一站式流程。'
             }
           ],
           startStepId: 'account-company-status',
@@ -525,39 +521,24 @@ Object.assign(window, {
               id: 'account-company-status',
               prompt: {
                 type: 'text',
-                content: '第一步，您目前屬於哪一個階段？'
+                content: '為了確認您適用的開戶流程，我先請問：您已經成立公司了嗎？'
               },
-              choices: [
+              routes: [
                 {
-                  action: '尚未成立公司',
+                  action: '未',
                   exactKeywords: ['未'],
-                  keywords: ['未成立', '未成立公司', '還未成立', '公司未成立', '未有公司'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '了解，您現階段可先整理日後開戶所需的基本資料。'
-                    }
-                  ],
+                  keywords: ['未', '未成立', '未成立公司', '還未成立', '公司未成立', '未有公司', 'not yet'],
+                  responses: [],
                   nextStepId: 'account-location'
                 },
                 {
-                  action: '剛成立未營運',
-                  keywords: ['剛成立', '新成立', '未營運'],
+                  action: '已',
+                  exactKeywords: ['已'],
+                  keywords: ['已', '已成立', '已經成立', 'yes'],
                   responses: [
                     {
                       type: 'text',
-                      content: '明白，您可按新成立公司的文件要求準備開戶資料。'
-                    }
-                  ],
-                  nextStepId: 'account-location'
-                },
-                {
-                  action: '已營運一段時間',
-                  keywords: ['已經營運', '營運一段時間', '已成立', '公司已成立', '已經成立', '已'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '明白，您可直接按現有業務資料和公司文件規劃開戶。'
+                      content: '明白。如公司已成立，我也可以協助您接續香港商業戶口開立流程。'
                     }
                   ],
                   nextStepId: 'account-location'
@@ -568,444 +549,209 @@ Object.assign(window, {
               id: 'account-location',
               prompt: {
                 type: 'text',
-                content: '第二步，公司將會或已經在哪裏成立？'
+                content: '您打算在哪裡成立公司？'
               },
-              choices: [
+              routes: [
                 {
-                  action: '香港',
-                  exactKeywords: ['香港'],
-                  keywords: ['香港公司', 'hk'],
+                  action: 'HK',
+                  exactKeywords: ['hk'],
+                  keywords: ['香港', '香港公司', 'hk', 'hong kong', 'hongkong', 'hkg'],
                   responses: [
                     {
                       type: 'text',
-                      content: '收到，香港公司一般會用到公司註冊證明、商業登記證 (BR) 及董事身份證明文件。'
+                      content: '好的，我將為您啟動「香港公司設立 + 商業戶口開立」一站式流程。如您同意，我可以在您授權下協助整理資料、生成待簽文件並提交公司設立申請；公司成立後，我會預填商業戶口開戶表格，最後您只需電子簽署即可提交開戶。'
                     }
                   ],
-                  nextStepId: 'account-structure'
-                },
-                {
-                  action: '內地',
-                  exactKeywords: ['內地'],
-                  keywords: ['中國內地', '內地公司', '大陸'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '收到，如屬內地公司，通常要按公司架構提供當地註冊文件及實益擁有人資料。'
-                    }
-                  ],
-                  nextStepId: 'account-structure'
+                  nextStepId: 'account-authorization'
                 },
                 {
                   action: '其他地區',
-                  exactKeywords: ['其他地區'],
-                  keywords: ['海外', '其他', '境外'],
+                  keywords: ['內地', '中國內地', '內地公司', '大陸', '海外', '其他', '境外'],
                   responses: [
                     {
                       type: 'text',
-                      content: '收到，境外公司通常需要更完整的註冊文件、股權架構及實益擁有人資料。'
+                      content: '這次示範我先按「香港公司設立 + 商業戶口開立」流程為您展示後續步驟。'
                     }
                   ],
-                  nextStepId: 'account-structure'
+                  nextStepId: 'account-authorization'
                 }
               ]
             },
             {
-              id: 'account-structure',
+              id: 'account-authorization',
               prompt: {
                 type: 'text',
-                content: '第三步，公司的架構較接近以下哪一類？'
+                content: '請問您是否授權我協助您完成整個流程？'
               },
-              choices: [
+              routes: [
                 {
-                  action: '獨資或合夥',
-                  keywords: ['獨資', '合夥'],
+                  action: '好，授權',
+                  keywords: ['授權', '同意', '可以', '好', 'ok'],
                   responses: [
                     {
                       type: 'text',
-                      content: '明白，架構相對簡單時，文件清單通常較直接。'
+                      content: '感謝您的授權。為保障您的資料安全，並符合開戶及後續申請流程要求，我需要先為您進行身分核實。完成後我才可繼續協助您提交公司設立及開戶相關申請。'
+                    },
+                    {
+                      type: 'text',
+                      content: '請先準備您的身分證明文件：香港身份證（HKID）或護照。'
+                    },
+                    {
+                      type: 'text',
+                      content: '請在光線充足的位置，拍攝一張自拍照：您本人清晰入鏡，並同時手持該身分證明文件，文件上的姓名及證件號碼需清晰可見。'
+                    },
+                    {
+                      type: 'text',
+                      content: '完成後請上載該相片，我會立即進行核對。'
                     }
                   ],
-                  nextStepId: 'account-directors'
+                  nextStepId: 'account-supporting-upload'
                 },
                 {
-                  action: '有限公司',
-                  keywords: ['有限公司', 'limited'],
+                  action: '暫不授權',
+                  keywords: ['不', '否', '未授權'],
                   responses: [
                     {
                       type: 'text',
-                      content: '了解，有限公司一般需提供公司註冊文件及董事資料。'
+                      content: '明白。當您準備好授權後，我可以再由身分核實開始協助您完成流程。'
                     }
                   ],
-                  nextStepId: 'account-directors'
-                },
-                {
-                  action: '多層股權或海外架構',
-                  keywords: ['多層股權', '海外架構', '複雜架構'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '收到，較複雜的股權架構通常需要額外的實益擁有人及架構證明。'
-                    }
-                  ],
-                  nextStepId: 'account-directors'
+                  clearFlow: true
                 }
               ]
-            },
-            {
-              id: 'account-directors',
-              prompt: {
-                type: 'text',
-                content: '第四步，公司大概有多少位董事或授權簽署人需要參與開戶？'
-              },
-              choices: [
-                {
-                  action: '1位',
-                  exactKeywords: ['1位'],
-                  keywords: ['一位', '1個'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '了解，單一簽署安排一般較容易整理文件與預約。'
-                    }
-                  ],
-                  nextStepId: 'account-channel'
-                },
-                {
-                  action: '2至4位',
-                  keywords: ['2至4位', '二至四位'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '收到，如有多位董事，建議及早確認每位需提交的身份文件。'
-                    }
-                  ],
-                  nextStepId: 'account-channel'
-                },
-                {
-                  action: '5位或以上',
-                  keywords: ['5位或以上', '五位或以上'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '明白，人數較多時最好先整理完整簽署及實益擁有人名單。'
-                    }
-                  ],
-                  nextStepId: 'account-channel'
-                }
-              ]
-            },
-            {
-              id: 'account-channel',
-              prompt: {
-                type: 'text',
-                content: '第五步，您較傾向用哪種方式辦理開戶？'
-              },
-              choices: [
-                {
-                  action: '透過 HSBC Sprint App',
-                  keywords: ['sprint app', 'app開戶'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '了解，如情況合適，Sprint App 可作為較方便的申請渠道。'
-                    }
-                  ],
-                  nextStepId: 'account-business-type'
-                },
-                {
-                  action: '親身到商業客戶服務中心',
-                  keywords: ['親身', '服務中心', '分行'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '明白，如需面談或文件較複雜，親身辦理會較清晰。'
-                    }
-                  ],
-                  nextStepId: 'account-business-type'
-                },
-                {
-                  action: '先比較兩種方式',
-                  keywords: ['比較', '先看看'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '可以，我會先以流程與文件準備角度幫您整理。'
-                    }
-                  ],
-                  nextStepId: 'account-business-type'
-                }
-              ]
-            },
-            {
-              id: 'account-business-type',
-              prompt: {
-                type: 'text',
-                content: '第六步，您的主要業務類型較接近哪一類？'
-              },
-              choices: [
-                {
-                  action: '貿易',
-                  keywords: ['貿易', '進出口'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '收到，貿易業務開戶時通常需要較多業務往來資料作支持。'
-                    }
-                  ],
-                  nextStepId: 'account-needs'
-                },
-                {
-                  action: '服務業',
-                  keywords: ['服務業', '顧問', '專業服務'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '明白，服務業一般會集中展示業務模式、合約或收款安排。'
-                    }
-                  ],
-                  nextStepId: 'account-needs'
-                },
-                {
-                  action: '電商或科技',
-                  keywords: ['電商', '科技', '平台'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '了解，電商或科技公司通常需要說明平台模式及資金流向。'
-                    }
-                  ],
-                  nextStepId: 'account-needs'
-                }
-              ]
-            },
-            {
-              id: 'account-needs',
-              prompt: {
-                type: 'text',
-                content: '第七步，您開戶後最主要需要哪一類銀行服務？'
-              },
-              choices: [
-                {
-                  action: '本地日常收支',
-                  keywords: ['本地', '日常收支'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '明白，這類需求通常以基本戶口功能和網上理財為主。'
-                    }
-                  ],
-                  nextStepId: 'account-documents'
-                },
-                {
-                  action: '跨境收款付款',
-                  keywords: ['跨境', '收款付款', '海外收款'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '收到，如涉及跨境交易，之後可一併留意多幣種及匯款安排。'
-                    }
-                  ],
-                  nextStepId: 'account-documents'
-                },
-                {
-                  action: '多幣種及網上銀行',
-                  keywords: ['多幣種', '網上銀行', '數碼理財'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '了解，這類需求通常會更重視數碼渠道及跨幣種管理功能。'
-                    }
-                  ],
-                  nextStepId: 'account-documents'
-                }
-              ]
-            },
-            {
-              id: 'account-documents',
-              prompt: {
-                type: 'text',
-                content: '第八步，您目前的開戶文件準備情況如何？'
-              },
-              choices: [
-                {
-                  action: '已備齊主要文件',
-                  keywords: ['已備齊', '文件齊'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '很好，這樣通常較容易進入下一步申請或預約。'
-                    }
-                  ],
-                  nextStepId: 'account-timeline'
-                },
-                {
-                  action: '已準備部分文件',
-                  keywords: ['部分文件', '準備了一部分'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '明白，之後可優先補齊公司註冊及身份證明文件。'
-                    }
-                  ],
-                  nextStepId: 'account-timeline'
-                },
-                {
-                  action: '未開始準備',
-                  keywords: ['未開始', '未準備'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '收到，稍後我可以先給您一份較實用的基本文件清單。'
-                    }
-                  ],
-                  nextStepId: 'account-timeline'
-                }
-              ]
-            },
-            {
-              id: 'account-timeline',
-              prompt: {
-                type: 'text',
-                content: '第九步，您希望大概何時完成開戶？'
-              },
-              choices: [
-                {
-                  action: '一星期內',
-                  keywords: ['一星期內', '盡快'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '明白，若時間較緊，文件完整度會特別重要。'
-                    }
-                  ],
-                  nextStepId: 'account-business-context'
-                },
-                {
-                  action: '本月內',
-                  keywords: ['本月內', '一個月內'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '收到，這個時間表通常足夠安排文件整理與申請。'
-                    }
-                  ],
-                  nextStepId: 'account-business-context'
-                },
-                {
-                  action: '先了解流程',
-                  keywords: ['先了解', '之後再決定'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '可以，先把流程與文件要求釐清會更穩妥。'
-                    }
-                  ],
-                  nextStepId: 'account-business-context'
-                }
-              ]
-            },
-            {
-              id: 'account-business-context',
-              inputMode: 'text',
-              inputPlaceholder: '例如：公司剛成立 3 個月，希望先開立本地及多幣種戶口',
-              prompt: {
-                type: 'text',
-                content: '第十步，請輸入一段補充資料，示範您的公司背景、開戶目標或特殊安排。'
-              },
-              captureResponses: [
-                {
-                  type: 'text',
-                  content: '已識別您輸入的開戶補充資料：{{account-business-context}}。'
-                }
-              ],
-              nextStepId: 'account-supporting-upload'
             },
             {
               id: 'account-supporting-upload',
               inputMode: 'file',
-              uploadPlaceholder: '此步驟請使用上傳按鈕加入示範文件',
-              fileAccept: '.pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx',
+              uploadPlaceholder: '此步驟請使用上傳按鈕加入自拍連同身份證明文件的相片',
+              fileAccept: '.png,.jpg,.jpeg,.pdf',
+              responseDelayMs: 3000,
               prompt: {
                 type: 'text',
-                content: '第十一步，請上傳 1 至 2 份示範文件，例如公司註冊文件、董事身份證明或業務證明。'
+                content: '請上載您本人清晰入鏡並手持身分證明文件的相片，我會立即進行核對。'
               },
               captureResponses: [
                 {
                   type: 'text',
-                  content: '已識別您上傳的文件：{{account-supporting-upload}}。'
+                  content: '面容識別已完成。'
                 },
                 {
                   type: 'text',
-                  content: '我已把補充資料和文件整理到摘要中，下一步請確認。'
+                  content: '文件內容識別已完成：\n\n證件類別：香港身份證\n\n證件編號：A123456(6)\n\n姓名：小白'
                 }
               ],
-              nextStepId: 'account-next-step'
+              nextStepId: 'account-verification-confirm'
             },
             {
-              id: 'account-next-step',
+              id: 'account-verification-confirm',
               prompt: {
                 type: 'text',
-                content: '第十二步，我已為您整理開戶摘要：目前階段為「{{account-company-status}}」，成立地為「{{account-location}}」，公司架構為「{{account-structure}}」，參與開戶人數為「{{account-directors}}」，偏好渠道為「{{account-channel}}」，主要業務為「{{account-business-type}}」，核心銀行需求為「{{account-needs}}」，文件狀態為「{{account-documents}}」，期望時程為「{{account-timeline}}」，補充說明為「{{account-business-context}}」，上傳資料為「{{account-supporting-upload}}」。如以上正確，請確認下一步。'
+                content: '如以上資料正確，請輸入「確認」。'
               },
-              choices: [
+              routes: [
                 {
-                  action: '確認並查看文件清單',
-                  keywords: ['文件清單', '需要甚麼文件'],
+                  action: '確認',
+                  keywords: ['確認', '正確', 'ok', 'yes'],
+                  responses: [],
+                  nextStepId: 'account-company-registration-info'
+                }
+              ]
+            },
+            {
+              id: 'account-company-registration-info',
+              inputMode: 'text',
+              inputPlaceholder: '例如：公司名稱「小白拉麵有限公司」，1 名董事兼股東，主要經營拉麵餐廳，計劃於九龍開業',
+              prompt: {
+                type: 'text',
+                content: '我將開始收集必要資料，並在每一步提供摘要供您確認。接下來我會先收集公司名稱、董事/股東安排及基本業務資料，並提供所需文件清單與狀態追蹤，讓您清楚每一步進度。請先提供公司名稱、董事/股東安排及基本業務資料。'
+              },
+              captureResponses: [
+                {
+                  type: 'text',
+                  content: '我已收到您提供的公司名稱、董事/股東安排及基本業務資料。'
+                },
+                {
+                  type: 'text',
+                  content: '我已協助整理公司設立申請資料，並已向公司註冊處提交，以取得 CI 及 BR。'
+                },
+                {
+                  type: 'text',
+                  content: '通知您：公司設立已完成。接下來我將為您啟動 HSBC 香港商業戶口開立，並預先填寫開戶表格。'
+                },
+                {
+                  type: 'text',
+                  content: '為加快審核及減少補件，我需要您提供以下與業務相關文件或資料（如適用，提供其一或多項即可）：'
+                },
+                {
+                  type: 'text',
+                  content: '1. 業務證明：餐廳 IG / Facebook 專頁、官方網站、外賣平台店舖頁面截圖（如 OpenRice / Foodpanda / Deliveroo 等）。'
+                },
+                {
+                  type: 'text',
+                  content: '2. 交易佐證：已發出或已收取的發票、收據、採購單、供應商合約或報價單。'
+                },
+                {
+                  type: 'text',
+                  content: '3. 租務文件：店舖租約或租務意向書（如已簽）。'
+                },
+                {
+                  type: 'text',
+                  content: '4. 營運資料：菜單、價目表、開業日期、主要供應商名稱（如有）。'
+                },
+                {
+                  type: 'text',
+                  content: '5. 資金來源佐證（如需要）：注資紀錄或相關說明。'
+                }
+              ],
+              nextStepId: 'account-business-supporting'
+            },
+            {
+              id: 'account-business-supporting',
+              inputMode: 'text-or-file',
+              inputPlaceholder: '例如：IG 連結、官方網站網址，或直接描述您準備提供的業務文件',
+              uploadPlaceholder: '此步驟可直接輸入連結，或使用上傳按鈕加入 PDF / 相片',
+              fileAccept: '.pdf,.png,.jpg,.jpeg,.doc,.docx',
+              prompt: {
+                type: 'text',
+                content: '請選擇最方便的方式提供：您可直接回覆連結，例如 IG URL；或上載 PDF / 相片，我會為您整理並附加至開戶申請檔案。'
+              },
+              captureResponses: [
+                {
+                  type: 'text',
+                  content: '我已收到並整理您提供的業務相關文件或資料，正進行文件驗證、CDD 核對及開戶摘要草擬。'
+                },
+                {
+                  type: 'text',
+                  content: '我已根據公司註冊資料預填開戶表格。下一步將進行電子簽署：您檢視摘要後一次過簽署提交；完成後我會持續為您更新審核進度，直至戶口開立完成。'
+                }
+              ],
+              nextStepId: 'account-esign'
+            },
+            {
+              id: 'account-esign',
+              prompt: {
+                type: 'text',
+                content: '如您準備好，請輸入「OK + e-sign」完成電子簽署。'
+              },
+              routes: [
+                {
+                  action: 'OK + e-sign',
+                  keywords: ['ok + e-sign', 'ok', 'e-sign', 'esign', '電子簽署'],
                   responses: [
                     {
                       type: 'text',
-                      content: '我已按您的摘要整理出基本文件方向。一般商業開戶會先準備商業登記證、公司註冊文件、董事及授權簽署人身份證明，以及視乎業務模式提供補充資料。'
+                      content: '已收到您的電子簽署並成功提交開戶申請，我會持續為您更新審核進度，如需補充文件亦會即時通知。'
                     },
                     {
                       type: 'text',
-                      content: '若公司架構或業務較複雜，可能還需要補充股權架構、實益擁有人及業務證明文件。',
-                      actions: ['我想了解不同公司架構的文件要求', '我想知道哪些文件最常缺漏']
-                    }
-                  ],
-                  clearFlow: true
-                },
-                {
-                  action: '確認並了解 HSBC Sprint App 開戶',
-                  keywords: ['sprint', 'app開戶'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '如情況合適，我已按您的摘要整理出較適合先了解的方向，您可先了解透過 HSBC Sprint App 辦理商業開戶的流程與文件要求。'
+                      content: '審核已完成。'
                     },
                     {
                       type: 'text',
-                      content: '在正式申請前，先確認公司架構、董事資料及主要業務資料是否齊備，通常會較有效率。',
-                      actions: ['我想知道 Sprint App 開戶流程', '我想了解 App 開戶需要哪些資料']
+                      content: '恭喜您，您的 HSBC 香港商業戶口已成功開立。'
                     }
                   ],
                   clearFlow: true
-                },
-                {
-                  action: '確認並預約商業客戶服務中心',
-                  keywords: ['預約', '服務中心', '分行'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '可以。我已根據您的摘要整理出會面前準備方向。若您想親身辦理，建議先確認方便的地區、時間，以及當日可帶備的開戶文件。'
-                    },
-                    {
-                      type: 'text',
-                      content: '如資料較複雜，預先整理公司架構與董事名單，通常能讓會面更聚焦。',
-                      actions: ['我想預約商業客戶服務中心', '我想先比較 App 與親身開戶']
-                    }
-                  ],
-                  clearFlow: true
-                },
-                {
-                  action: '我想修改前面資料',
-                  keywords: ['修改', '重整', '返回'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '可以，我們重新整理您的開戶需求。'
-                    }
-                  ],
-                  nextStepId: 'account-company-status'
                 }
               ]
             }
@@ -1518,527 +1264,190 @@ Object.assign(window, {
         }
       },
       {
-        trigger: '內地擴張',
-        keywords: ['內地擴張', '擴張', '內地市場', '中國市場'],
+        trigger: '拓展內地分店',
+        keywords: ['拓展內地分店', '內地分店', '國內開分店', '開分店', '內地擴張'],
+        topicId: 'mainland-branch-flow',
         flow: {
-          id: 'mainland-expansion-flow',
+          id: 'mainland-branch-flow',
           introResponses: [
             {
               type: 'text',
-              content: '了解。我可以協助您逐步整理進入內地市場或擴張內地業務的方向。'
-            },
-            {
-              type: 'text',
-              content: '我會用 10 個步驟了解您的擴張階段、地區、行業和配套需要，再給您下一步建議。'
+              content: '明白，我可以為您提供內地開設餐廳的一般性準備建議；另外，在您同意下，我亦可參考您在本行的歷史收支與交易行為特徵，例如收款渠道分佈、付款週期、幣種使用及現金流穩定性等，為您模擬最可能適合您的幾個方案選項，並列出每個選項的注意事項與文件準備方向。'
             }
           ],
-          startStepId: 'mainland-stage',
+          startStepId: 'mainland-branch-consent',
           steps: [
             {
-              id: 'mainland-stage',
+              id: 'mainland-branch-consent',
               prompt: {
                 type: 'text',
-                content: '第一步，您目前的內地擴張進度屬於哪一個階段？'
+                content: '請問您是否同意我使用上述資訊作分析，以便提供更貼合您情況的建議？'
               },
               choices: [
                 {
-                  action: '剛開始規劃',
-                  keywords: ['規劃', '初步'],
+                  action: '同意',
+                  keywords: ['同意', '可以', '好'],
                   responses: [
                     {
                       type: 'text',
-                      content: '了解，現階段適合先梳理進入模式、時間表及所需支援。'
-                    }
-                  ],
-                  nextStepId: 'mainland-model'
-                },
-                {
-                  action: '已接觸客戶或供應商',
-                  keywords: ['接觸客戶', '接觸供應商'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '明白，您已進入較具體的市場接觸階段。'
-                    }
-                  ],
-                  nextStepId: 'mainland-model'
-                },
-                {
-                  action: '準備正式落地',
-                  keywords: ['正式落地', '準備成立'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '收到，這通常需要同時考慮公司設立、銀行服務及風險管理安排。'
-                    }
-                  ],
-                  nextStepId: 'mainland-model'
-                }
-              ]
-            },
-            {
-              id: 'mainland-model',
-              prompt: {
-                type: 'text',
-                content: '第二步，您較傾向以下哪一種進入模式？'
-              },
-              choices: [
-                {
-                  action: '設立內地公司',
-                  keywords: ['設立公司', '內地公司'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '了解，設立實體通常需要較完整地規劃公司架構與銀行配套。'
-                    }
-                  ],
-                  nextStepId: 'mainland-region'
-                },
-                {
-                  action: '跨境銷售到內地',
-                  keywords: ['跨境銷售', '出口內地'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '明白，跨境模式通常會較關注收付款、物流及匯率安排。'
-                    }
-                  ],
-                  nextStepId: 'mainland-region'
-                },
-                {
-                  action: '尋找供應鏈或合作夥伴',
-                  keywords: ['供應鏈', '合作夥伴'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '收到，這類模式一般需要更早確認合作結構與交易安排。'
-                    }
-                  ],
-                  nextStepId: 'mainland-region'
-                }
-              ]
-            },
-            {
-              id: 'mainland-region',
-              prompt: {
-                type: 'text',
-                content: '第三步，您較聚焦哪一個內地地區？'
-              },
-              choices: [
-                {
-                  action: '大灣區',
-                  keywords: ['大灣區', 'gba'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '了解，大灣區通常是港商較常見的擴張起點。'
-                    }
-                  ],
-                  nextStepId: 'mainland-industry'
-                },
-                {
-                  action: '華東地區',
-                  keywords: ['華東', '上海', '江浙'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '明白，華東地區常見於製造、貿易及高增值服務業務布局。'
-                    }
-                  ],
-                  nextStepId: 'mainland-industry'
-                },
-                {
-                  action: '其他地區',
-                  keywords: ['其他地區', '其他城市'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '收到，不同地區在行政安排與合作資源上可能有不同重點。'
-                    }
-                  ],
-                  nextStepId: 'mainland-industry'
-                }
-              ]
-            },
-            {
-              id: 'mainland-industry',
-              prompt: {
-                type: 'text',
-                content: '第四步，您的主要行業較接近哪一類？'
-              },
-              choices: [
-                {
-                  action: '製造業',
-                  keywords: ['製造', '工廠'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '了解，製造業通常會較關注供應鏈、設備與跨境資金流安排。'
-                    }
-                  ],
-                  nextStepId: 'mainland-scale'
-                },
-                {
-                  action: '貿易批發',
-                  keywords: ['貿易', '批發'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '明白，貿易批發業務通常較重視跨境收付款與匯率管理。'
-                    }
-                  ],
-                  nextStepId: 'mainland-scale'
-                },
-                {
-                  action: '服務或科技',
-                  keywords: ['服務', '科技', 'tech'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '收到，服務或科技業務一般更著重業務模式、客戶來源與收款安排。'
-                    }
-                  ],
-                  nextStepId: 'mainland-scale'
-                }
-              ]
-            },
-            {
-              id: 'mainland-scale',
-              prompt: {
-                type: 'text',
-                content: '第五步，您預計的擴張規模較接近哪一類？'
-              },
-              choices: [
-                {
-                  action: '試點項目',
-                  keywords: ['試點', '先試'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '了解，試點模式通常適合先驗證市場與資金安排。'
-                    }
-                  ],
-                  nextStepId: 'mainland-banking-needs'
-                },
-                {
-                  action: '中型擴張',
-                  keywords: ['中型', '逐步擴張'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '明白，這通常需要同時規劃銀行服務與日後擴張節奏。'
-                    }
-                  ],
-                  nextStepId: 'mainland-banking-needs'
-                },
-                {
-                  action: '大規模投資',
-                  keywords: ['大規模', '大額投資'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '收到，較大規模項目通常需要更完整的融資及風險管理安排。'
-                    }
-                  ],
-                  nextStepId: 'mainland-banking-needs'
-                }
-              ]
-            },
-            {
-              id: 'mainland-banking-needs',
-              prompt: {
-                type: 'text',
-                content: '第六步，您目前最需要哪一類銀行支援？'
-              },
-              choices: [
-                {
-                  action: '收付款與賬戶安排',
-                  keywords: ['收付款', '賬戶'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '了解，這通常會先聚焦開戶、多幣種與跨境收付款配套。'
-                    }
-                  ],
-                  nextStepId: 'mainland-compliance'
-                },
-                {
-                  action: '融資支援',
-                  keywords: ['融資', '貸款'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '明白，如涉及擴張融資，通常需要更早準備用途與業務預測資料。'
-                    }
-                  ],
-                  nextStepId: 'mainland-compliance'
-                },
-                {
-                  action: '外匯與風險管理',
-                  keywords: ['外匯', '風險管理'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '收到，如涉及跨境資金流，外匯與風險管理通常需要一併規劃。'
-                    }
-                  ],
-                  nextStepId: 'mainland-compliance'
-                }
-              ]
-            },
-            {
-              id: 'mainland-compliance',
-              prompt: {
-                type: 'text',
-                content: '第七步，您目前對內地合規或行政安排的準備情況如何？'
-              },
-              choices: [
-                {
-                  action: '已有專業顧問協助',
-                  keywords: ['顧問', '專業顧問'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '很好，如已有顧問，通常較容易同步規劃公司設立與銀行安排。'
-                    }
-                  ],
-                  nextStepId: 'mainland-timeline'
-                },
-                {
-                  action: '由內部團隊處理',
-                  keywords: ['內部團隊'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '明白，內部處理時建議及早整理時間表與責任分工。'
-                    }
-                  ],
-                  nextStepId: 'mainland-timeline'
-                },
-                {
-                  action: '想先了解要求',
-                  keywords: ['先了解', '未開始'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '可以，先釐清基本要求通常有助減少後續來回確認。'
-                    }
-                  ],
-                  nextStepId: 'mainland-timeline'
-                }
-              ]
-            },
-            {
-              id: 'mainland-timeline',
-              prompt: {
-                type: 'text',
-                content: '第八步，您預計何時推進內地擴張計劃？'
-              },
-              choices: [
-                {
-                  action: '3個月內',
-                  keywords: ['3個月內', '三個月內'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '了解，若時間較緊，建議同步規劃公司設立、賬戶與資金安排。'
-                    }
-                  ],
-                  nextStepId: 'mainland-partners'
-                },
-                {
-                  action: '6至12個月',
-                  keywords: ['6至12個月', '半年至一年'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '明白，這個時間表較適合逐步驗證地區與合作模式。'
-                    }
-                  ],
-                  nextStepId: 'mainland-partners'
-                },
-                {
-                  action: '長期規劃中',
-                  keywords: ['長期', '規劃中'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '收到，先建立整體路線圖會較適合您目前的階段。'
-                    }
-                  ],
-                  nextStepId: 'mainland-partners'
-                }
-              ]
-            },
-            {
-              id: 'mainland-partners',
-              prompt: {
-                type: 'text',
-                content: '第九步，您目前在內地的合作資源情況如何？'
-              },
-              choices: [
-                {
-                  action: '已有合作夥伴',
-                  keywords: ['已有合作夥伴', '已有夥伴'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '很好，已有合作資源通常可讓市場切入和資金安排更明確。'
-                    }
-                  ],
-                  nextStepId: 'mainland-expansion-context'
-                },
-                {
-                  action: '正在尋找合作夥伴',
-                  keywords: ['正在尋找', '物色夥伴'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '明白，在合作模式未定前，先保留彈性的銀行與資金安排會較穩妥。'
-                    }
-                  ],
-                  nextStepId: 'mainland-expansion-context'
-                },
-                {
-                  action: '尚未確定',
-                  keywords: ['未確定', '尚未確定'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '收到，先聚焦市場策略與進入模式會較適合目前階段。'
-                    }
-                  ],
-                  nextStepId: 'mainland-expansion-context'
-                }
-              ]
-            },
-            {
-              id: 'mainland-expansion-context',
-              inputMode: 'text',
-              inputPlaceholder: '例如：計劃先進入大灣區，6 個月內完成試點並同步規劃跨境收款',
-              prompt: {
-                type: 'text',
-                content: '第十步，請輸入一段補充資料，示範您的擴張計劃、時間表或最想優先處理的議題。'
-              },
-              captureResponses: [
-                {
-                  type: 'text',
-                  content: '已識別您輸入的內地擴張補充資料：{{mainland-expansion-context}}。'
-                }
-              ],
-              nextStepId: 'mainland-supporting-upload'
-            },
-            {
-              id: 'mainland-supporting-upload',
-              inputMode: 'file',
-              uploadPlaceholder: '此步驟請使用上傳按鈕加入示範文件',
-              fileAccept: '.pdf,.png,.jpg,.jpeg,.ppt,.pptx,.xls,.xlsx,.doc,.docx',
-              prompt: {
-                type: 'text',
-                content: '第十一步，請上傳 1 至 2 份示範文件，例如商業計劃、合作資料、預算表或市場分析。'
-              },
-              captureResponses: [
-                {
-                  type: 'text',
-                  content: '已識別您上傳的文件：{{mainland-supporting-upload}}。'
-                },
-                {
-                  type: 'text',
-                  content: '我已把補充資料和文件整理到摘要中，下一步請確認。'
-                }
-              ],
-              nextStepId: 'mainland-next-step'
-            },
-            {
-              id: 'mainland-next-step',
-              prompt: {
-                type: 'text',
-                content: '第十二步，我已為您整理內地擴張摘要：目前階段為「{{mainland-stage}}」，進入模式為「{{mainland-model}}」，重點地區為「{{mainland-region}}」，行業類型為「{{mainland-industry}}」，擴張規模為「{{mainland-scale}}」，所需銀行支援為「{{mainland-banking-needs}}」，合規準備為「{{mainland-compliance}}」，推進時程為「{{mainland-timeline}}」，合作資源為「{{mainland-partners}}」，補充說明為「{{mainland-expansion-context}}」，上傳資料為「{{mainland-supporting-upload}}」。如以上正確，請確認下一步。'
-              },
-              choices: [
-                {
-                  action: '確認並了解跨境金融方案',
-                  keywords: ['跨境金融', '方案'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '我已按您的摘要整理出跨境金融重點。若您想先了解跨境金融方案，可先聚焦收付款安排、賬戶架構、多幣種需求及是否涉及融資或外匯管理。'
+                      content: '感謝確認。根據您在本行的交易趨勢與營運特徵，我為您模擬了三個最常見且與您情況匹配度較高的拓展方案，並給出優先建議（Top Choice）。'
                     },
                     {
                       type: 'text',
-                      content: '之後再按實際進入模式和地區，進一步收窄較適合的配套。',
-                      actions: ['我想了解跨境收付款安排', '我想知道內地擴張常見的銀行支援']
+                      content: 'Top Choice：先在大灣區以自營模式開設首間試點餐廳，配合跨境收款、供應商付款及初期營運資金安排。'
+                    },
+                    {
+                      type: 'text',
+                      content: '我已附上三個方案供您逐一查看，您可按以下按鈕打開方案詳情。',
+                      actions: ['查看方案 1：大灣區試點店（Top Choice）', '查看方案 2：合資經營分店', '查看方案 3：加盟／品牌授權模式']
                     }
                   ],
                   clearFlow: true
                 },
                 {
-                  action: '確認並聯絡跨境業務團隊',
-                  keywords: ['跨境團隊', '聯絡團隊'],
+                  action: '不同意',
+                  keywords: ['不同意', '暫不同意', '暫時不同意'],
                   responses: [
                     {
                       type: 'text',
-                      content: '可以。我已依照您的摘要整理出溝通重點，建議您先整理目標地區、進入模式、時間表、預算規模及目前最需要的銀行支援。'
+                      content: '明白。如您暫時不希望我使用上述資訊，我仍可先提供一般性準備建議。'
                     },
                     {
                       type: 'text',
-                      content: '如已有合作夥伴或初步商業計劃，也可一併準備以便更聚焦討論。',
-                      actions: ['請給我與跨境團隊溝通的重點', '我想整理內地擴張的準備清單']
+                      content: '一般而言，拓展內地餐廳分店可先整理目標城市、開店模式、預算、供應鏈安排，以及公司與負責人的基本證明文件。',
+                      actions: ['我想查看一般準備清單', '我想了解常見所需文件']
                     }
                   ],
                   clearFlow: true
-                },
-                {
-                  action: '確認並預約諮詢',
-                  keywords: ['預約', '諮詢'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '明白。我已先整理好跨境擴張摘要。若要預約諮詢，建議先確認方便的日期、地區，以及您最想優先處理的跨境議題。'
-                    },
-                    {
-                      type: 'text',
-                      content: '如可預先整理公司背景、擴張目標及預計時間表，會更有助會面聚焦。',
-                      actions: ['我想預約商業諮詢', '我想先看看內地擴張準備重點']
-                    }
-                  ],
-                  clearFlow: true
-                },
-                {
-                  action: '我想修改前面資料',
-                  keywords: ['修改', '重整', '返回'],
-                  responses: [
-                    {
-                      type: 'text',
-                      content: '可以，我們重新整理您的內地擴張需求。'
-                    }
-                  ],
-                  nextStepId: 'mainland-stage'
                 }
               ]
             }
           ]
         }
+      },
+      {
+        trigger: '查看方案 1：大灣區試點店（Top Choice）',
+        keywords: ['查看方案 1', '方案 1', '大灣區試點店', 'top choice'],
+        topicId: 'mainland-branch-flow',
+        responses: [
+          {
+            type: 'text',
+            content: '方案 1｜大灣區試點店（Top Choice）：較適合已有穩定香港餐飲營運、希望先以一間內地試點店測試客流與供應鏈安排的企業。'
+          },
+          {
+            type: 'text',
+            content: '注意事項：先確認落戶城市、租約期、食品經營相關牌照、收款工具、員工招聘與薪酬支付安排，並預留首 6 至 12 個月的營運資金緩衝。'
+          },
+          {
+            type: 'text',
+            content: '文件準備方向：香港公司註冊及商業登記文件、董事及實益擁有人身份證明、最近營運流水或管理帳、開店商業計劃、門店預算、意向租約或選址資料、主要供應商名單。',
+            actions: ['查看方案 2：合資經營分店', '查看方案 3：加盟／品牌授權模式', '返回三個方案總覽']
+          }
+        ]
+      },
+      {
+        trigger: '查看方案 2：合資經營分店',
+        keywords: ['查看方案 2', '方案 2', '合資經營分店', '合資經營'],
+        topicId: 'mainland-branch-flow',
+        responses: [
+          {
+            type: 'text',
+            content: '方案 2｜合資經營分店：較適合已找到內地合作方、希望借助本地團隊加快選址、招募與營運落地的企業。'
+          },
+          {
+            type: 'text',
+            content: '注意事項：應先釐清股權與分工、品牌使用權、資金調撥、董事會或授權機制，以及退出安排，避免日後營運與現金管理出現分歧。'
+          },
+          {
+            type: 'text',
+            content: '文件準備方向：合作方背景資料與 KYC 文件、合作框架或 term sheet、預計股權架構、投資金額與注資時間表、收益分配模型、品牌授權與內控安排。',
+            actions: ['查看方案 1：大灣區試點店（Top Choice）', '查看方案 3：加盟／品牌授權模式', '返回三個方案總覽']
+          }
+        ]
+      },
+      {
+        trigger: '查看方案 3：加盟／品牌授權模式',
+        keywords: ['查看方案 3', '方案 3', '加盟', '品牌授權模式'],
+        topicId: 'mainland-branch-flow',
+        responses: [
+          {
+            type: 'text',
+            content: '方案 3｜加盟／品牌授權模式：較適合希望以較輕資產方式拓展，並把部分門店投資與日常營運交由合作方承擔的企業。'
+          },
+          {
+            type: 'text',
+            content: '注意事項：需要特別留意品牌一致性、加盟商篩選、品質控制、費用結算、知識產權保護，以及培訓與審核制度。'
+          },
+          {
+            type: 'text',
+            content: '文件準備方向：商標或品牌權屬證明、加盟或授權合約草案、營運手冊、培訓安排、加盟費與持續服務費結算方式、門店審核與稽核框架。',
+            actions: ['查看方案 1：大灣區試點店（Top Choice）', '查看方案 2：合資經營分店', '返回三個方案總覽']
+          }
+        ]
+      },
+      {
+        trigger: '返回三個方案總覽',
+        keywords: ['返回三個方案總覽', '方案總覽', '返回總覽'],
+        topicId: 'mainland-branch-flow',
+        responses: [
+          {
+            type: 'text',
+            content: '目前較建議您先從方案 1 的試點店路線開始評估，再按實際合作資源與投資節奏比較另外兩個方案。',
+            actions: ['查看方案 1：大灣區試點店（Top Choice）', '查看方案 2：合資經營分店', '查看方案 3：加盟／品牌授權模式']
+          }
+        ]
+      },
+      {
+        trigger: '我想查看一般準備清單',
+        keywords: ['一般準備清單', '準備清單'],
+        topicId: 'mainland-branch-flow',
+        responses: [
+          {
+            type: 'text',
+            content: '一般準備清單可先由五部分入手：目標城市與選址、開店模式、自有資金與現金流預算、供應鏈及人手安排、以及公司與負責人證明文件。'
+          },
+          {
+            type: 'text',
+            content: '若之後您願意讓我使用交易特徵作分析，我亦可以再為您模擬較貼合的拓展方案。',
+            actions: ['拓展內地分店', '我想了解常見所需文件']
+          }
+        ]
+      },
+      {
+        trigger: '我想了解常見所需文件',
+        keywords: ['常見所需文件', '所需文件', '文件'],
+        topicId: 'mainland-branch-flow',
+        responses: [
+          {
+            type: 'text',
+            content: '常見文件可包括：香港公司註冊及商業登記文件、董事及實益擁有人身份證明、營運流水或管理帳、門店商業計劃、選址或租約資料、供應商及合作方資料，以及視乎模式需要的品牌授權或合作框架文件。'
+          },
+          {
+            type: 'text',
+            content: '如您想進一步比較三個拓展方案，我可以即時帶您返回方案總覽。',
+            actions: ['返回三個方案總覽', '拓展內地分店']
+          }
+        ]
       }
     ],
     defaultResponses: [
       {
         type: 'text',
-        content: '抱歉，我不太明白您的問題。您可以輸入「貸款」、「開戶」、「外匯對沖」或「內地擴張」等關鍵詞，或直接查詢相關服務。',
-        actions: ['我想查詢中小企貸款', '我想了解如何開立匯豐商業戶口', '我想了解外匯對沖', '我想查詢內地擴張支援']
+        content: '抱歉，我不太明白您的問題。您可以輸入「貸款」、「優惠」、「交易」或「外匯」等關鍵詞，或直接查詢相關服務。',
+        actions: ['我想查詢中小企貸款的最新方案。', '我想查詢最新優惠', '我想進行交易', '我想進行外匯交易']
       }
     ],
     initialMessage: {
       sender: 'ai',
       type: 'text',
       content: '您好！我是匯豐中小企 AI 助手。請問今日有什麼可以幫到您的企業？',
-      actions: ['我想查詢中小企貸款的最新方案。', '我想了解如何開立匯豐商業戶口。', '我想了解外匯對沖方案。', '我想查詢內地擴張支援。']
+      actions: ['我想查詢中小企貸款的最新方案。', '我想了解如何開立匯豐商業戶口。', '我想了解外匯對沖方案。', '我想了解拓展內地分店。']
     },
     initialMessagesByEntry: {
       'locked-screen': {
         sender: 'ai',
         type: 'text',
-        content: '您好！我已根據鎖定畫面的提醒，為您準備好日圓波動與現金流風險的重點方向。您想先看外匯對沖建議、跨境付款安排，還是近期匯率風險摘要？',
+        content: '🔔近期日圓（JPY）波動加劇。根據過往交易記錄，您可能面臨匯率波動導致成本上升的風險。如您希穩定未來採購成本，可考慮使用外匯對沖方案（例如：遠期外匯合約等）。是否需要我為您進行快速評估並提供可行選項？',
         actions: ['我想了解外匯對沖建議。', '我想了解跨境付款安排。', '我想查看近期匯率風險摘要。']
       },
       'video-loan': {
@@ -2050,20 +1459,20 @@ Object.assign(window, {
       'video-account-opening': {
         sender: 'ai',
         type: 'text',
-        content: '歡迎返回。我可以接續剛才的 Account Opening 內容，幫您整理開戶流程、文件要求，或比較 App 與親身辦理方式。',
-        actions: ['我想了解商業戶口開戶流程。', '我想查看開戶文件清單。', '我想比較 App 與親身開戶。']
+        content: '歡迎返回。我可以接續剛才的開戶示範，由公司設立、身分核實，到香港商業戶口申請提交流程。',
+        actions: ['開戶']
       },
       'video-fx-hedging': {
         sender: 'ai',
         type: 'text',
-        content: '歡迎返回。我可以接續剛才的 FX Hedging 內容，幫您比較對沖工具、整理風險重點，或準備與外匯專家溝通的資料。',
-        actions: ['我想比較外匯對沖工具。', '我想整理外匯風險重點。', '我想知道與外匯專家溝通前要準備甚麼。']
+        content: '歡迎返回。我可以接續剛才的外匯對沖示範，根據交易行為分析風險重點，並提供較貼近情況的產品建議。',
+        actions: ['外匯對沖', '我想比較外匯對沖工具。', '我想整理外匯風險重點。']
       },
       'video-mainland-expansion': {
         sender: 'ai',
         type: 'text',
-        content: '歡迎返回。我可以接續剛才的 Mainland Expansion 內容，幫您整理跨境金融安排、擴張準備清單，或收窄下一步支援方向。',
-        actions: ['我想了解跨境金融安排。', '我想整理內地擴張準備清單。', '我想看看常見的銀行支援方向。']
+        content: '歡迎返回。我可以接續剛才的拓展內地分店內容，幫您比較三個常見方案、整理開店準備清單，或查看文件方向。',
+        actions: ['拓展內地分店', '我想查看一般準備清單', '我想了解常見所需文件']
       }
     }
   }

@@ -7,6 +7,42 @@
   }
 
   var navigationStateKey = 'hsbc-presenter-navigation-open';
+  var featuredTopicOrder = ['account-opening-flow', 'fx-hedging-flow', 'mainland-branch-flow'];
+  var topicDemoScripts = {
+    'account-opening-flow': [
+      { kind: 'text', value: '開戶' },
+      { kind: 'text', value: '未' },
+      { kind: 'text', value: 'HK' },
+      { kind: 'text', value: '好，授權' },
+      { kind: 'upload', value: '', label: '上傳自拍 + 身分證明文件' },
+      { kind: 'text', value: '確認' },
+      { kind: 'text', value: '公司名稱「小白拉麵有限公司」，1 名董事兼股東，主要經營拉麵餐廳，計劃於九龍開業' },
+      { kind: 'text', value: 'https://instagram.com/demo-ramen-shop' },
+      { kind: 'text', value: 'OK + e-sign' }
+    ],
+    'fx-hedging-flow': [
+      { kind: 'text', value: '外匯對沖' },
+      { kind: 'text', value: '美元' },
+      { kind: 'text', value: '主要是付款' },
+      { kind: 'text', value: '每月都有' },
+      { kind: 'text', value: '50萬至500萬' },
+      { kind: 'text', value: '想先比較不同工具' },
+      { kind: 'text', value: '未來3個月' },
+      { kind: 'text', value: '希望保留部分升值機會' },
+      { kind: 'text', value: '已持有匯豐商業戶口' },
+      { kind: 'text', value: '已有交易單據及發票' },
+      { kind: 'text', value: '未來 3 個月每月都有美元付款，希望先鎖定部分匯率' },
+      { kind: 'upload', value: '', label: '上傳發票 / 訂單 / 明細' },
+      { kind: 'text', value: '確認並比較外匯工具' }
+    ],
+    'mainland-branch-flow': [
+      { kind: 'text', value: '拓展內地分店' },
+      { kind: 'text', value: '同意' },
+      { kind: 'text', value: '查看方案 1：大灣區試點店（Top Choice）' },
+      { kind: 'text', value: '查看方案 2：合資經營分店' },
+      { kind: 'text', value: '查看方案 3：加盟／品牌授權模式' }
+    ]
+  };
 
   var currentPageId = document.body.getAttribute('data-page-id') || '';
   var rootPathPrefix = getRootPathPrefix();
@@ -28,36 +64,36 @@
   ];
   var videoPages = [
     {
-      id: 'video-loan',
-      path: 'vid/v1.html',
-      kicker: 'Video 01',
-      title: 'SME Loan Film',
-      description: 'Cinematic playback for the SME loan journey.',
-      topicLabel: '貸款'
-    },
-    {
-      id: 'video-account-opening',
-      path: 'vid/v2.html',
-      kicker: 'Video 02',
-      title: 'Account Opening Film',
-      description: 'Cinematic playback for the business account opening journey.',
+      id: 'feature-demo-account-opening',
+      path: 'v1.html',
+      kicker: 'Feature 01',
+      title: '基本功能及外部 API 連結',
+      description: '以開戶 flow 示範基本對話、文件上傳與證件分析。',
       topicLabel: '開戶'
     },
     {
-      id: 'video-fx-hedging',
-      path: 'vid/v3.html',
-      kicker: 'Video 03',
-      title: 'FX Hedging Film',
-      description: 'Cinematic playback for the FX hedging journey.',
+      id: 'feature-demo-fx-hedging',
+      path: 'v2.html',
+      kicker: 'Feature 02',
+      title: '用戶行為分析及軟性產品推廣',
+      description: '以外匯對沖 flow 示範行為分析與軟性產品推廣。',
       topicLabel: '外匯對沖'
     },
     {
+      id: 'feature-demo-mainland-expansion',
+      path: 'v3.html',
+      kicker: 'Feature 03',
+      title: '諮詢功能及大數據分析',
+      description: '以拓展內地分店 flow 示範諮詢功能及大數據分析。',
+      topicLabel: '拓展內地分店'
+    },
+    {
       id: 'video-mainland-expansion',
-      path: 'vid/v4.html',
+      path: 'v4.html',
       kicker: 'Video 04',
-      title: 'Mainland Expansion Film',
-      description: 'Cinematic playback for the mainland expansion journey.',
-      topicLabel: '內地擴張'
+      title: 'Mainland Branch Expansion Film',
+      description: 'Original standalone cinematic playback for the branch expansion journey.',
+      topicLabel: '拓展內地分店'
     }
   ];
   var allPages = demoPages.concat(videoPages);
@@ -92,14 +128,24 @@
       return [];
     }
 
-    return knowledgeBase.knowledgeBase.map(function (entry, index) {
+    return knowledgeBase.knowledgeBase.filter(function (entry) {
+      return entry.flow && entry.flow.startStepId;
+    }).map(function (entry, index) {
       var flow = entry.flow || {};
+      var topicId = typeof entry.topicId === 'string' && entry.topicId
+        ? entry.topicId
+        : (typeof flow.id === 'string' && flow.id ? flow.id : String(entry.trigger || ''));
+      var demoScript = topicDemoScripts[topicId] || [];
+      var featuredIndex = featuredTopicOrder.indexOf(topicId);
       var steps = Array.isArray(flow.steps) ? flow.steps : [];
       var lastStep = steps.length > 0 ? steps[steps.length - 1] : null;
       var introResponses = Array.isArray(flow.introResponses) ? flow.introResponses : [];
       var lastIntro = introResponses.length > 0 ? introResponses[introResponses.length - 1] : null;
       var title = String(entry.trigger || 'Topic ' + (index + 1)).split('/')[0].trim();
       var starter = Array.isArray(entry.keywords) && entry.keywords.length > 0 ? entry.keywords[0] : title;
+      var defaultCopy = demoScript.find(function (step) {
+        return step.kind === 'text' && step.value;
+      });
       var summaryEnabled = Boolean(
         lastStep &&
         lastStep.prompt &&
@@ -108,21 +154,54 @@
       );
 
       return {
+        featuredIndex: featuredIndex,
+        topicId: topicId,
         title: title,
         starter: starter,
+        defaultCopy: defaultCopy ? defaultCopy.value : starter,
         stepsCount: steps.length,
         hasSummaryConfirm: summaryEnabled,
+        demoScript: demoScript,
         copy: lastIntro && lastIntro.content
           ? lastIntro.content
           : 'Open the guided conversation flow for this topic.',
         href: getPageHref('index.html', 'topic=' + encodeURIComponent(starter))
       };
+    }).filter(function (topic) {
+      return topic.featuredIndex !== -1;
+    }).sort(function (left, right) {
+      return left.featuredIndex - right.featuredIndex;
     });
+  }
+
+  function renderTopicDemoScript(topic) {
+    if (!Array.isArray(topic.demoScript) || topic.demoScript.length === 0) {
+      return '';
+    }
+
+    return '' +
+      '<div class="navigation-topic-script">' +
+        '<span class="navigation-topic-script-label">Demo Inputs</span>' +
+        '<div class="navigation-topic-script-list">' +
+          topic.demoScript.map(function (step, index) {
+            var label = step.label || step.value || '';
+            return '' +
+              '<button class="navigation-topic-script-btn' + (step.kind === 'upload' ? ' is-upload' : '') + '" type="button" data-demo-kind="' + escapeHtml(step.kind || 'text') + '" data-demo-text="' + escapeHtml(step.value || '') + '" title="' + escapeHtml(label) + '">' +
+                '<span class="navigation-topic-script-index">' + String(index + 1) + '</span>' +
+                '<span class="navigation-topic-script-text">' + escapeHtml(label) + '</span>' +
+              '</button>';
+          }).join('') +
+        '</div>' +
+      '</div>';
   }
 
   function renderTopicCards(topicEntries) {
     if (!topicEntries.length) {
       return '';
+    }
+
+    function getCopyLabel(copyText) {
+      return 'Copy: ' + copyText;
     }
 
     return '' +
@@ -140,15 +219,14 @@
               metaParts.push('Summary Confirm');
             }
 
-            // Add starter text and copy button for demo
             return '' +
               '<a class="navigation-topic-button" href="' + escapeHtml(topic.href) + '">' +
                 '<span class="navigation-topic-button-title">' + escapeHtml(topic.title) + '</span>' +
                 '<span class="navigation-topic-button-meta">' + escapeHtml(metaParts.join(' · ')) + '</span>' +
                 '<span class="navigation-topic-button-copy">' + escapeHtml(topic.copy) + '</span>' +
-                '<span class="navigation-topic-starter">'
-                  + 'Type: <span class="navigation-topic-starter-text">' + escapeHtml(topic.starter) + '</span>'
-                  + ' <button class="navigation-topic-copy-btn" data-copy="' + escapeHtml(topic.starter) + '" title="Copy to chat input">Copy</button>'
+                renderTopicDemoScript(topic) +
+                '<span class="navigation-topic-actions">'
+                  + '<button class="navigation-topic-copy-btn" type="button" data-topic-id="' + escapeHtml(topic.topicId) + '" data-default-copy="' + escapeHtml(topic.defaultCopy) + '" data-copy="' + escapeHtml(topic.defaultCopy) + '" title="Copy next suggested input">' + escapeHtml(getCopyLabel(topic.defaultCopy)) + '</button>'
                 + '</span>' +
               '</a>';
           }).join('') +
@@ -206,10 +284,11 @@
   toggle.type = 'button';
   toggle.setAttribute('aria-controls', 'presenterNavigationPanel');
   toggle.setAttribute('aria-expanded', 'false');
+  toggle.setAttribute('aria-label', 'Show Navigation');
+  toggle.setAttribute('title', 'Show Navigation');
   toggle.innerHTML =
-    '<span id="presenterNavigationToggleCopy">Show Navigation</span>' +
     '<span class="navigation-toggle-icon" aria-hidden="true">' +
-      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>' +
+      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>' +
     '</span>';
 
   var panel = document.createElement('aside');
@@ -222,9 +301,16 @@
         '<div>' +
           '<p class="navigation-kicker">Presenter</p>' +
           '<h2>Navigation</h2>' +
-          '<p class="navigation-panel-copy">Use this shared control to move between demo screens, cinematic videos, and assistant topics from one place.</p>' +
         '</div>' +
       '</div>' +
+      '<section class="navigation-section">' +
+        '<p class="navigation-section-label">Current Screen</p>' +
+        '<div class="navigation-current-screen">' +
+          '<span class="navigation-current-screen-kicker">Now Showing</span>' +
+          '<strong>' + currentPage.title + '</strong>' +
+          '<p>' + currentPage.description + '</p>' +
+        '</div>' +
+      '</section>' +
       '<section class="navigation-section">' +
         '<p class="navigation-section-label">Demo Screens</p>' +
         '<div class="navigation-page-list">' +
@@ -241,14 +327,6 @@
         '</div>' +
       '</section>' +
       renderVideoCards() +
-      '<section class="navigation-section">' +
-        '<p class="navigation-section-label">Current Screen</p>' +
-        '<div class="navigation-current-screen">' +
-          '<span class="navigation-current-screen-kicker">Now Showing</span>' +
-          '<strong>' + currentPage.title + '</strong>' +
-          '<p>' + currentPage.description + '</p>' +
-        '</div>' +
-      '</section>' +
       /* Flow Snapshot section removed */
       renderTopicCards(topicEntries) +
       '<section class="navigation-section">' +
@@ -260,7 +338,74 @@
   workspaceLayout.appendChild(toggle);
   workspaceLayout.appendChild(panel);
 
-  var toggleCopy = document.getElementById('presenterNavigationToggleCopy');
+  function setTopicCopyButton(button, copyText) {
+    var resolvedText = copyText || button.getAttribute('data-default-copy') || '';
+
+    button.setAttribute('data-copy', resolvedText);
+    button.textContent = 'Copy: ' + resolvedText;
+    button.setAttribute('title', resolvedText ? 'Copy next suggested input: ' + resolvedText : 'Copy next suggested input');
+  }
+
+  function updateTopicCopyButtons(activeTopicId, suggestedInput) {
+    var copyButtons = panel.querySelectorAll('.navigation-topic-copy-btn');
+
+    Array.prototype.forEach.call(copyButtons, function (button) {
+      var topicId = button.getAttribute('data-topic-id') || '';
+      var defaultCopy = button.getAttribute('data-default-copy') || '';
+      var nextCopy = activeTopicId && topicId === activeTopicId && suggestedInput ? suggestedInput : defaultCopy;
+
+      setTopicCopyButton(button, nextCopy);
+    });
+  }
+
+  function copyToClipboard(text) {
+    if (!text || !window.navigator || !window.navigator.clipboard || typeof window.navigator.clipboard.writeText !== 'function') {
+      return;
+    }
+
+    window.navigator.clipboard.writeText(text).catch(function () {
+      // Ignore clipboard failures and fall back to input insertion only.
+    });
+  }
+
+  function seedMessageInput(text) {
+    var input = document.getElementById('messageInput');
+
+    if (text) {
+      copyToClipboard(text);
+    }
+
+    if (!input || !text) {
+      return;
+    }
+
+    input.value = text;
+    input.focus();
+
+    var evt = document.createEvent('Event');
+    evt.initEvent('input', true, true);
+    input.dispatchEvent(evt);
+  }
+
+  function triggerUploadPicker() {
+    var uploadButton = document.getElementById('uploadButton');
+
+    if (!uploadButton || uploadButton.hidden || uploadButton.disabled) {
+      return false;
+    }
+
+    uploadButton.click();
+    return true;
+  }
+
+  window.addEventListener('hsbc-navigation-state-change', function (event) {
+    var detail = event && event.detail ? event.detail : {};
+
+    updateTopicCopyButtons(detail.activeTopicId || '', detail.suggestedInput || '');
+  });
+
+  updateTopicCopyButtons('', '');
+
   var isOpen = readOpenState();
 
   function readOpenState() {
@@ -285,10 +430,8 @@
     workspaceLayout.classList.toggle('is-navigation-open', nextValue);
     toggle.setAttribute('aria-expanded', String(nextValue));
     panel.setAttribute('aria-hidden', String(!nextValue));
-
-    if (toggleCopy) {
-      toggleCopy.textContent = nextValue ? 'Hide Navigation' : 'Show Navigation';
-    }
+    toggle.setAttribute('aria-label', nextValue ? 'Hide Navigation' : 'Show Navigation');
+    toggle.setAttribute('title', nextValue ? 'Hide Navigation' : 'Show Navigation');
   }
 
   toggle.addEventListener('click', function () {
@@ -311,17 +454,24 @@
 
   // Copy starter to input box when copy button is clicked
   panel.addEventListener('click', function (event) {
+    var demoBtn = event.target.closest('.navigation-topic-script-btn');
     var copyBtn = event.target.closest('.navigation-topic-copy-btn');
+
+    if (demoBtn) {
+      if ((demoBtn.getAttribute('data-demo-kind') || 'text') === 'upload') {
+        triggerUploadPicker();
+      } else {
+        seedMessageInput(demoBtn.getAttribute('data-demo-text') || '');
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
     if (copyBtn) {
       var copyText = copyBtn.getAttribute('data-copy');
-      var input = document.getElementById('messageInput');
-      if (input && copyText) {
-        input.value = copyText;
-        input.focus();
-        var evt = document.createEvent('Event');
-        evt.initEvent('input', true, true);
-        input.dispatchEvent(evt);
-      }
+      seedMessageInput(copyText);
       event.preventDefault();
       event.stopPropagation();
     }

@@ -29,7 +29,8 @@
     activeFlowId: null,
     activeFlowStepId: null,
     flowAnswers: {},
-    thinkingMessageId: null
+    thinkingMessageId: null,
+    currentTopicId: inferTopicIdFromRouteEntry(initialRouteState.entry)
   };
 
   function getInitialRouteState() {
@@ -46,13 +47,57 @@
     };
   }
 
+  function inferTopicIdFromRouteEntry(entry) {
+    switch (entry) {
+      case 'video-loan':
+        return 'loan-flow';
+      case 'video-account-opening':
+        return 'account-opening-flow';
+      case 'video-fx-hedging':
+        return 'fx-hedging-flow';
+      case 'video-mainland-expansion':
+        return 'mainland-branch-flow';
+      default:
+        return null;
+    }
+  }
+
+  function getEntryTopicId(entry) {
+    if (!entry) {
+      return null;
+    }
+
+    if (typeof entry.topicId === 'string' && entry.topicId) {
+      return entry.topicId;
+    }
+
+    if (entry.flow && typeof entry.flow.id === 'string' && entry.flow.id) {
+      return entry.flow.id;
+    }
+
+    if (typeof entry.trigger !== 'string' || !entry.trigger) {
+      return null;
+    }
+
+    return String(entry.trigger).split('/')[0].trim() || null;
+  }
+
+  function setCurrentTopic(topicId) {
+    state.currentTopicId = topicId || null;
+  }
+
   function cloneMessage(message) {
     return {
       id: message.id || null,
       sender: message.sender,
       type: message.type,
       content: message.content,
-      actions: Array.isArray(message.actions) ? message.actions.slice() : []
+      actions: Array.isArray(message.actions) ? message.actions.slice() : [],
+      files: Array.isArray(message.files)
+        ? message.files.map(function (file) {
+            return cloneUploadedFile(file);
+          })
+        : []
     };
   }
 
@@ -93,15 +138,37 @@
     return '共' + names.length + ' 份：' + names.join('、');
   }
 
+  function createPreviewUrl(file) {
+    if (!file || !file.type || file.type.indexOf('image/') !== 0) {
+      return '';
+    }
+
+    if (!window.URL || typeof window.URL.createObjectURL !== 'function') {
+      return '';
+    }
+
+    return window.URL.createObjectURL(file);
+  }
+
+  function cloneUploadedFile(file) {
+    return {
+      name: file && file.name ? file.name : 'untitled',
+      type: file && file.type ? file.type : '',
+      size: file && typeof file.size === 'number' ? file.size : 0,
+      previewUrl: file && file.previewUrl ? file.previewUrl : ''
+    };
+  }
+
   function createFileSubmission(fileList) {
     var files = Array.prototype.slice.call(fileList || [])
       .filter(Boolean)
       .map(function (file) {
-        return {
+        return cloneUploadedFile({
           name: file.name || 'untitled',
           type: file.type || '',
-          size: file.size || 0
-        };
+          size: file.size || 0,
+          previewUrl: createPreviewUrl(file)
+        });
       });
     var summary = formatUploadedFileNames(files);
 
@@ -145,6 +212,81 @@
       .replaceAll('>', '&gt;')
       .replaceAll('"', '&quot;')
       .replaceAll("'", '&#39;');
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes < 1024) {
+      return bytes + ' B';
+    }
+
+    if (bytes < 1024 * 1024) {
+      return (bytes / 1024).toFixed(1) + ' KB';
+    }
+
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function getFileBadgeLabel(fileName) {
+    var parts = String(fileName || '').split('.');
+    var extension = parts.length > 1 ? parts.pop() : '';
+
+    if (!extension) {
+      return 'FILE';
+    }
+
+    return extension.slice(0, 4).toUpperCase();
+  }
+
+  function createFilePreviewContent(files) {
+    var wrapper = document.createElement('div');
+    var header = document.createElement('div');
+
+    wrapper.className = 'uploaded-file-preview';
+    header.className = 'uploaded-file-preview-header';
+    header.textContent = files.length > 1 ? '上傳預覽 (' + files.length + ')' : '上傳預覽';
+    wrapper.appendChild(header);
+
+    files.forEach(function (file) {
+      var item = document.createElement('div');
+      var visual;
+      var meta = document.createElement('div');
+      var name = document.createElement('div');
+      var detail = document.createElement('div');
+      var detailParts = [];
+
+      item.className = 'uploaded-file-preview-item';
+
+      if (file.previewUrl) {
+        visual = document.createElement('img');
+        visual.className = 'uploaded-file-preview-thumb';
+        visual.src = file.previewUrl;
+        visual.alt = file.name || 'uploaded image preview';
+      } else {
+        visual = document.createElement('div');
+        visual.className = 'uploaded-file-preview-badge';
+        visual.textContent = getFileBadgeLabel(file.name);
+      }
+
+      meta.className = 'uploaded-file-preview-meta';
+      name.className = 'uploaded-file-preview-name';
+      name.textContent = file.name || 'untitled';
+
+      if (file.type) {
+        detailParts.push(file.type);
+      }
+
+      detailParts.push(formatFileSize(file.size || 0));
+      detail.className = 'uploaded-file-preview-detail';
+      detail.textContent = detailParts.join(' · ');
+
+      meta.appendChild(name);
+      meta.appendChild(detail);
+      item.appendChild(visual);
+      item.appendChild(meta);
+      wrapper.appendChild(item);
+    });
+
+    return wrapper;
   }
 
   function pad2(value) {
@@ -369,6 +511,84 @@
     ];
   }
 
+  function getSuggestedInputForStep(step) {
+    var promptActions;
+    var inputMode;
+
+    if (!step) {
+      return '';
+    }
+
+    inputMode = getStepInputMode(step);
+
+    promptActions = Array.isArray(step.prompt && step.prompt.actions) && step.prompt.actions.length > 0
+      ? step.prompt.actions.slice()
+      : getStepTransitions(step)
+        .map(function (transition) {
+          return transition && transition.action ? transition.action : '';
+        })
+        .filter(Boolean);
+
+    if (promptActions.length > 0) {
+      return promptActions[0];
+    }
+
+    if ((inputMode === 'text' || inputMode === 'text-or-file') && typeof step.inputPlaceholder === 'string' && step.inputPlaceholder) {
+      return step.inputPlaceholder;
+    }
+
+    if ((inputMode === 'file' || inputMode === 'text-or-file') && typeof step.uploadPlaceholder === 'string' && step.uploadPlaceholder) {
+      return step.uploadPlaceholder;
+    }
+
+    if (inputMode === 'file') {
+      return typeof step.uploadPlaceholder === 'string' && step.uploadPlaceholder
+        ? step.uploadPlaceholder
+        : '請使用上傳按鈕加入示範文件';
+    }
+
+    return step.prompt && typeof step.prompt.content === 'string' ? step.prompt.content : '';
+  }
+
+  function getLatestAssistantSuggestedInput() {
+    var index;
+    var message;
+
+    for (index = state.messages.length - 1; index >= 0; index -= 1) {
+      message = state.messages[index];
+
+      if (!message || message.sender !== 'ai' || !Array.isArray(message.actions) || message.actions.length === 0) {
+        continue;
+      }
+
+      return message.actions[0];
+    }
+
+    return '';
+  }
+
+  function dispatchNavigationState() {
+    var activeStep;
+    var suggestedInput;
+    var inputMode;
+
+    if (typeof window.dispatchEvent !== 'function' || typeof window.CustomEvent !== 'function') {
+      return;
+    }
+
+    activeStep = getActiveFlowStep();
+    inputMode = getStepInputMode(activeStep);
+    suggestedInput = getSuggestedInputForStep(activeStep) || getLatestAssistantSuggestedInput();
+
+    window.dispatchEvent(new window.CustomEvent('hsbc-navigation-state-change', {
+      detail: {
+        activeTopicId: state.currentTopicId,
+        suggestedInput: suggestedInput,
+        isFileStep: inputMode === 'file' || inputMode === 'text-or-file'
+      }
+    }));
+  }
+
   function getEntryResponses(entry) {
     var baseResponses = Array.isArray(entry.responses) ? entry.responses : [];
     var introResponses;
@@ -401,7 +621,7 @@
   }
 
   function getStepInputMode(step) {
-    if (!step || (step.inputMode !== 'text' && step.inputMode !== 'file')) {
+    if (!step || (step.inputMode !== 'text' && step.inputMode !== 'file' && step.inputMode !== 'text-or-file')) {
       return '';
     }
 
@@ -443,6 +663,32 @@
       }
 
       answerValue = submission.answer || getSubmissionText(submission);
+    } else if (inputMode === 'text-or-file') {
+      if (submission && submission.kind === 'file') {
+        if (!Array.isArray(submission.files) || submission.files.length === 0) {
+          return [
+            {
+              type: 'text',
+              content: '這一步請直接輸入連結或資料，或使用上傳按鈕加入示範文件。',
+              actions: []
+            }
+          ];
+        }
+
+        answerValue = submission.answer || getSubmissionText(submission);
+      } else {
+        answerValue = getSubmissionText(submission);
+
+        if (!answerValue) {
+          return [
+            {
+              type: 'text',
+              content: '這一步請直接輸入連結或資料，或使用上傳按鈕加入示範文件。',
+              actions: []
+            }
+          ];
+        }
+      }
     } else {
       answerValue = getSubmissionText(submission);
 
@@ -525,6 +771,7 @@
     var transitionResponses;
 
     if (!submission) {
+      setCurrentTopic(null);
       setActiveFlow(null, null);
       return appData.defaultResponses;
     }
@@ -536,6 +783,8 @@
     knowledgeEntry = getKnowledgeEntryForInput(input);
 
     if (knowledgeEntry) {
+      setCurrentTopic(getEntryTopicId(knowledgeEntry));
+
       if (knowledgeEntry.flow && knowledgeEntry.flow.startStepId) {
         setActiveFlow(knowledgeEntry.flow.id, knowledgeEntry.flow.startStepId);
       } else {
@@ -564,6 +813,7 @@
       }
 
       setActiveFlow(null, null);
+      setCurrentTopic(null);
       return appData.defaultResponses;
     }
 
@@ -571,10 +821,12 @@
 
     if (contextFreeResponse) {
       setActiveFlow(null, null);
+      setCurrentTopic(null);
       return contextFreeResponse.responses;
     }
 
     setActiveFlow(null, null);
+    setCurrentTopic(null);
     return appData.defaultResponses;
   }
 
@@ -610,6 +862,9 @@
             '<span>點擊查看詳情及條款</span>' +
           '</div>' +
         '</div>';
+    } else if (message.type === 'file-preview') {
+      bubble.className += ' file-preview-bubble';
+      bubble.appendChild(createFilePreviewContent(Array.isArray(message.files) ? message.files : []));
     } else {
       var actionsMarkup = '';
 
@@ -647,6 +902,7 @@
 
     scrollToLatest();
     setComposerState();
+    dispatchNavigationState();
   }
 
   function findResponses(input) {
@@ -684,6 +940,7 @@
     var activeStep = getActiveFlowStep();
     var inputMode = getStepInputMode(activeStep);
     var isFileStep = inputMode === 'file';
+    var allowsFileUpload = inputMode === 'file' || inputMode === 'text-or-file';
 
     if (isFileStep) {
       messageInput.value = '';
@@ -696,16 +953,34 @@
         : '此步驟請使用上傳按鈕加入文件。')
       : (activeStep && typeof activeStep.inputPlaceholder === 'string'
         ? activeStep.inputPlaceholder
-        : defaultComposerPlaceholder);
+        : (inputMode === 'text-or-file' && activeStep && typeof activeStep.uploadPlaceholder === 'string'
+          ? activeStep.uploadPlaceholder
+          : defaultComposerPlaceholder));
 
-    uploadButton.hidden = !isFileStep;
-    uploadButton.disabled = !isFileStep;
+    if (inputMode === 'text-or-file' && activeStep && typeof activeStep.inputPlaceholder === 'string' && activeStep.inputPlaceholder) {
+      messageInput.placeholder = activeStep.inputPlaceholder;
+    }
+
+    uploadButton.hidden = !allowsFileUpload;
+    uploadButton.disabled = !allowsFileUpload;
     fileUploadInput.accept = activeStep && typeof activeStep.fileAccept === 'string' ? activeStep.fileAccept : '';
     fileUploadInput.multiple = !(activeStep && activeStep.fileMultiple === false);
     sendButton.disabled = isFileStep || messageInput.value.trim().length === 0;
   }
 
+  function getResponseDelayMs() {
+    var activeStep = getActiveFlowStep();
+
+    if (!activeStep || typeof activeStep.responseDelayMs !== 'number') {
+      return 500;
+    }
+
+    return Math.max(0, activeStep.responseDelayMs);
+  }
+
   function queueAssistantResponses(input) {
+    var responseDelay = getResponseDelayMs();
+
     showThinkingMessage();
 
     var replyTimeout = window.setTimeout(function () {
@@ -733,7 +1008,7 @@
       if (responses.length === 0) {
         removeThinkingMessage();
       }
-    }, 500);
+    }, responseDelay);
 
     state.timeouts.push(replyTimeout);
   }
@@ -744,11 +1019,25 @@
     }
 
     state.messages.push({
+      id: createMessageId(),
       sender: 'user',
       type: 'text',
       content: submission.userMessage,
       actions: []
     });
+
+    if (submission.kind === 'file' && Array.isArray(submission.files) && submission.files.length > 0) {
+      state.messages.push({
+        id: createMessageId(),
+        sender: 'user',
+        type: 'file-preview',
+        content: '',
+        actions: [],
+        files: submission.files.map(function (file) {
+          return cloneUploadedFile(file);
+        })
+      });
+    }
 
     renderMessages();
     messageInput.value = '';
@@ -804,7 +1093,10 @@
   });
 
   fileUploadInput.addEventListener('change', function (event) {
-    sendUploadedFiles(event.target.files);
+    var files = event.target.files;
+    if (files && files.length > 0) {
+      sendUploadedFiles(files);
+    }
     event.target.value = '';
   });
 
