@@ -9,22 +9,74 @@
   var navigationStateKey = 'hsbc-presenter-navigation-open';
 
   var currentPageId = document.body.getAttribute('data-page-id') || '';
+  var rootPathPrefix = getRootPathPrefix();
   var demoPages = [
     {
       id: 'lock-screen',
-      href: './locked-screen.html',
+      path: 'locked-screen.html',
       kicker: 'Entry',
       title: 'Lock Screen',
       description: 'Start the demo from the black wallpaper notification view.'
     },
     {
       id: 'assistant-chat',
-      href: './index.html',
+      path: 'index.html',
       kicker: 'Conversation',
       title: 'Assistant Chat',
       description: 'Open the HSBC SME assistant with guided flows, summary confirmation, and animated reply states.'
     }
   ];
+  var videoPages = [
+    {
+      id: 'video-loan',
+      path: 'vid/v1.html',
+      kicker: 'Video 01',
+      title: 'SME Loan Film',
+      description: 'Cinematic playback for the SME loan journey.',
+      topicLabel: '貸款'
+    },
+    {
+      id: 'video-account-opening',
+      path: 'vid/v2.html',
+      kicker: 'Video 02',
+      title: 'Account Opening Film',
+      description: 'Cinematic playback for the business account opening journey.',
+      topicLabel: '開戶'
+    },
+    {
+      id: 'video-fx-hedging',
+      path: 'vid/v3.html',
+      kicker: 'Video 03',
+      title: 'FX Hedging Film',
+      description: 'Cinematic playback for the FX hedging journey.',
+      topicLabel: '外匯對沖'
+    },
+    {
+      id: 'video-mainland-expansion',
+      path: 'vid/v4.html',
+      kicker: 'Video 04',
+      title: 'Mainland Expansion Film',
+      description: 'Cinematic playback for the mainland expansion journey.',
+      topicLabel: '內地擴張'
+    }
+  ];
+  var allPages = demoPages.concat(videoPages);
+
+  function getRootPathPrefix() {
+    var pathname = window.location.pathname || '';
+
+    return /\/vid\/[^/]+$/i.test(pathname) ? '../' : './';
+  }
+
+  function getPageHref(path, queryString) {
+    var href = rootPathPrefix + path;
+
+    if (queryString) {
+      href += queryString.charAt(0) === '?' ? queryString : '?' + queryString;
+    }
+
+    return href;
+  }
 
   function escapeHtml(value) {
     return String(value)
@@ -63,7 +115,7 @@
         copy: lastIntro && lastIntro.content
           ? lastIntro.content
           : 'Open the guided conversation flow for this topic.',
-        href: './index.html?topic=' + encodeURIComponent(starter)
+        href: getPageHref('index.html', 'topic=' + encodeURIComponent(starter))
       };
     });
   }
@@ -88,11 +140,16 @@
               metaParts.push('Summary Confirm');
             }
 
+            // Add starter text and copy button for demo
             return '' +
               '<a class="navigation-topic-button" href="' + escapeHtml(topic.href) + '">' +
                 '<span class="navigation-topic-button-title">' + escapeHtml(topic.title) + '</span>' +
                 '<span class="navigation-topic-button-meta">' + escapeHtml(metaParts.join(' · ')) + '</span>' +
                 '<span class="navigation-topic-button-copy">' + escapeHtml(topic.copy) + '</span>' +
+                '<span class="navigation-topic-starter">'
+                  + 'Type: <span class="navigation-topic-starter-text">' + escapeHtml(topic.starter) + '</span>'
+                  + ' <button class="navigation-topic-copy-btn" data-copy="' + escapeHtml(topic.starter) + '" title="Copy to chat input">Copy</button>'
+                + '</span>' +
               '</a>';
           }).join('') +
         '</div>' +
@@ -117,9 +174,29 @@
     return '';
   }
 
+  function renderVideoCards() {
+    return '' +
+      '<section class="navigation-section">' +
+        '<p class="navigation-section-label">Video Stories</p>' +
+        '<div class="navigation-page-list">' +
+          videoPages.map(function (page) {
+            var isActive = page.id === currentPageId;
+
+            return '' +
+              '<a class="navigation-page-link' + (isActive ? ' is-active' : '') + '" href="' + escapeHtml(getPageHref(page.path)) + '"' + (isActive ? ' aria-current="page"' : '') + '>' +
+                '<span class="navigation-page-link-kicker">' + escapeHtml(page.kicker) + '</span>' +
+                '<span class="navigation-page-link-title">' + escapeHtml(page.title) + '</span>' +
+                '<span class="navigation-page-link-copy">' + escapeHtml(page.description + ' Return topic: ' + page.topicLabel + '.') + '</span>' +
+                '<span class="navigation-page-link-state">' + (isActive ? 'Current Page' : 'Open Video') + '</span>' +
+              '</a>';
+          }).join('') +
+        '</div>' +
+      '</section>';
+  }
+
   var topicEntries = getTopicEntries();
 
-  var currentPage = demoPages.find(function (page) {
+  var currentPage = allPages.find(function (page) {
     return page.id === currentPageId;
   }) || demoPages[0];
 
@@ -145,7 +222,7 @@
         '<div>' +
           '<p class="navigation-kicker">Presenter</p>' +
           '<h2>Navigation</h2>' +
-          '<p class="navigation-panel-copy">Use this shared control to move between demo screens and launch the latest assistant topics from one place.</p>' +
+          '<p class="navigation-panel-copy">Use this shared control to move between demo screens, cinematic videos, and assistant topics from one place.</p>' +
         '</div>' +
       '</div>' +
       '<section class="navigation-section">' +
@@ -154,7 +231,7 @@
           demoPages.map(function (page) {
             var isActive = page.id === currentPageId;
             return '' +
-              '<a class="navigation-page-link' + (isActive ? ' is-active' : '') + '" href="' + page.href + '"' + (isActive ? ' aria-current="page"' : '') + '>' +
+              '<a class="navigation-page-link' + (isActive ? ' is-active' : '') + '" href="' + escapeHtml(getPageHref(page.path)) + '"' + (isActive ? ' aria-current="page"' : '') + '>' +
                 '<span class="navigation-page-link-kicker">' + page.kicker + '</span>' +
                 '<span class="navigation-page-link-title">' + page.title + '</span>' +
                 '<span class="navigation-page-link-copy">' + page.description + '</span>' +
@@ -163,6 +240,7 @@
           }).join('') +
         '</div>' +
       '</section>' +
+      renderVideoCards() +
       '<section class="navigation-section">' +
         '<p class="navigation-section-label">Current Screen</p>' +
         '<div class="navigation-current-screen">' +

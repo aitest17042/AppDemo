@@ -10,22 +10,41 @@
   var messageList = document.getElementById('messageList');
   var messageInput = document.getElementById('messageInput');
   var sendButton = document.getElementById('sendButton');
+  var uploadButton = document.getElementById('uploadButton');
+  var fileUploadInput = document.getElementById('fileUploadInput');
   var statusTime = document.getElementById('statusTime');
   var timelineLabel = document.getElementById('timelineLabel');
 
-  if (!chatArea || !messageList || !messageInput || !sendButton || !statusTime || !timelineLabel) {
+  if (!chatArea || !messageList || !messageInput || !sendButton || !uploadButton || !fileUploadInput || !statusTime || !timelineLabel) {
     console.error('Chat UI failed to initialize.');
     return;
   }
 
+  var initialRouteState = getInitialRouteState();
+  var defaultComposerPlaceholder = messageInput.getAttribute('placeholder') || '';
+
   var state = {
-    messages: [cloneMessage(appData.initialMessage)],
+    messages: [cloneMessage(initialRouteState.initialMessage)],
     timeouts: [],
     activeFlowId: null,
     activeFlowStepId: null,
     flowAnswers: {},
     thinkingMessageId: null
   };
+
+  function getInitialRouteState() {
+    var params = new URLSearchParams(window.location.search);
+    var entry = params.get('entry') || '';
+    var initialMessagesByEntry = appData.initialMessagesByEntry || {};
+    var matchedMessage = Object.prototype.hasOwnProperty.call(initialMessagesByEntry, entry)
+      ? initialMessagesByEntry[entry]
+      : null;
+
+    return {
+      entry: entry,
+      initialMessage: matchedMessage || appData.initialMessage
+    };
+  }
 
   function cloneMessage(message) {
     return {
@@ -39,6 +58,84 @@
 
   function createMessageId() {
     return 'msg-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+  }
+
+  function createTextSubmission(rawValue) {
+    var value = String(rawValue || '').trim();
+
+    if (!value) {
+      return null;
+    }
+
+    return {
+      kind: 'text',
+      text: value,
+      answer: value,
+      userMessage: value
+    };
+  }
+
+  function formatUploadedFileNames(files) {
+    var names = files
+      .map(function (file) {
+        return file.name;
+      })
+      .filter(Boolean);
+
+    if (names.length === 0) {
+      return '';
+    }
+
+    if (names.length === 1) {
+      return names[0];
+    }
+
+    return '共' + names.length + ' 份：' + names.join('、');
+  }
+
+  function createFileSubmission(fileList) {
+    var files = Array.prototype.slice.call(fileList || [])
+      .filter(Boolean)
+      .map(function (file) {
+        return {
+          name: file.name || 'untitled',
+          type: file.type || '',
+          size: file.size || 0
+        };
+      });
+    var summary = formatUploadedFileNames(files);
+
+    if (!summary) {
+      return null;
+    }
+
+    return {
+      kind: 'file',
+      files: files,
+      text: summary,
+      answer: summary,
+      userMessage: '已上傳：' + summary
+    };
+  }
+
+  function normalizeSubmission(rawValue) {
+    if (typeof rawValue === 'string') {
+      return createTextSubmission(rawValue);
+    }
+
+    if (!rawValue || typeof rawValue !== 'object') {
+      return null;
+    }
+
+    if (rawValue.kind === 'text' || rawValue.kind === 'file') {
+      return rawValue;
+    }
+
+    return null;
+  }
+
+  function getSubmissionText(submission) {
+    return submission && typeof submission.text === 'string' ? submission.text : '';
   }
 
   function escapeHtml(value) {
@@ -303,6 +400,77 @@
     return Array.isArray(step.routes) ? step.routes : [];
   }
 
+  function getStepInputMode(step) {
+    if (!step || (step.inputMode !== 'text' && step.inputMode !== 'file')) {
+      return '';
+    }
+
+    return step.inputMode;
+  }
+
+  function isCaptureStep(step) {
+    return Boolean(getStepInputMode(step));
+  }
+
+  function getCaptureStepResponses(step, flowDefinition) {
+    if (Array.isArray(step.captureResponses) && step.captureResponses.length > 0) {
+      return cloneResponses(step.captureResponses, flowDefinition);
+    }
+
+    return [
+      {
+        type: 'text',
+        content: getStepInputMode(step) === 'file' ? '已收到您上傳的文件。' : '已收到您輸入的資料。',
+        actions: []
+      }
+    ];
+  }
+
+  function handleCaptureStepSubmission(step, flowDefinition, submission) {
+    var inputMode = getStepInputMode(step);
+    var answerValue;
+    var responses;
+
+    if (inputMode === 'file') {
+      if (!submission || submission.kind !== 'file' || !Array.isArray(submission.files) || submission.files.length === 0) {
+        return [
+          {
+            type: 'text',
+            content: '這一步請使用下方的上傳按鈕加入示範文件。',
+            actions: []
+          }
+        ];
+      }
+
+      answerValue = submission.answer || getSubmissionText(submission);
+    } else {
+      answerValue = getSubmissionText(submission);
+
+      if (!answerValue) {
+        return [
+          {
+            type: 'text',
+            content: '這一步請先輸入資料，然後再按發送。',
+            actions: []
+          }
+        ];
+      }
+    }
+
+    setFlowStepAnswer(state.activeFlowId, step.id, answerValue);
+    responses = getCaptureStepResponses(step, flowDefinition);
+
+    if (step.clearFlow) {
+      clearFlowAnswers(state.activeFlowId);
+      setActiveFlow(null, null);
+    } else if (step.nextStepId) {
+      setActiveFlow(state.activeFlowId, step.nextStepId);
+      responses = responses.concat(getStepPromptResponses(flowDefinition, step.nextStepId));
+    }
+
+    return responses.length > 0 ? responses : appData.defaultResponses;
+  }
+
   function getMatchedFlowTransition(step, input) {
     var normalizedInput = normalizeInput(input);
 
@@ -346,13 +514,26 @@
     return input;
   }
 
-  function resolveResponses(input) {
-    var knowledgeEntry = getKnowledgeEntryForInput(input);
+  function resolveResponses(rawSubmission) {
+    var submission = normalizeSubmission(rawSubmission);
+    var input = getSubmissionText(submission);
+    var knowledgeEntry;
     var activeFlowStep = getActiveFlowStep();
     var activeFlowDefinition = getFlowDefinition(state.activeFlowId);
     var matchedTransition;
     var contextFreeResponse;
     var transitionResponses;
+
+    if (!submission) {
+      setActiveFlow(null, null);
+      return appData.defaultResponses;
+    }
+
+    if (activeFlowStep && isCaptureStep(activeFlowStep)) {
+      return handleCaptureStepSubmission(activeFlowStep, activeFlowDefinition, submission);
+    }
+
+    knowledgeEntry = getKnowledgeEntryForInput(input);
 
     if (knowledgeEntry) {
       if (knowledgeEntry.flow && knowledgeEntry.flow.startStepId) {
@@ -465,6 +646,7 @@
     });
 
     scrollToLatest();
+    setComposerState();
   }
 
   function findResponses(input) {
@@ -499,7 +681,28 @@
   }
 
   function setComposerState() {
-    sendButton.disabled = messageInput.value.trim().length === 0;
+    var activeStep = getActiveFlowStep();
+    var inputMode = getStepInputMode(activeStep);
+    var isFileStep = inputMode === 'file';
+
+    if (isFileStep) {
+      messageInput.value = '';
+    }
+
+    messageInput.disabled = isFileStep;
+    messageInput.placeholder = isFileStep
+      ? (activeStep && typeof activeStep.uploadPlaceholder === 'string'
+        ? activeStep.uploadPlaceholder
+        : '此步驟請使用上傳按鈕加入文件。')
+      : (activeStep && typeof activeStep.inputPlaceholder === 'string'
+        ? activeStep.inputPlaceholder
+        : defaultComposerPlaceholder);
+
+    uploadButton.hidden = !isFileStep;
+    uploadButton.disabled = !isFileStep;
+    fileUploadInput.accept = activeStep && typeof activeStep.fileAccept === 'string' ? activeStep.fileAccept : '';
+    fileUploadInput.multiple = !(activeStep && activeStep.fileMultiple === false);
+    sendButton.disabled = isFileStep || messageInput.value.trim().length === 0;
   }
 
   function queueAssistantResponses(input) {
@@ -535,37 +738,52 @@
     state.timeouts.push(replyTimeout);
   }
 
-  function sendMessage(rawValue) {
-    var value = rawValue.trim();
-
-    if (!value) {
+  function sendSubmission(submission) {
+    if (!submission) {
       return;
     }
 
     state.messages.push({
       sender: 'user',
       type: 'text',
-      content: value,
+      content: submission.userMessage,
       actions: []
     });
 
     renderMessages();
     messageInput.value = '';
+    fileUploadInput.value = '';
     setComposerState();
-    queueAssistantResponses(value);
+    queueAssistantResponses(submission);
   }
 
-  function consumeInitialTopicFromUrl() {
+  function sendMessage(rawValue) {
+    sendSubmission(createTextSubmission(rawValue));
+  }
+
+  function sendUploadedFiles(fileList) {
+    sendSubmission(createFileSubmission(fileList));
+  }
+
+  function consumeInitialRouteParams() {
     var params = new URLSearchParams(window.location.search);
+    var hasEntry = params.has('entry');
     var topic = params.get('topic');
     var nextUrl;
 
-    if (!topic) {
+    if (!topic && !hasEntry) {
       return;
     }
 
-    sendMessage(topic);
-    params.delete('topic');
+    if (topic) {
+      sendMessage(topic);
+      params.delete('topic');
+    }
+
+    if (hasEntry) {
+      params.delete('entry');
+    }
+
     nextUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '') + window.location.hash;
 
     if (window.history && typeof window.history.replaceState === 'function') {
@@ -575,6 +793,19 @@
 
   sendButton.addEventListener('click', function () {
     sendMessage(messageInput.value);
+  });
+
+  uploadButton.addEventListener('click', function () {
+    if (uploadButton.disabled) {
+      return;
+    }
+
+    fileUploadInput.click();
+  });
+
+  fileUploadInput.addEventListener('change', function (event) {
+    sendUploadedFiles(event.target.files);
+    event.target.value = '';
   });
 
   messageInput.addEventListener('input', setComposerState);
@@ -605,5 +836,5 @@
   window.setInterval(updateTimeElements, 1000);
   renderMessages();
   setComposerState();
-  consumeInitialTopicFromUrl();
+  consumeInitialRouteParams();
 })();

@@ -370,7 +370,7 @@ Object.assign(window, {
                       content: '了解，固定分期較方便預算每月現金流。'
                     }
                   ],
-                  nextStepId: 'loan-next-step'
+                  nextStepId: 'loan-business-context'
                 },
                 {
                   action: '循環貸款',
@@ -381,7 +381,7 @@ Object.assign(window, {
                       content: '明白，循環額度較適合彈性運用資金。'
                     }
                   ],
-                  nextStepId: 'loan-next-step'
+                  nextStepId: 'loan-business-context'
                 },
                 {
                   action: '想先比較方案',
@@ -392,15 +392,52 @@ Object.assign(window, {
                       content: '可以，我會先以方案比較角度幫您整理下一步。'
                     }
                   ],
-                  nextStepId: 'loan-next-step'
+                  nextStepId: 'loan-business-context'
                 }
               ]
+            },
+            {
+              id: 'loan-business-context',
+              inputMode: 'text',
+              inputPlaceholder: '例如：希望 6 月提取 150 萬作存貨週轉，並先了解 24 個月還款安排',
+              prompt: {
+                type: 'text',
+                content: '第十步，請輸入一段補充資料，示範您的融資用途、提款時間或其他重點。'
+              },
+              captureResponses: [
+                {
+                  type: 'text',
+                  content: '已識別您輸入的貸款補充資料：{{loan-business-context}}。'
+                }
+              ],
+              nextStepId: 'loan-supporting-upload'
+            },
+            {
+              id: 'loan-supporting-upload',
+              inputMode: 'file',
+              uploadPlaceholder: '此步驟請使用上傳按鈕加入示範文件',
+              fileAccept: '.pdf,.png,.jpg,.jpeg,.xls,.xlsx,.doc,.docx',
+              prompt: {
+                type: 'text',
+                content: '第十一步，請上傳 1 至 2 份示範文件，例如財務報表、銀行流水或訂單資料。'
+              },
+              captureResponses: [
+                {
+                  type: 'text',
+                  content: '已識別您上傳的文件：{{loan-supporting-upload}}。'
+                },
+                {
+                  type: 'text',
+                  content: '我已把補充資料和文件整理到摘要中，下一步請確認。'
+                }
+              ],
+              nextStepId: 'loan-next-step'
             },
             {
               id: 'loan-next-step',
               prompt: {
                 type: 'text',
-                content: '第十步，我已為您整理貸款需求摘要：用途為「{{loan-purpose}}」，金額為「{{loan-amount}}」，營運階段為「{{loan-business-stage}}」，營業額區間為「{{loan-turnover}}」，融資偏好為「{{loan-collateral}}」，期望時程為「{{loan-urgency}}」，往來狀況為「{{loan-banking}}」，文件狀態為「{{loan-documents}}」。如以上正確，請確認下一步。'
+                content: '第十二步，我已為您整理貸款需求摘要：用途為「{{loan-purpose}}」，金額為「{{loan-amount}}」，營運階段為「{{loan-business-stage}}」，營業額區間為「{{loan-turnover}}」，融資偏好為「{{loan-collateral}}」，期望時程為「{{loan-urgency}}」，往來狀況為「{{loan-banking}}」，文件狀態為「{{loan-documents}}」，補充說明為「{{loan-business-context}}」，上傳資料為「{{loan-supporting-upload}}」。如以上正確，請確認下一步。'
               },
               choices: [
                 {
@@ -841,7 +878,7 @@ Object.assign(window, {
                       content: '明白，若時間較緊，文件完整度會特別重要。'
                     }
                   ],
-                  nextStepId: 'account-next-step'
+                  nextStepId: 'account-business-context'
                 },
                 {
                   action: '本月內',
@@ -852,7 +889,7 @@ Object.assign(window, {
                       content: '收到，這個時間表通常足夠安排文件整理與申請。'
                     }
                   ],
-                  nextStepId: 'account-next-step'
+                  nextStepId: 'account-business-context'
                 },
                 {
                   action: '先了解流程',
@@ -863,15 +900,52 @@ Object.assign(window, {
                       content: '可以，先把流程與文件要求釐清會更穩妥。'
                     }
                   ],
-                  nextStepId: 'account-next-step'
+                  nextStepId: 'account-business-context'
                 }
               ]
+            },
+            {
+              id: 'account-business-context',
+              inputMode: 'text',
+              inputPlaceholder: '例如：公司剛成立 3 個月，希望先開立本地及多幣種戶口',
+              prompt: {
+                type: 'text',
+                content: '第十步，請輸入一段補充資料，示範您的公司背景、開戶目標或特殊安排。'
+              },
+              captureResponses: [
+                {
+                  type: 'text',
+                  content: '已識別您輸入的開戶補充資料：{{account-business-context}}。'
+                }
+              ],
+              nextStepId: 'account-supporting-upload'
+            },
+            {
+              id: 'account-supporting-upload',
+              inputMode: 'file',
+              uploadPlaceholder: '此步驟請使用上傳按鈕加入示範文件',
+              fileAccept: '.pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx',
+              prompt: {
+                type: 'text',
+                content: '第十一步，請上傳 1 至 2 份示範文件，例如公司註冊文件、董事身份證明或業務證明。'
+              },
+              captureResponses: [
+                {
+                  type: 'text',
+                  content: '已識別您上傳的文件：{{account-supporting-upload}}。'
+                },
+                {
+                  type: 'text',
+                  content: '我已把補充資料和文件整理到摘要中，下一步請確認。'
+                }
+              ],
+              nextStepId: 'account-next-step'
             },
             {
               id: 'account-next-step',
               prompt: {
                 type: 'text',
-                content: '第十步，我已為您整理開戶摘要：目前階段為「{{account-company-status}}」，成立地為「{{account-location}}」，公司架構為「{{account-structure}}」，參與開戶人數為「{{account-directors}}」，偏好渠道為「{{account-channel}}」，主要業務為「{{account-business-type}}」，核心銀行需求為「{{account-needs}}」，文件狀態為「{{account-documents}}」，期望時程為「{{account-timeline}}」。如以上正確，請確認下一步。'
+                content: '第十二步，我已為您整理開戶摘要：目前階段為「{{account-company-status}}」，成立地為「{{account-location}}」，公司架構為「{{account-structure}}」，參與開戶人數為「{{account-directors}}」，偏好渠道為「{{account-channel}}」，主要業務為「{{account-business-type}}」，核心銀行需求為「{{account-needs}}」，文件狀態為「{{account-documents}}」，期望時程為「{{account-timeline}}」，補充說明為「{{account-business-context}}」，上傳資料為「{{account-supporting-upload}}」。如以上正確，請確認下一步。'
               },
               choices: [
                 {
@@ -1309,7 +1383,7 @@ Object.assign(window, {
                       content: '很好，有交易文件通常有助更具體地討論對沖安排。'
                     }
                   ],
-                  nextStepId: 'fx-next-step'
+                  nextStepId: 'fx-risk-context'
                 },
                 {
                   action: '已有部分文件',
@@ -1320,7 +1394,7 @@ Object.assign(window, {
                       content: '明白，之後可再補充實際交易背景與金額資料。'
                     }
                   ],
-                  nextStepId: 'fx-next-step'
+                  nextStepId: 'fx-risk-context'
                 },
                 {
                   action: '未開始準備',
@@ -1331,15 +1405,52 @@ Object.assign(window, {
                       content: '收到，稍後我可以先告訴您一般會用到哪些背景資料。'
                     }
                   ],
-                  nextStepId: 'fx-next-step'
+                  nextStepId: 'fx-risk-context'
                 }
               ]
+            },
+            {
+              id: 'fx-risk-context',
+              inputMode: 'text',
+              inputPlaceholder: '例如：未來 3 個月每月都有美元付款，希望先鎖定部分匯率',
+              prompt: {
+                type: 'text',
+                content: '第十步，請輸入一段補充資料，示範您的交易背景、風險重點或想管理的期限。'
+              },
+              captureResponses: [
+                {
+                  type: 'text',
+                  content: '已識別您輸入的外匯補充資料：{{fx-risk-context}}。'
+                }
+              ],
+              nextStepId: 'fx-supporting-upload'
+            },
+            {
+              id: 'fx-supporting-upload',
+              inputMode: 'file',
+              uploadPlaceholder: '此步驟請使用上傳按鈕加入示範文件',
+              fileAccept: '.pdf,.png,.jpg,.jpeg,.xls,.xlsx,.csv,.doc,.docx',
+              prompt: {
+                type: 'text',
+                content: '第十一步，請上傳 1 至 2 份示範文件，例如發票、訂單、收付款明細或交易清單。'
+              },
+              captureResponses: [
+                {
+                  type: 'text',
+                  content: '已識別您上傳的文件：{{fx-supporting-upload}}。'
+                },
+                {
+                  type: 'text',
+                  content: '我已把補充資料和文件整理到摘要中，下一步請確認。'
+                }
+              ],
+              nextStepId: 'fx-next-step'
             },
             {
               id: 'fx-next-step',
               prompt: {
                 type: 'text',
-                content: '第十步，我已為您整理外匯對沖摘要：主要貨幣為「{{fx-currency}}」，風險方向為「{{fx-direction}}」，交易頻率為「{{fx-frequency}}」，金額區間為「{{fx-amount}}」，偏好工具為「{{fx-solution}}」，關注期限為「{{fx-timing}}」，風險偏好為「{{fx-risk-preference}}」，銀行關係為「{{fx-banking}}」，文件準備為「{{fx-documents}}」。如以上正確，請確認下一步。'
+                content: '第十二步，我已為您整理外匯對沖摘要：主要貨幣為「{{fx-currency}}」，風險方向為「{{fx-direction}}」，交易頻率為「{{fx-frequency}}」，金額區間為「{{fx-amount}}」，偏好工具為「{{fx-solution}}」，關注期限為「{{fx-timing}}」，風險偏好為「{{fx-risk-preference}}」，銀行關係為「{{fx-banking}}」，文件準備為「{{fx-documents}}」，補充說明為「{{fx-risk-context}}」，上傳資料為「{{fx-supporting-upload}}」。如以上正確，請確認下一步。'
               },
               choices: [
                 {
@@ -1775,7 +1886,7 @@ Object.assign(window, {
                       content: '很好，已有合作資源通常可讓市場切入和資金安排更明確。'
                     }
                   ],
-                  nextStepId: 'mainland-next-step'
+                  nextStepId: 'mainland-expansion-context'
                 },
                 {
                   action: '正在尋找合作夥伴',
@@ -1786,7 +1897,7 @@ Object.assign(window, {
                       content: '明白，在合作模式未定前，先保留彈性的銀行與資金安排會較穩妥。'
                     }
                   ],
-                  nextStepId: 'mainland-next-step'
+                  nextStepId: 'mainland-expansion-context'
                 },
                 {
                   action: '尚未確定',
@@ -1797,15 +1908,52 @@ Object.assign(window, {
                       content: '收到，先聚焦市場策略與進入模式會較適合目前階段。'
                     }
                   ],
-                  nextStepId: 'mainland-next-step'
+                  nextStepId: 'mainland-expansion-context'
                 }
               ]
+            },
+            {
+              id: 'mainland-expansion-context',
+              inputMode: 'text',
+              inputPlaceholder: '例如：計劃先進入大灣區，6 個月內完成試點並同步規劃跨境收款',
+              prompt: {
+                type: 'text',
+                content: '第十步，請輸入一段補充資料，示範您的擴張計劃、時間表或最想優先處理的議題。'
+              },
+              captureResponses: [
+                {
+                  type: 'text',
+                  content: '已識別您輸入的內地擴張補充資料：{{mainland-expansion-context}}。'
+                }
+              ],
+              nextStepId: 'mainland-supporting-upload'
+            },
+            {
+              id: 'mainland-supporting-upload',
+              inputMode: 'file',
+              uploadPlaceholder: '此步驟請使用上傳按鈕加入示範文件',
+              fileAccept: '.pdf,.png,.jpg,.jpeg,.ppt,.pptx,.xls,.xlsx,.doc,.docx',
+              prompt: {
+                type: 'text',
+                content: '第十一步，請上傳 1 至 2 份示範文件，例如商業計劃、合作資料、預算表或市場分析。'
+              },
+              captureResponses: [
+                {
+                  type: 'text',
+                  content: '已識別您上傳的文件：{{mainland-supporting-upload}}。'
+                },
+                {
+                  type: 'text',
+                  content: '我已把補充資料和文件整理到摘要中，下一步請確認。'
+                }
+              ],
+              nextStepId: 'mainland-next-step'
             },
             {
               id: 'mainland-next-step',
               prompt: {
                 type: 'text',
-                content: '第十步，我已為您整理內地擴張摘要：目前階段為「{{mainland-stage}}」，進入模式為「{{mainland-model}}」，重點地區為「{{mainland-region}}」，行業類型為「{{mainland-industry}}」，擴張規模為「{{mainland-scale}}」，所需銀行支援為「{{mainland-banking-needs}}」，合規準備為「{{mainland-compliance}}」，推進時程為「{{mainland-timeline}}」，合作資源為「{{mainland-partners}}」。如以上正確，請確認下一步。'
+                content: '第十二步，我已為您整理內地擴張摘要：目前階段為「{{mainland-stage}}」，進入模式為「{{mainland-model}}」，重點地區為「{{mainland-region}}」，行業類型為「{{mainland-industry}}」，擴張規模為「{{mainland-scale}}」，所需銀行支援為「{{mainland-banking-needs}}」，合規準備為「{{mainland-compliance}}」，推進時程為「{{mainland-timeline}}」，合作資源為「{{mainland-partners}}」，補充說明為「{{mainland-expansion-context}}」，上傳資料為「{{mainland-supporting-upload}}」。如以上正確，請確認下一步。'
               },
               choices: [
                 {
@@ -1885,6 +2033,38 @@ Object.assign(window, {
       type: 'text',
       content: '您好！我是匯豐中小企 AI 助手。請問今日有什麼可以幫到您的企業？',
       actions: ['我想查詢中小企貸款的最新方案。', '我想了解如何開立匯豐商業戶口。', '我想了解外匯對沖方案。', '我想查詢內地擴張支援。']
+    },
+    initialMessagesByEntry: {
+      'locked-screen': {
+        sender: 'ai',
+        type: 'text',
+        content: '您好！我已根據鎖定畫面的提醒，為您準備好日圓波動與現金流風險的重點方向。您想先看外匯對沖建議、跨境付款安排，還是近期匯率風險摘要？',
+        actions: ['我想了解外匯對沖建議。', '我想了解跨境付款安排。', '我想查看近期匯率風險摘要。']
+      },
+      'video-loan': {
+        sender: 'ai',
+        type: 'text',
+        content: '歡迎返回。我可以延續剛才的 SME Loan 內容，幫您收窄貸款方向、了解申請資格，或整理申請前文件。',
+        actions: ['我想了解中小企貸款方案。', '我想查看貸款申請資格。', '我想知道貸款前要準備哪些文件。']
+      },
+      'video-account-opening': {
+        sender: 'ai',
+        type: 'text',
+        content: '歡迎返回。我可以接續剛才的 Account Opening 內容，幫您整理開戶流程、文件要求，或比較 App 與親身辦理方式。',
+        actions: ['我想了解商業戶口開戶流程。', '我想查看開戶文件清單。', '我想比較 App 與親身開戶。']
+      },
+      'video-fx-hedging': {
+        sender: 'ai',
+        type: 'text',
+        content: '歡迎返回。我可以接續剛才的 FX Hedging 內容，幫您比較對沖工具、整理風險重點，或準備與外匯專家溝通的資料。',
+        actions: ['我想比較外匯對沖工具。', '我想整理外匯風險重點。', '我想知道與外匯專家溝通前要準備甚麼。']
+      },
+      'video-mainland-expansion': {
+        sender: 'ai',
+        type: 'text',
+        content: '歡迎返回。我可以接續剛才的 Mainland Expansion 內容，幫您整理跨境金融安排、擴張準備清單，或收窄下一步支援方向。',
+        actions: ['我想了解跨境金融安排。', '我想整理內地擴張準備清單。', '我想看看常見的銀行支援方向。']
+      }
     }
   }
 });
