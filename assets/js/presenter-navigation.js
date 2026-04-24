@@ -15,15 +15,14 @@
   };
   var topicDemoScripts = {
     'account-opening-flow': [
-      { kind: 'text', value: '開戶' },
-      { kind: 'text', value: '未' },
-      { kind: 'text', value: 'HK' },
-      { kind: 'text', value: '好，授權' },
+      { kind: 'text', value: '我最近被人炒咗，有個開公司嘅諗法，要點做' },
+      { kind: 'text', value: '未啊' },
+      { kind: 'text', value: 'HK?' },
+      { kind: 'text', value: '哦，好，授權' },
       { kind: 'upload', value: '', label: '上傳自拍 + 身分證明文件' },
-      { kind: 'text', value: '確認' },
-      { kind: 'text', value: '公司名稱「小白拉麵有限公司」，1 名董事兼股東，主要經營拉麵餐廳，計劃於九龍開業' },
-      { kind: 'text', value: 'https://instagram.com/demo-ramen-shop' },
-      { kind: 'text', value: 'OK + e-sign' }
+      { kind: 'text', value: '確認囉' },
+      { kind: 'text', value: '公司名稱「拉王有限公司」，1 名董事兼股東，主要經營拉麵餐廳，計劃於九龍開業' },
+      { kind: 'text', value: 'e-sign' }
     ],
     'fx-hedging-flow': [
       { kind: 'text', value: '外匯對沖' },

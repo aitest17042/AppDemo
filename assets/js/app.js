@@ -15,6 +15,7 @@
   var statusTime = document.getElementById('statusTime');
   var timelineLabel = document.getElementById('timelineLabel');
   var headerActions = document.querySelector('.header-actions');
+  var allowAllTopics = document.body.getAttribute('data-allow-all-topics') === 'true';
   var defaultTopic = document.body.getAttribute('data-default-topic') || '';
   var defaultTopicId = document.body.getAttribute('data-default-topic-id') || '';
 
@@ -23,17 +24,19 @@
     return;
   }
 
+  var allowedTopicIds = getAllowedTopicIds();
+  var scopedKnowledgeBase = getScopedKnowledgeBase();
   var initialRouteState = getInitialRouteState();
   var defaultComposerPlaceholder = messageInput.getAttribute('placeholder') || '';
 
   var state = {
-    messages: [cloneMessage(initialRouteState.initialMessage)],
+    messages: buildInitialMessages(initialRouteState),
     timeouts: [],
-    activeFlowId: null,
-    activeFlowStepId: null,
+    activeFlowId: initialRouteState.initialFlowId || null,
+    activeFlowStepId: initialRouteState.initialStepId || null,
     flowAnswers: {},
     thinkingMessageId: null,
-    currentTopicId: inferTopicIdFromRouteEntry(initialRouteState.entry) || defaultTopicId || null
+    currentTopicId: initialRouteState.initialTopicId || inferTopicIdFromRouteEntry(initialRouteState.entry) || defaultTopicId || null
   };
 
   var authState = {
@@ -42,19 +45,133 @@
     isLoading: false,
     loginTimeoutId: null
   };
+  var presenterState = {
+    handledCommandIds: Object.create(null),
+    typingTimeoutIds: []
+  };
+
+  function getAllowedTopicIds() {
+    var configured = (document.body.getAttribute('data-allowed-topic-ids') || '')
+      .split(',')
+      .map(function (value) {
+        return String(value || '').trim();
+      })
+      .filter(Boolean);
+
+    if (configured.length > 0) {
+      return configured;
+    }
+
+    if (!allowAllTopics && defaultTopicId) {
+      return [defaultTopicId];
+    }
+
+    return [];
+  }
+
+  function isEntryAllowed(entry) {
+    var topicId;
+
+    if (allowAllTopics || allowedTopicIds.length === 0) {
+      return true;
+    }
+
+    topicId = getEntryTopicId(entry);
+    return Boolean(topicId && allowedTopicIds.indexOf(topicId) !== -1);
+  }
+
+  function getScopedKnowledgeBase() {
+    return Array.isArray(appData.knowledgeBase)
+      ? appData.knowledgeBase.filter(function (entry) {
+          return isEntryAllowed(entry);
+        })
+      : [];
+  }
+
+  function getInitialMessagePayload(config) {
+    if (!config) {
+      return {
+        sender: 'ai',
+        type: 'text',
+        content: '',
+        actions: []
+      };
+    }
+
+    return {
+      sender: typeof config.sender === 'string' ? config.sender : 'ai',
+      type: typeof config.type === 'string' ? config.type : 'text',
+      content: typeof config.content === 'string' ? config.content : '',
+      actions: Array.isArray(config.actions) ? config.actions.slice() : []
+    };
+  }
 
   function getInitialRouteState() {
     var params = new URLSearchParams(window.location.search);
-    var entry = params.get('entry') || '';
+    var entry = params.get('entry') || document.body.getAttribute('data-initial-entry') || '';
     var initialMessagesByEntry = appData.initialMessagesByEntry || {};
     var matchedMessage = Object.prototype.hasOwnProperty.call(initialMessagesByEntry, entry)
       ? initialMessagesByEntry[entry]
       : null;
+    var initialMessage = getInitialMessagePayload(matchedMessage || appData.initialMessage);
+    var initialFlowId = matchedMessage && typeof matchedMessage.flowId === 'string' ? matchedMessage.flowId : '';
+    var initialStepId = matchedMessage && typeof matchedMessage.stepId === 'string' ? matchedMessage.stepId : '';
+    var initialTopicId = matchedMessage && typeof matchedMessage.topicId === 'string'
+      ? matchedMessage.topicId
+      : (initialFlowId || null);
 
     return {
       entry: entry,
-      initialMessage: matchedMessage || appData.initialMessage
+      initialMessage: initialMessage,
+      initialFlowId: initialFlowId || null,
+      initialStepId: initialStepId || null,
+      initialTopicId: initialTopicId,
+      appendStepPrompt: Boolean(matchedMessage && matchedMessage.appendStepPrompt && initialFlowId && initialStepId)
     };
+  }
+
+  function createAssistantMessage(message) {
+    return {
+      id: message.id || null,
+      sender: typeof message.sender === 'string' ? message.sender : 'ai',
+      type: typeof message.type === 'string' ? message.type : 'text',
+      content: typeof message.content === 'string' ? message.content : '',
+      actions: Array.isArray(message.actions) ? message.actions.slice() : [],
+      files: Array.isArray(message.files)
+        ? message.files.map(function (file) {
+            return cloneUploadedFile(file);
+          })
+        : []
+    };
+  }
+
+  function buildInitialMessages(routeState) {
+    var messages = [createAssistantMessage(routeState.initialMessage)];
+    var flowDefinition;
+    var promptResponses;
+
+    if (!routeState.appendStepPrompt || !routeState.initialFlowId || !routeState.initialStepId) {
+      return messages;
+    }
+
+    flowDefinition = getFlowDefinition(routeState.initialFlowId);
+    promptResponses = getStepPromptResponses(flowDefinition, routeState.initialStepId);
+
+    return messages.concat(promptResponses.map(function (response) {
+      return createAssistantMessage({
+        sender: 'ai',
+        type: response.type,
+        content: response.content,
+        actions: response.actions || []
+      });
+    }));
+  }
+
+  function getCurrentPagePath() {
+    var pathname = window.location.pathname || '';
+    var segments = pathname.split('/').filter(Boolean);
+
+    return segments.length > 0 ? segments[segments.length - 1] : '';
   }
 
   function getLoginButtonMarkup() {
@@ -493,7 +610,7 @@
       return null;
     }
 
-    return appData.knowledgeBase.find(function (entry) {
+    return scopedKnowledgeBase.find(function (entry) {
       return matchesInputRule(normalizedInput, entry);
     }) || null;
   }
@@ -503,11 +620,50 @@
       return null;
     }
 
-    var matchedEntry = appData.knowledgeBase.find(function (entry) {
+    var matchedEntry = scopedKnowledgeBase.find(function (entry) {
       return entry.flow && entry.flow.id === flowId;
     });
 
     return matchedEntry ? matchedEntry.flow : null;
+  }
+
+  function getScopedDefaultResponses() {
+    if (allowAllTopics || allowedTopicIds.length !== 1) {
+      return appData.defaultResponses;
+    }
+
+    switch (allowedTopicIds[0]) {
+      case 'account-opening-flow':
+        return [
+          {
+            type: 'text',
+            content: '目前此頁只支援商業戶口開立流程。您可直接開始開戶流程。',
+            actions: ['開立匯豐商業戶口']
+          }
+        ];
+      case 'fx-hedging-flow':
+        return [
+          {
+            type: 'text',
+            content: '目前此頁只支援外匯對沖流程。您可直接輸入「外匯對沖」開始。',
+            actions: ['外匯對沖']
+          }
+        ];
+      case 'mainland-branch-flow':
+        return [
+          {
+            type: 'text',
+            content: '目前此頁只支援拓展內地分店流程。您可直接開始相關方案流程。',
+            actions: ['拓展內地分店']
+          }
+        ];
+      default:
+        return appData.defaultResponses;
+    }
+  }
+
+  function getDefaultResponses() {
+    return cloneResponses(getScopedDefaultResponses(), null);
   }
 
   function ensureFlowAnswers(flowId) {
@@ -563,6 +719,7 @@
     return {
       type: response.type,
       content: interpolateTemplate(response.content, flowDefinition),
+      delayMs: typeof response.delayMs === 'number' ? response.delayMs : null,
       actions: Array.isArray(response.actions)
         ? response.actions.map(function (action) {
             return interpolateTemplate(action, flowDefinition);
@@ -696,6 +853,7 @@
     var activeStep;
     var suggestedInput;
     var inputMode;
+    var detail;
 
     if (typeof window.dispatchEvent !== 'function' || typeof window.CustomEvent !== 'function') {
       return;
@@ -705,13 +863,127 @@
     inputMode = getStepInputMode(activeStep);
     suggestedInput = getSuggestedInputForStep(activeStep) || getLatestAssistantSuggestedInput();
 
+    detail = {
+      activeTopicId: state.currentTopicId,
+      suggestedInput: suggestedInput,
+      isFileStep: inputMode === 'file' || inputMode === 'text-or-file'
+    };
+
     window.dispatchEvent(new window.CustomEvent('hsbc-navigation-state-change', {
-      detail: {
-        activeTopicId: state.currentTopicId,
-        suggestedInput: suggestedInput,
-        isFileStep: inputMode === 'file' || inputMode === 'text-or-file'
-      }
+      detail: detail
     }));
+
+    postPresenterState(detail);
+  }
+
+  function postPresenterState(detail) {
+    if (!window.opener || window.opener.closed || typeof window.opener.postMessage !== 'function') {
+      return;
+    }
+
+    window.opener.postMessage({
+      type: 'hsbc-presenter-state',
+      pageId: document.body.getAttribute('data-page-id') || '',
+      pageTitle: document.body.getAttribute('data-page-title') || document.title || '',
+      pagePath: getCurrentPagePath(),
+      activeTopicId: detail && detail.activeTopicId ? detail.activeTopicId : '',
+      suggestedInput: detail && detail.suggestedInput ? detail.suggestedInput : ''
+    }, '*');
+  }
+
+  function seedMessageInput(text) {
+    if (!messageInput || !text) {
+      return;
+    }
+
+    messageInput.value = text;
+    messageInput.focus();
+    syncMessageInputViewport();
+
+    var evt = document.createEvent('Event');
+    evt.initEvent('input', true, true);
+    messageInput.dispatchEvent(evt);
+  }
+
+  function syncMessageInputViewport() {
+    if (!messageInput) {
+      return;
+    }
+
+    if (typeof messageInput.setSelectionRange === 'function') {
+      messageInput.setSelectionRange(messageInput.value.length, messageInput.value.length);
+    }
+
+    messageInput.scrollLeft = messageInput.scrollWidth;
+  }
+
+  function clearPresenterTyping() {
+    presenterState.typingTimeoutIds.forEach(function (timeoutId) {
+      window.clearTimeout(timeoutId);
+    });
+    presenterState.typingTimeoutIds = [];
+  }
+
+  function typeMessageInput(text) {
+    var value = String(text || '');
+
+    clearPresenterTyping();
+
+    if (!messageInput) {
+      return;
+    }
+
+    messageInput.focus();
+    messageInput.value = '';
+    setComposerState();
+
+    value.split('').forEach(function (character, index) {
+      var timeoutId = window.setTimeout(function () {
+        var evt = document.createEvent('Event');
+
+        messageInput.value += character;
+        syncMessageInputViewport();
+        evt.initEvent('input', true, true);
+        messageInput.dispatchEvent(evt);
+      }, index * 75);
+
+      presenterState.typingTimeoutIds.push(timeoutId);
+    });
+  }
+
+  function handlePresenterCommand(data) {
+    var commandId = data && data.commandId ? String(data.commandId) : '';
+    var command = data && data.command ? String(data.command) : '';
+    var text = data && data.text ? String(data.text) : '';
+
+    if (!commandId || presenterState.handledCommandIds[commandId]) {
+      return;
+    }
+
+    presenterState.handledCommandIds[commandId] = true;
+
+    if (command === 'seed-input') {
+      typeMessageInput(text);
+      return;
+    }
+
+    if (command === 'send-text') {
+      sendMessage(text);
+      return;
+    }
+
+    if (command === 'send-current-input') {
+      if (!sendButton.disabled) {
+        sendButton.click();
+      }
+      return;
+    }
+
+    if (command === 'trigger-upload') {
+      if (!uploadButton.hidden && !uploadButton.disabled) {
+        uploadButton.click();
+      }
+    }
   }
 
   function getEntryResponses(entry) {
@@ -836,10 +1108,13 @@
       setActiveFlow(null, null);
     } else if (step.nextStepId) {
       setActiveFlow(state.activeFlowId, step.nextStepId);
-      responses = responses.concat(getStepPromptResponses(flowDefinition, step.nextStepId));
+
+      if (!step.skipNextPromptResponses) {
+        responses = responses.concat(getStepPromptResponses(flowDefinition, step.nextStepId));
+      }
     }
 
-    return responses.length > 0 ? responses : appData.defaultResponses;
+    return responses.length > 0 ? responses : getDefaultResponses();
   }
 
   function getMatchedFlowTransition(step, input) {
@@ -898,7 +1173,7 @@
     if (!submission) {
       setCurrentTopic(null);
       setActiveFlow(null, null);
-      return appData.defaultResponses;
+      return getDefaultResponses();
     }
 
     if (activeFlowStep && isCaptureStep(activeFlowStep)) {
@@ -934,12 +1209,12 @@
           transitionResponses = transitionResponses.concat(getStepPromptResponses(activeFlowDefinition, matchedTransition.nextStepId));
         }
 
-        return transitionResponses.length > 0 ? transitionResponses : appData.defaultResponses;
+        return transitionResponses.length > 0 ? transitionResponses : getDefaultResponses();
       }
 
       setActiveFlow(null, null);
       setCurrentTopic(null);
-      return appData.defaultResponses;
+      return getDefaultResponses();
     }
 
     contextFreeResponse = getContextFreeResponseForInput(input);
@@ -952,7 +1227,7 @@
 
     setActiveFlow(null, null);
     setCurrentTopic(null);
-    return appData.defaultResponses;
+    return getDefaultResponses();
   }
 
   function updateTimeElements() {
@@ -977,7 +1252,7 @@
 
     if (message.type === 'thinking') {
       bubble.className += ' thinking-bubble';
-      bubble.innerHTML = createThinkingDots();
+      bubble.innerHTML = (message.content ? '<p>' + escapeHtml(message.content) + '</p>' : '') + createThinkingDots();
     } else if (message.type === 'image') {
       bubble.innerHTML =
         '<div class="image-card">' +
@@ -1061,6 +1336,51 @@
     renderMessages();
   }
 
+  function updateThinkingMessage(response) {
+    var thinkingMessage;
+
+    if (!state.thinkingMessageId) {
+      showThinkingMessage();
+    }
+
+    thinkingMessage = state.messages.find(function (message) {
+      return message.id === state.thinkingMessageId;
+    });
+
+    if (!thinkingMessage) {
+      return;
+    }
+
+    thinkingMessage.type = 'thinking';
+    thinkingMessage.content = response.content;
+    thinkingMessage.actions = response.actions || [];
+    renderMessages();
+  }
+
+  function replaceThinkingMessage(response) {
+    var thinkingMessage;
+
+    if (!state.thinkingMessageId) {
+      return false;
+    }
+
+    thinkingMessage = state.messages.find(function (message) {
+      return message.id === state.thinkingMessageId;
+    });
+
+    if (!thinkingMessage) {
+      state.thinkingMessageId = null;
+      return false;
+    }
+
+    thinkingMessage.type = response.type;
+    thinkingMessage.content = response.content;
+    thinkingMessage.actions = response.actions || [];
+    state.thinkingMessageId = null;
+    renderMessages();
+    return true;
+  }
+
   function setComposerState() {
     var activeStep = getActiveFlowStep();
     var inputMode = getStepInputMode(activeStep);
@@ -1110,9 +1430,22 @@
 
     var replyTimeout = window.setTimeout(function () {
       var responses = findResponses(input);
+      var hasThinkingResponse = responses.some(function (response) {
+        return response && response.type === 'thinking';
+      });
+      var cumulativeDelay = 0;
 
       responses.forEach(function (response, index) {
         var bubbleTimeout = window.setTimeout(function () {
+          if (response.type === 'thinking') {
+            updateThinkingMessage(response);
+            return;
+          }
+
+          if (hasThinkingResponse && replaceThinkingMessage(response)) {
+            return;
+          }
+
           if (index === 0) {
             removeThinkingMessage();
           }
@@ -1125,9 +1458,12 @@
             actions: response.actions || []
           });
           renderMessages();
-        }, index * 800);
+        }, cumulativeDelay);
 
         state.timeouts.push(bubbleTimeout);
+        cumulativeDelay += typeof response.delayMs === 'number'
+          ? Math.max(0, response.delayMs)
+          : (index === 0 ? 0 : 800);
       });
 
       if (responses.length === 0) {
@@ -1251,9 +1587,21 @@
       window.clearTimeout(authState.loginTimeoutId);
     }
 
+    clearPresenterTyping();
+
     state.timeouts.forEach(function (timeoutId) {
       window.clearTimeout(timeoutId);
     });
+  });
+
+  window.addEventListener('message', function (event) {
+    var data = event.data || {};
+
+    if (!data || data.type !== 'hsbc-presenter-command') {
+      return;
+    }
+
+    handlePresenterCommand(data);
   });
 
   updateTimeElements();

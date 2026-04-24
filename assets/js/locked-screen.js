@@ -137,6 +137,11 @@
         resetNotification(notification, true);
       }
     });
+    notification.addEventListener('click', function () {
+      if (notification.getAttribute('data-open-on-tap') === 'true') {
+        navigateToTarget(notification.getAttribute('data-target') || './account-opening.html');
+      }
+    });
     notification.addEventListener('keydown', handleKeyDown);
   });
 

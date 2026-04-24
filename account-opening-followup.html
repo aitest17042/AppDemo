@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>滙豐萬事屋</title>
+    <title>滙豐萬事屋 開戶後續</title>
     <link rel="stylesheet" href="./assets/css/styles.css" />
   </head>
-  <body data-page-id="assistant-account-opening" data-default-topic="開戶" data-default-topic-id="account-opening-flow" data-initial-entry="assistant-account-opening">
+  <body data-page-id="assistant-account-opening-followup" data-page-title="開戶下半部分" data-default-topic-id="account-opening-flow" data-initial-entry="account-opening-followup">
     <div class="workspace-layout" id="workspaceLayout">
       <div class="app-shell">
         <div class="phone-frame">
@@ -40,24 +40,27 @@
                 </span>
               </div>
             </div>
-
             <div class="dynamic-island" aria-hidden="true"></div>
-
             <header class="header">
               <img class="app-logo" src="./assets/media/icons/hsbc_logo.png" alt="滙豐萬事屋" />
               <div class="header-copy">
                 <h1><span class="app-name-with-status">滙豐萬事屋<span class="online-indicator" aria-label="在線"></span></span></h1>
               </div>
               <div class="header-actions">
-                <button class="login-button" type="button">登入</button>
+                <div class="header-user" aria-label="已登入用戶">
+                  <img class="header-user-avatar" src="./assets/media/icons/chiikawa_icon.png" alt="已登入用戶" />
+                  <span class="header-user-verified" aria-hidden="true">
+                    <svg width="8" height="8" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M2.5 6.2 4.8 8.4 9.5 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
+                </div>
               </div>
             </header>
-
             <main class="chat-area" id="chatArea">
               <div class="timeline-label" id="timelineLabel">今天 --:-- --</div>
               <div class="message-list" id="messageList"></div>
             </main>
-
             <footer class="composer">
               <input id="fileUploadInput" class="composer-file-input" type="file" hidden />
               <button id="uploadButton" class="upload-button" type="button" aria-label="Upload supporting files" hidden>
@@ -75,7 +78,6 @@
                 </svg>
               </button>
             </footer>
-
             <div class="home-indicator"><div></div></div>
           </div>
         </div>
@@ -88,4 +90,3 @@
     <script defer src="./assets/js/app.js"></script>
   </body>
 </html>
-

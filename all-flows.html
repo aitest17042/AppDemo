@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>滙豐萬事屋</title>
+    <title>滙豐萬事屋 後備模式</title>
     <link rel="stylesheet" href="./assets/css/styles.css" />
   </head>
-  <body data-page-id="assistant-account-opening" data-default-topic="開戶" data-default-topic-id="account-opening-flow" data-initial-entry="assistant-account-opening">
+  <body data-page-id="assistant-all-flows" data-page-title="後備模式" data-initial-entry="all-flows" data-allow-all-topics="true">
     <div class="workspace-layout" id="workspaceLayout">
       <div class="app-shell">
         <div class="phone-frame">
@@ -40,9 +40,7 @@
                 </span>
               </div>
             </div>
-
             <div class="dynamic-island" aria-hidden="true"></div>
-
             <header class="header">
               <img class="app-logo" src="./assets/media/icons/hsbc_logo.png" alt="滙豐萬事屋" />
               <div class="header-copy">
@@ -52,12 +50,10 @@
                 <button class="login-button" type="button">登入</button>
               </div>
             </header>
-
             <main class="chat-area" id="chatArea">
               <div class="timeline-label" id="timelineLabel">今天 --:-- --</div>
               <div class="message-list" id="messageList"></div>
             </main>
-
             <footer class="composer">
               <input id="fileUploadInput" class="composer-file-input" type="file" hidden />
               <button id="uploadButton" class="upload-button" type="button" aria-label="Upload supporting files" hidden>
@@ -75,7 +71,6 @@
                 </svg>
               </button>
             </footer>
-
             <div class="home-indicator"><div></div></div>
           </div>
         </div>
@@ -88,4 +83,3 @@
     <script defer src="./assets/js/app.js"></script>
   </body>
 </html>
-

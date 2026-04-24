@@ -3,7 +3,7 @@ window.HSBCFlowModules = window.HSBCFlowModules || {};
 window.HSBCFlowModules.accountOpening = [
   {
     trigger: '開戶 / Account Opening',
-    keywords: ['開戶', 'account', '銀行卡', '開帳戶'],
+    keywords: ['開立匯豐商業戶口', '開公司', '開戶', 'account', '銀行卡', '開帳戶'],
     flow: {
       id: 'account-opening-flow',
       introResponses: [
@@ -158,6 +158,7 @@ window.HSBCFlowModules.accountOpening = [
           id: 'account-company-registration-info',
           inputMode: 'text',
           inputPlaceholder: '例如：公司名稱「小白拉麵有限公司」，1 名董事兼股東，主要經營拉麵餐廳，計劃於九龍開業',
+          skipNextPromptResponses: true,
           prompt: {
             type: 'text',
             content: '我將開始收集必要資料，並在每一步提供摘要供您確認。接下來我會先收集公司名稱、董事/股東安排及基本業務資料，並提供所需文件清單與狀態追蹤，讓您清楚每一步進度。請先提供公司名稱、董事/股東安排及基本業務資料。'
@@ -165,87 +166,31 @@ window.HSBCFlowModules.accountOpening = [
           captureResponses: [
             {
               type: 'text',
-              content: '我已收到您提供的公司名稱、董事/股東安排及基本業務資料。'
-            },
-            {
-              type: 'text',
-              content: '我已協助整理公司設立申請資料，並已向公司註冊處提交，以取得 CI 及 BR。'
-            },
-            {
-              type: 'text',
-              content: '通知您：公司設立已完成。接下來我將為您啟動 HSBC 香港商業戶口開立，並預先填寫開戶表格。'
-            },
-            {
-              type: 'text',
-              content: '為加快審核及減少補件，我需要您提供以下與業務相關文件或資料（如適用，提供其一或多項即可）：'
-            },
-            {
-              type: 'text',
-              content: '1. 業務證明：餐廳 IG / Facebook 專頁、官方網站、外賣平台店舖頁面截圖（如 OpenRice / Foodpanda / Deliveroo 等）。'
-            },
-            {
-              type: 'text',
-              content: '2. 交易佐證：已發出或已收取的發票、收據、採購單、供應商合約或報價單。'
-            },
-            {
-              type: 'text',
-              content: '3. 租務文件：店舖租約或租務意向書（如已簽）。'
-            },
-            {
-              type: 'text',
-              content: '4. 營運資料：菜單、價目表、開業日期、主要供應商名稱（如有）。'
-            },
-            {
-              type: 'text',
-              content: '5. 資金來源佐證（如需要）：注資紀錄或相關說明。'
-            }
-          ],
-          nextStepId: 'account-business-supporting'
-        },
-        {
-          id: 'account-business-supporting',
-          inputMode: 'text-or-file',
-          inputPlaceholder: '例如：IG 連結、官方網站網址，或直接描述您準備提供的業務文件',
-          uploadPlaceholder: '此步驟可直接輸入連結，或使用上傳按鈕加入 PDF / 相片',
-          fileAccept: '.pdf,.png,.jpg,.jpeg,.doc,.docx',
-          prompt: {
-            type: 'text',
-            content: '請選擇最方便的方式提供：您可直接回覆連結，例如 IG URL；或上載 PDF / 相片，我會為您整理並附加至開戶申請檔案。'
-          },
-          captureResponses: [
-            {
-              type: 'text',
-              content: '我已收到並整理您提供的業務相關文件或資料，正進行文件驗證、CDD 核對及開戶摘要草擬。'
-            },
-            {
-              type: 'text',
-              content: '我已根據公司註冊資料預填開戶表格。下一步將進行電子簽署：您檢視摘要後一次過簽署提交；完成後我會持續為您更新審核進度，直至戶口開立完成。'
+              content: '我已收到您提供的公司名稱、董事/股東安排及基本業務資料。現在需要你的e-sign'
             }
           ],
           nextStepId: 'account-esign'
         },
         {
           id: 'account-esign',
+          responseDelayMs: 0,
           prompt: {
             type: 'text',
-            content: '如您準備好，請輸入「OK + e-sign」完成電子簽署。'
+            content: '請輸入「e-sign」完成電子簽署。'
           },
           routes: [
             {
-              action: 'OK + e-sign',
-              keywords: ['ok + e-sign', 'ok', 'e-sign', 'esign', '電子簽署'],
+              action: 'e-sign',
+              keywords: ['e-sign', 'esign', '電子簽署'],
               responses: [
                 {
-                  type: 'text',
-                  content: '已收到您的電子簽署並成功提交開戶申請，我會持續為您更新審核進度，如需補充文件亦會即時通知。'
+                  type: 'thinking',
+                  content: '正在連接外部API'
                 },
                 {
                   type: 'text',
-                  content: '審核已完成。'
-                },
-                {
-                  type: 'text',
-                  content: '恭喜您，您的 HSBC 香港商業戶口已成功開立。'
+                  content: '已成功遞交申請',
+                  delayMs: 2000
                 }
               ],
               clearFlow: true
