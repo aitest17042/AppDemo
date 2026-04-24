@@ -7,15 +7,15 @@
   }
 
   var navigationStateKey = 'hsbc-presenter-navigation-open';
-  var featuredTopicOrder = ['account-opening-flow', 'fx-hedging-flow', 'mainland-branch-flow'];
+  var featuredTopicOrder = ['account-opening-start', 'fx-hedging-flow', 'mainland-branch-flow'];
   var topicPageById = {
-    'account-opening-flow': 'app_account-opening.html',
+    'account-opening-start': 'app_account-opening-start.html',
     'fx-hedging-flow': 'app_fx-hedging.html',
     'mainland-branch-flow': 'app_mainland-branch.html'
   };
   var topicDemoScripts = {
-    'account-opening-flow': [
-      { kind: 'text', value: '我最近被人炒咗，有個開公司嘅諗法，要點做' },
+    'account-opening-start': [
+      { kind: 'text', value: '我最近被人炒咗，我唔想再做社畜啦，不如開公司啦，但係要點做' },
       { kind: 'text', value: '未啊' },
       { kind: 'text', value: 'HK?' },
       { kind: 'text', value: '哦，好，授權' },
@@ -52,8 +52,8 @@
       description: '從鎖屏通知進入已登入的外匯對沖示範。'
     },
     {
-      id: 'assistant-account-opening',
-      path: 'app_account-opening.html',
+      id: 'assistant-account-opening-start',
+      path: 'app_account-opening-start.html',
       kicker: 'Demo 01',
       title: '開戶',
       description: '未登入狀態的開戶示範頁。'
@@ -176,7 +176,7 @@
         copy: lastIntro && lastIntro.content
           ? lastIntro.content
           : 'Open the guided conversation flow for this topic.',
-        href: getPageHref(topicPageById[topicId] || 'app_account-opening.html')
+        href: getPageHref(topicPageById[topicId] || 'app_account-opening-start.html')
       };
     }).filter(function (topic) {
       return topic.featuredIndex !== -1;

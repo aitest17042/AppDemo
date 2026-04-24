@@ -36,14 +36,18 @@
     activeFlowStepId: initialRouteState.initialStepId || null,
     flowAnswers: {},
     thinkingMessageId: null,
-    currentTopicId: initialRouteState.initialTopicId || inferTopicIdFromRouteEntry(initialRouteState.entry) || defaultTopicId || null
+    currentTopicId: initialRouteState.initialTopicId || defaultTopicId || null
   };
 
   var authState = {
-    isLoggedIn: Boolean(headerActions && headerActions.querySelector('.header-user')),
+    isLoggedIn: document.body.getAttribute('data-auto-login') === 'true' || Boolean(headerActions && headerActions.querySelector('.header-user')),
     isMenuOpen: false,
     isLoading: false,
     loginTimeoutId: null
+  };
+  var pageAutomationState = {
+    initialActionStarted: false,
+    initialActionTimeoutId: null
   };
   var presenterState = {
     handledCommandIds: Object.create(null),
@@ -94,7 +98,8 @@
         sender: 'ai',
         type: 'text',
         content: '',
-        actions: []
+        actions: [],
+        actionPresentation: ''
       };
     }
 
@@ -102,31 +107,37 @@
       sender: typeof config.sender === 'string' ? config.sender : 'ai',
       type: typeof config.type === 'string' ? config.type : 'text',
       content: typeof config.content === 'string' ? config.content : '',
-      actions: Array.isArray(config.actions) ? config.actions.slice() : []
+      actions: Array.isArray(config.actions) ? config.actions.slice() : [],
+      actionPresentation: typeof config.actionPresentation === 'string' ? config.actionPresentation : ''
     };
   }
 
+  function getInitialMessageConfig(pageId, topicId) {
+    if (pageId && appData.initialMessagesByPageId && appData.initialMessagesByPageId[pageId]) {
+      return appData.initialMessagesByPageId[pageId];
+    }
+
+    if (topicId && appData.initialMessagesByTopic && appData.initialMessagesByTopic[topicId]) {
+      return appData.initialMessagesByTopic[topicId];
+    }
+
+    return appData.initialMessage || null;
+  }
+
   function getInitialRouteState() {
-    var params = new URLSearchParams(window.location.search);
-    var entry = params.get('entry') || document.body.getAttribute('data-initial-entry') || '';
-    var initialMessagesByEntry = appData.initialMessagesByEntry || {};
-    var matchedMessage = Object.prototype.hasOwnProperty.call(initialMessagesByEntry, entry)
-      ? initialMessagesByEntry[entry]
-      : null;
-    var initialMessage = getInitialMessagePayload(matchedMessage || appData.initialMessage);
-    var initialFlowId = matchedMessage && typeof matchedMessage.flowId === 'string' ? matchedMessage.flowId : '';
-    var initialStepId = matchedMessage && typeof matchedMessage.stepId === 'string' ? matchedMessage.stepId : '';
-    var initialTopicId = matchedMessage && typeof matchedMessage.topicId === 'string'
-      ? matchedMessage.topicId
-      : (initialFlowId || null);
+    var pageId = document.body.getAttribute('data-page-id') || '';
+    var initialFlowId = document.body.getAttribute('data-initial-flow-id') || '';
+    var initialStepId = document.body.getAttribute('data-initial-step-id') || '';
+    var initialTopicId = document.body.getAttribute('data-initial-topic-id') || initialFlowId || null;
+    var initialMessage = getInitialMessagePayload(getInitialMessageConfig(pageId, initialTopicId));
 
     return {
-      entry: entry,
+      entry: pageId,
       initialMessage: initialMessage,
       initialFlowId: initialFlowId || null,
       initialStepId: initialStepId || null,
       initialTopicId: initialTopicId,
-      appendStepPrompt: Boolean(matchedMessage && matchedMessage.appendStepPrompt && initialFlowId && initialStepId)
+      appendStepPrompt: document.body.getAttribute('data-append-step-prompt') === 'true' && Boolean(initialFlowId && initialStepId)
     };
   }
 
@@ -137,6 +148,7 @@
       type: typeof message.type === 'string' ? message.type : 'text',
       content: typeof message.content === 'string' ? message.content : '',
       actions: Array.isArray(message.actions) ? message.actions.slice() : [],
+      actionPresentation: typeof message.actionPresentation === 'string' ? message.actionPresentation : '',
       files: Array.isArray(message.files)
         ? message.files.map(function (file) {
             return cloneUploadedFile(file);
@@ -162,7 +174,8 @@
         sender: 'ai',
         type: response.type,
         content: response.content,
-        actions: response.actions || []
+        actions: response.actions || [],
+        actionPresentation: response.actionPresentation || ''
       });
     }));
   }
@@ -172,6 +185,100 @@
     var segments = pathname.split('/').filter(Boolean);
 
     return segments.length > 0 ? segments[segments.length - 1] : '';
+  }
+
+  function isAccountOpeningCompleteEntry() {
+    return (document.body.getAttribute('data-page-id') || '') === 'assistant-account-opening-complete';
+  }
+
+  function appendAssistantMessages(messages) {
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return;
+    }
+
+    messages.forEach(function (message) {
+      state.messages.push(createAssistantMessage({
+        id: createMessageId(),
+        sender: 'ai',
+        type: message.type,
+        content: message.content,
+        actions: message.actions || [],
+        actionPresentation: message.actionPresentation || ''
+      }));
+    });
+
+    renderMessages();
+  }
+
+  function triggerFollowupLoginFlow() {
+    var flowDefinition;
+    var promptResponses;
+
+    if (!isAccountOpeningCompleteEntry() || state.activeFlowStepId || authState.isLoading || !authState.isLoggedIn) {
+      return;
+    }
+
+    flowDefinition = getFlowDefinition('account-opening-complete');
+    promptResponses = getStepPromptResponses(flowDefinition, 'account-followup-openrice-offer');
+
+    if (!flowDefinition || promptResponses.length === 0) {
+      return;
+    }
+
+    setActiveFlow('account-opening-complete', 'account-followup-openrice-offer');
+    appendAssistantMessages(promptResponses);
+  }
+
+  function getInitialActionConfig() {
+    var text = document.body.getAttribute('data-initial-action-text') || '';
+    var flowId = document.body.getAttribute('data-initial-action-flow-id') || '';
+    var stepId = document.body.getAttribute('data-initial-action-step-id') || '';
+
+    if (!text || !flowId || !stepId) {
+      return null;
+    }
+
+    return {
+      text: text,
+      flowId: flowId,
+      stepId: stepId
+    };
+  }
+
+  function getInitialActionResponses(input) {
+    var initialAction = getInitialActionConfig();
+    var normalizedInput = normalizeInput(input || '');
+    var flowDefinition;
+    var promptResponses;
+
+    if (!initialAction || normalizedInput !== normalizeInput(initialAction.text)) {
+      return null;
+    }
+
+    flowDefinition = getFlowDefinition(initialAction.flowId);
+
+    if (!flowDefinition) {
+      return null;
+    }
+
+    setCurrentTopic(initialAction.flowId);
+    setActiveFlow(initialAction.flowId, initialAction.stepId);
+    promptResponses = getStepPromptResponses(flowDefinition, initialAction.stepId);
+    return promptResponses.length > 0 ? promptResponses : null;
+  }
+
+  function autoStartInitialAction() {
+    var initialAction = getInitialActionConfig();
+
+    if (!initialAction || pageAutomationState.initialActionStarted || document.body.getAttribute('data-auto-start-initial-action') !== 'true' || !authState.isLoggedIn) {
+      return;
+    }
+
+    pageAutomationState.initialActionStarted = true;
+    pageAutomationState.initialActionTimeoutId = window.setTimeout(function () {
+      pageAutomationState.initialActionTimeoutId = null;
+      sendMessage(initialAction.text);
+    }, 500);
   }
 
   function getLoginButtonMarkup() {
@@ -239,6 +346,7 @@
       authState.loginTimeoutId = null;
       authState.isLoggedIn = true;
       renderAuthControl();
+      triggerFollowupLoginFlow();
     }, 3000);
   }
 
@@ -289,19 +397,6 @@
         setUserMenuOpen(false);
       }
     });
-  }
-
-  function inferTopicIdFromRouteEntry(entry) {
-    switch (entry) {
-      case 'video-account-opening':
-        return 'account-opening-flow';
-      case 'video-fx-hedging':
-        return 'fx-hedging-flow';
-      case 'video-mainland-expansion':
-        return 'mainland-branch-flow';
-      default:
-        return null;
-    }
   }
 
   function getEntryTopicId(entry) {
@@ -635,13 +730,25 @@
       return appData.defaultResponses;
     }
 
+    if (appData.defaultResponsesByTopic && Array.isArray(appData.defaultResponsesByTopic[allowedTopicIds[0]])) {
+      return appData.defaultResponsesByTopic[allowedTopicIds[0]];
+    }
+
     switch (allowedTopicIds[0]) {
-      case 'account-opening-flow':
+      case 'account-opening-start':
         return [
           {
             type: 'text',
             content: '目前此頁只支援商業戶口開立流程。您可直接開始開戶流程。',
             actions: ['開立匯豐商業戶口']
+          }
+        ];
+      case 'account-opening-complete':
+        return [
+          {
+            type: 'text',
+            content: '目前此頁只支援開戶完成後的後續服務流程。請先登入查看戶口資料。',
+            actions: []
           }
         ];
       case 'fx-hedging-flow':
@@ -726,6 +833,7 @@
       imageSubtitle: interpolateTemplate(response.imageSubtitle, flowDefinition),
       imageAlt: interpolateTemplate(response.imageAlt, flowDefinition),
       delayMs: typeof response.delayMs === 'number' ? response.delayMs : null,
+      actionPresentation: typeof response.actionPresentation === 'string' ? response.actionPresentation : '',
       actions: Array.isArray(response.actions)
         ? response.actions.map(function (action) {
             return interpolateTemplate(action, flowDefinition);
@@ -792,6 +900,7 @@
       {
         type: step.prompt.type || 'text',
         content: interpolateTemplate(step.prompt.content, flowDefinition),
+        actionPresentation: typeof step.prompt.actionPresentation === 'string' ? step.prompt.actionPresentation : '',
         actions: promptActions.map(function (action) {
           return interpolateTemplate(action, flowDefinition);
         })
@@ -1186,6 +1295,12 @@
       return handleCaptureStepSubmission(activeFlowStep, activeFlowDefinition, submission);
     }
 
+    transitionResponses = getInitialActionResponses(input);
+
+    if (transitionResponses) {
+      return transitionResponses;
+    }
+
     knowledgeEntry = getKnowledgeEntryForInput(input);
 
     if (knowledgeEntry) {
@@ -1273,19 +1388,27 @@
       bubble.appendChild(createFilePreviewContent(Array.isArray(message.files) ? message.files : []));
     } else {
       var actionsMarkup = '';
+      var isDirectReply = message.actionPresentation === 'direct-reply';
 
       if (Array.isArray(message.actions) && message.actions.length > 0) {
-        actionsMarkup =
-          '<div class="actions-box">' +
-            '<div class="label">您可以試試問：</div>' +
-            '<div class="action-list">' +
+        actionsMarkup = isDirectReply
+          ? '<div class="direct-reply-box">' +
               message.actions
                 .map(function (action) {
-                  return '<button class="action-button" type="button" data-action="' + escapeHtml(action) + '"><span>「' + escapeHtml(action) + '」</span>' + createChevron() + '</button>';
+                  return '<button class="direct-reply-button" type="button" data-action="' + escapeHtml(action) + '"><span>' + escapeHtml(action) + '</span></button>';
                 })
                 .join('') +
-            '</div>' +
-          '</div>';
+            '</div>'
+          : '<div class="actions-box">' +
+              '<div class="label">您可以試試問：</div>' +
+              '<div class="action-list">' +
+                message.actions
+                  .map(function (action) {
+                    return '<button class="action-button" type="button" data-action="' + escapeHtml(action) + '"><span>「' + escapeHtml(action) + '」</span>' + createChevron() + '</button>';
+                  })
+                  .join('') +
+              '</div>' +
+            '</div>';
       }
 
       bubble.innerHTML = '<p>' + escapeHtml(message.content) + '</p>' + actionsMarkup;
@@ -1464,6 +1587,7 @@
             imageTitle: response.imageTitle || '',
             imageSubtitle: response.imageSubtitle || '',
             imageAlt: response.imageAlt || '',
+            actionPresentation: response.actionPresentation || '',
             actions: response.actions || []
           });
           renderMessages();
@@ -1596,6 +1720,10 @@
       window.clearTimeout(authState.loginTimeoutId);
     }
 
+    if (pageAutomationState.initialActionTimeoutId) {
+      window.clearTimeout(pageAutomationState.initialActionTimeoutId);
+    }
+
     clearPresenterTyping();
 
     state.timeouts.forEach(function (timeoutId) {
@@ -1618,5 +1746,6 @@
   initializeAuthControl();
   renderMessages();
   setComposerState();
+  autoStartInitialAction();
   consumeInitialRouteParams();
 })();

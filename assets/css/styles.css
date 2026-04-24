@@ -984,6 +984,7 @@ a {
 .message-bubble p {
   margin: 0;
   font-weight: 500;
+  white-space: pre-wrap;
 }
 
 .uploaded-file-preview {
@@ -1084,6 +1085,33 @@ a {
   margin-top: 20px;
   padding-top: 16px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.direct-reply-box {
+  margin-top: 18px;
+}
+
+.direct-reply-button {
+  width: 100%;
+  border: 1px solid rgba(219, 0, 17, 0.12);
+  border-radius: 14px;
+  background: rgba(219, 0, 17, 0.1);
+  padding: 12px 14px;
+  text-align: center;
+  color: var(--hsbc-red);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.direct-reply-button:hover {
+  background: rgba(219, 0, 17, 0.16);
+  border-color: rgba(219, 0, 17, 0.2);
+}
+
+.direct-reply-button:active {
+  transform: scale(0.99);
 }
 
 .actions-box .label {

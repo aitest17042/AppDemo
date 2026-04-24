@@ -26,15 +26,16 @@
     activeTopicId: '',
     suggestedInput: ''
   };
-  var featuredTopicOrder = ['account-opening-flow', 'fx-hedging-flow', 'mainland-branch-flow'];
+  var featuredTopicOrder = ['account-opening-start', 'account-opening-complete', 'fx-hedging-flow', 'mainland-branch-flow'];
   var topicPageById = {
-    'account-opening-flow': 'app_account-opening.html',
+    'account-opening-start': 'app_account-opening-start.html',
+    'account-opening-complete': 'app_account-opening-complete.html',
     'fx-hedging-flow': 'app_fx-hedging.html',
     'mainland-branch-flow': 'app_mainland-branch.html'
   };
   var topicDemoScripts = {
-    'account-opening-flow': [
-      { kind: 'text', value: '我最近被人炒咗，有個開公司嘅諗法，要點做' },
+    'account-opening-start': [
+      { kind: 'text', value: '我最近被人炒咗，我唔想再做社畜啦，不如開公司啦，但係要點做' },
       { kind: 'text', value: '未啊' },
       { kind: 'text', value: 'HK?' },
       { kind: 'text', value: '哦，好，授權' },
@@ -42,6 +43,10 @@
       { kind: 'text', value: '確認囉' },
       { kind: 'text', value: '公司名稱「拉王有限公司」，1 名董事兼股東，主要經營拉麵餐廳，計劃於九龍開業' },
       { kind: 'text', value: 'e-sign' }
+    ],
+    'account-opening-complete': [
+      { kind: 'text', value: 'ok, openrice' },
+      { kind: 'text', value: '授權並直接提交' }
     ],
     'fx-hedging-flow': [
       { kind: 'text', value: 'ok' },
@@ -63,11 +68,11 @@
     { order: 1, pageId: 'story-brand-intro', path: 'tran_brand-intro.html', title: '滙豐萬事屋', summary: '開場品牌頁。', kicker: 'Intro' },
     { order: 2, pageId: 'story-home', path: 'tran_home.html', title: '首頁', summary: '小白的創業故事由此開始。', kicker: 'Story 01' },
     { order: 3, pageId: 'feature-demo-account-opening', path: 'vid_v1.html', title: 'vid_v1.html', summary: '展示開戶功能與外部 API 連結。', kicker: 'Step 02' },
-    { order: 4, pageId: 'transition-after-v1', path: 'tran_v1transition.html', title: '創業念頭過場', summary: '動畫文字 + 思想 bubble：我最近被人炒咗，有個開公司嘅諗法，要點做⋯⋯ → 滙豐萬事屋？', kicker: 'Transition' },
-    { order: 5, pageId: 'assistant-account-opening', path: 'app_account-opening.html', title: 'app_account-opening.html', summary: '進入開戶示範上半部分。', kicker: 'Step 03' },
-    { order: 6, pageId: 'story-two-days-later', path: 'tran_two-days-later.html', title: '2 天後。。。', summary: '過場頁，交代時間推進。', kicker: 'Step 04' },
+    { order: 4, pageId: 'transition-after-v1', path: 'tran_v1transition.html', title: '創業念頭過場', summary: '動畫文字 + 思想 bubble：我最近被人炒咗，我唔想再做社畜啦，不如開公司啦，但係要點做⋯⋯ → 滙豐萬事屋？', kicker: 'Transition' },
+    { order: 5, pageId: 'assistant-account-opening-start', path: 'app_account-opening-start.html', title: 'app_account-opening-start.html', summary: '進入開戶示範上半部分。', kicker: 'Step 03' },
+    { order: 6, pageId: 'story-two-days-later', path: 'tran_two-days-later.html', title: '兩天後。。。', summary: '過場頁，交代時間推進。', kicker: 'Step 04' },
     { order: 7, pageId: 'lock-screen-account-opening', path: 'loks_account-opening.html', title: '開戶成功 Lock Screen', summary: '展示開戶成功及 BR / CR 推送。', kicker: 'Step 05' },
-    { order: 8, pageId: 'assistant-account-opening-followup', path: 'app_account-opening-followup.html', title: 'app_account-opening.html（下半部分）', summary: '展示開戶後續與已完成項目。', kicker: 'Step 06' },
+    { order: 8, pageId: 'assistant-account-opening-complete', path: 'app_account-opening-complete.html', title: 'app_account-opening-complete.html', summary: '展示開戶完成後的後續服務與已完成項目。', kicker: 'Step 06' },
     { order: 9, pageId: 'feature-demo-fx-hedging', path: 'vid_v2.html', title: 'vid_v2.html', summary: '進入外匯對沖影片與優惠推廣。', kicker: 'Step 07' },
     { order: 10, pageId: 'lock-screen-fx', path: 'loks_fx-hedging.html', title: 'FX Lock Screen', summary: '展示日圓風險提醒與外匯對沖入口。', kicker: 'Step 08' },
     { order: 11, pageId: 'assistant-fx-hedging', path: 'app_fx-hedging.html', title: 'app_fx-hedging.html', summary: '展示分析、優惠推廣、交易確認及查閱交易記錄。', kicker: 'Step 09' },
@@ -229,7 +234,7 @@
           featuredIndex: featuredIndex,
           title: title,
           description: lastIntro && lastIntro.content ? lastIntro.content : 'Open the guided conversation flow for this topic.',
-          pagePath: topicPageById[topicId] || 'app_account-opening.html',
+          pagePath: topicPageById[topicId] || 'app_account-opening-start.html',
           demoScript: demoScript,
           successSteps: getSuccessfulKeywordSteps(entry, demoScript)
         };
@@ -466,8 +471,12 @@
       return null;
     }
 
-    if (item.pageId === 'assistant-account-opening') {
-      return topicsById['account-opening-flow'] || null;
+    if (item.pageId === 'assistant-account-opening-start') {
+      return topicsById['account-opening-start'] || null;
+    }
+
+    if (item.pageId === 'assistant-account-opening-complete') {
+      return topicsById['account-opening-complete'] || null;
     }
 
     if (item.pageId === 'assistant-fx-hedging') {
@@ -538,7 +547,7 @@
     return '' +
       '<section class="presenter-console-section">' +
         '<div class="presenter-console-section-header">' +
-          '<p class="presenter-console-section-kicker">Present Sequence</p>' +
+          '<p class="presenter-console-section-kicker">Sequence</p>' +
           '<h2>按 Present 次序顯示</h2>' +
         '</div>' +
         '<div class="presenter-sequence-list">' +

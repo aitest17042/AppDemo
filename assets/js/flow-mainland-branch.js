@@ -1,9 +1,10 @@
 window.HSBCFlowModules = window.HSBCFlowModules || {};
+window.HSBCFlowModuleConfigs = window.HSBCFlowModuleConfigs || {};
 
 window.HSBCFlowModules.mainlandBranch = [
   {
     trigger: '拓展內地分店',
-    keywords: ['拓展內地分店', '內地分店', '國內開分店', '開分店', '內地擴張'],
+    keywords: ['內地分店', '國內開分店', '開分店', '內地擴張'],
     topicId: 'mainland-branch-flow',
     flow: {
       id: 'mainland-branch-flow',
@@ -168,3 +169,22 @@ window.HSBCFlowModules.mainlandBranch = [
     ]
   }
 ];
+
+window.HSBCFlowModuleConfigs.mainlandBranch = {
+  topicId: 'mainland-branch-flow',
+  initialMessagesByTopic: {
+    'mainland-branch-flow': {
+      sender: 'ai',
+      type: 'text',
+      content: '您好！我是滙豐萬事屋。請問今日有什麼可以幫到您的企業？',
+      actions: ['我想過數。', '我要兌換外幣']
+    }
+  },
+  defaultResponses: [
+    {
+      type: 'text',
+      content: '您好！我是滙豐萬事屋。請問今日有什麼可以幫到您的企業？',
+      actions: ['我想過數。', '我要兌換外幣']
+    }
+  ]
+};

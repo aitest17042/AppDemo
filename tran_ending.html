@@ -25,6 +25,9 @@
         margin: 0;
         min-height: 3.8em;
         max-width: 18em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         text-align: center;
         font-size: clamp(2rem, 4.5vw, 3.5rem);
         line-height: 1.75;
@@ -32,6 +35,12 @@
         font-weight: 500;
         color: inherit;
         text-wrap: balance;
+      }
+
+      .typing-line-image {
+        width: min(220px, 48vw);
+        height: auto;
+        object-fit: contain;
       }
 
       .typing-copy {
@@ -76,9 +85,8 @@
       (function () {
         var lineNode = document.getElementById('typingLine');
         var copyNode = document.getElementById('typingCopy');
-        var lineText = '從此小白過上無憂無慮的生活。。。';
-        var copyText = '由創業起步、成功開戶，到管理匯率風險及規劃拓展，小白終於有更多時間專注做好生意，也對未來更有把握。';
-        var lineIndex = 0;
+        var lineImagePath = './assets/media/icons/chiikawa_icon.png';
+        var copyText = '由創業起步、成功開戶，到管理匯率風險及規劃拓展，\n小白終於有更多時間專注做好生意，也對未來更有把握。';
         var copyIndex = 0;
 
         function renderCopy() {
@@ -93,14 +101,7 @@
         }
 
         function renderLine() {
-          if (lineIndex < lineText.length) {
-            lineNode.textContent += lineText.charAt(lineIndex);
-            lineIndex += 1;
-            window.setTimeout(renderLine, 78);
-            return;
-          }
-
-          lineNode.innerHTML = lineNode.textContent + '<span class="typing-caret" aria-hidden="true"></span>';
+          lineNode.innerHTML = '<img class="typing-line-image" src="' + lineImagePath + '" alt="Chiikawa" />';
           window.setTimeout(renderCopy, 220);
         }
 

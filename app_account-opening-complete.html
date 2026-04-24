@@ -6,7 +6,7 @@
     <title>滙豐萬事屋</title>
     <link rel="stylesheet" href="./assets/css/styles.css" />
   </head>
-  <body data-page-id="assistant-account-opening-followup" data-page-title="開戶下半部分" data-default-topic-id="account-opening-flow" data-initial-entry="account-opening-followup">
+  <body data-page-id="assistant-account-opening-complete" data-page-title="開戶完成" data-default-topic-id="account-opening-complete" data-initial-topic-id="account-opening-complete" data-auto-login="true" data-initial-action-text="查看你的戶口。" data-initial-action-flow-id="account-opening-complete" data-initial-action-step-id="account-followup-openrice-offer" data-auto-start-initial-action="true">
     <div class="workspace-layout" id="workspaceLayout">
       <div class="app-shell">
         <div class="phone-frame">
@@ -46,16 +46,7 @@
               <div class="header-copy">
                 <h1><span class="app-name-with-status">滙豐萬事屋<span class="online-indicator" aria-label="在線"></span></span></h1>
               </div>
-              <div class="header-actions">
-                <div class="header-user" aria-label="已登入用戶">
-                  <img class="header-user-avatar" src="./assets/media/icons/chiikawa_icon.png" alt="已登入用戶" />
-                  <span class="header-user-verified" aria-hidden="true">
-                    <svg width="8" height="8" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M2.5 6.2 4.8 8.4 9.5 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  </span>
-                </div>
-              </div>
+              <div class="header-actions"></div>
             </header>
             <main class="chat-area" id="chatArea">
               <div class="timeline-label" id="timelineLabel">今天 --:-- --</div>
@@ -83,9 +74,10 @@
         </div>
       </div>
     </div>
-    <script defer src="./assets/js/account-opening-flow.js"></script>
-    <script defer src="./assets/js/fx-hedging-flow.js"></script>
-    <script defer src="./assets/js/mainland-branch-flow.js"></script>
+    <script defer src="./assets/js/flow-account-opening-start.js"></script>
+    <script defer src="./assets/js/flow-account-opening-complete.js"></script>
+    <script defer src="./assets/js/flow-fx-hedging.js"></script>
+    <script defer src="./assets/js/flow-mainland-branch.js"></script>
     <script defer src="./assets/js/knowledgeBase.js"></script>
     <script defer src="./assets/js/app.js"></script>
   </body>

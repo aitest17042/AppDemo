@@ -1,4 +1,5 @@
 window.HSBCFlowModules = window.HSBCFlowModules || {};
+window.HSBCFlowModuleConfigs = window.HSBCFlowModuleConfigs || {};
 
 window.HSBCFlowModules.fxHedging = [
   {
@@ -175,3 +176,22 @@ window.HSBCFlowModules.fxHedging = [
     }
   }
 ];
+
+window.HSBCFlowModuleConfigs.fxHedging = {
+  topicId: 'fx-hedging-flow',
+  initialMessagesByTopic: {
+    'fx-hedging-flow': {
+      sender: 'ai',
+      type: 'text',
+      content: '🔔近期日圓（JPY）波動加劇。根據過往交易記錄，您可能面臨匯率波動導致成本上升的風險。如您希穩定未來採購成本，可考慮使用外匯對沖方案（例如：遠期外匯合約等）。是否需要我為您進行快速評估並提供可行選項？',
+      actions: []
+    }
+  },
+  defaultResponses: [
+    {
+      type: 'text',
+      content: '🔔近期日圓（JPY）波動加劇。根據過往交易記錄，您可能面臨匯率波動導致成本上升的風險。如您希穩定未來採購成本，可考慮使用外匯對沖方案（例如：遠期外匯合約等）。是否需要我為您進行快速評估並提供可行選項？',
+      actions: []
+    }
+  ]
+};
