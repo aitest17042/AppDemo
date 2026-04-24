@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HSBC SME Assistant</title>
+    <title>滙豐萬事屋</title>
     <link rel="stylesheet" href="./assets/css/styles.css" />
   </head>
-  <body data-page-id="assistant-chat">
+  <body data-page-id="assistant-account-opening" data-default-topic="開戶" data-default-topic-id="account-opening-flow">
     <div class="workspace-layout" id="workspaceLayout">
       <div class="app-shell">
         <div class="phone-frame">
@@ -44,20 +44,12 @@
             <div class="dynamic-island" aria-hidden="true"></div>
 
             <header class="header">
-              <div class="hex-logo" aria-hidden="true"></div>
+              <img class="app-logo" src="./assets/media/icons/hsbc_logo.png" alt="滙豐萬事屋" />
               <div class="header-copy">
-                <h1>HSBC 匯豐</h1>
-                <p>SME Assistant</p>
+                <h1><span class="app-name-with-status">滙豐萬事屋<span class="online-indicator" aria-label="在線"></span></span></h1>
               </div>
               <div class="header-actions">
-                <div class="status-dot" aria-hidden="true"></div>
-                <button class="menu-button" type="button" aria-label="Menu">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                    <path d="M4 7h16"></path>
-                    <path d="M4 12h16"></path>
-                    <path d="M4 17h16"></path>
-                  </svg>
-                </button>
+                <button class="login-button" type="button">登入</button>
               </div>
             </header>
 
@@ -89,6 +81,9 @@
         </div>
       </div>
     </div>
+    <script defer src="./assets/js/account-opening-flow.js"></script>
+    <script defer src="./assets/js/fx-hedging-flow.js"></script>
+    <script defer src="./assets/js/mainland-branch-flow.js"></script>
     <script defer src="./assets/js/knowledgeBase.js"></script>
     <script defer src="./assets/js/presenter-navigation.js"></script>
     <script defer src="./assets/js/app.js"></script>

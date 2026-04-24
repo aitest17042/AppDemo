@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HSBC SME Assistant Lock Screen</title>
+    <title>滙豐萬事屋</title>
     <link rel="stylesheet" href="./assets/css/styles.css" />
   </head>
   <body data-page-id="lock-screen">
@@ -50,13 +50,13 @@
               </div>
 
               <div class="notification-stack">
-                <div class="lock-notification" data-target="./index.html?entry=locked-screen&topic=%E5%A4%96%E5%8C%AF%E5%B0%8D%E6%B2%96" tabindex="0" role="button" aria-label="Open FX hedging flow by swiping right">
+                <div class="lock-notification" data-target="./fx-hedging.html?entry=locked-screen" tabindex="0" role="button" aria-label="Open FX hedging flow by swiping right">
                   <div class="notification-swipe-indicator">向右滑動打開</div>
                   <div class="notification-head">
                     <div class="notification-app">
                       <div class="notification-app-icon notification-app-icon-hsbc" aria-hidden="true"></div>
                       <div>
-                        <div class="notification-app-name">HSBC 匯豐</div>
+                        <div class="notification-app-name"><span class="app-name-with-status">滙豐萬事屋<span class="online-indicator" aria-label="在線"></span></span></div>
                         <div class="notification-app-time">現在</div>
                       </div>
                     </div>
@@ -66,7 +66,7 @@
                   <div class="notification-body">AI: 分析顯示您每月都有恆常日元支出。受中東局勢動盪與國際油價飆升雙重夾擊，日圓兌港元匯率最近大幅波動，建議您考慮使用外匯對沖策略以降低風險，右滑以查看更多資訊。</div>
                 </div>
 
-                <div class="lock-notification" data-target="./index.html?entry=locked-screen&topic=%E5%A4%96%E5%8C%AF%E5%B0%8D%E6%B2%96" tabindex="0" role="button" aria-label="Open FX hedging flow by swiping right">
+                <div class="lock-notification" data-target="./fx-hedging.html?entry=locked-screen" tabindex="0" role="button" aria-label="Open FX hedging flow by swiping right">
                   <div class="notification-swipe-indicator">向右滑動打開</div>
                   <div class="notification-head">
                     <div class="notification-app">
@@ -77,7 +77,7 @@
                         </svg>
                       </div>
                       <div>
-                        <div class="notification-app-name">Business Ops</div>
+                        <div class="notification-app-name"><span class="app-name-with-status">滙豐萬事屋<span class="online-indicator" aria-label="在線"></span></span></div>
                         <div class="notification-app-time">1 分鐘前</div>
                       </div>
                     </div>
@@ -94,6 +94,9 @@
         </div>
       </div>
     </div>
+    <script defer src="./assets/js/account-opening-flow.js"></script>
+    <script defer src="./assets/js/fx-hedging-flow.js"></script>
+    <script defer src="./assets/js/mainland-branch-flow.js"></script>
     <script defer src="./assets/js/knowledgeBase.js"></script>
     <script defer src="./assets/js/presenter-navigation.js"></script>
     <script defer src="./assets/js/locked-screen.js"></script>

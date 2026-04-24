@@ -14,6 +14,9 @@
   var fileUploadInput = document.getElementById('fileUploadInput');
   var statusTime = document.getElementById('statusTime');
   var timelineLabel = document.getElementById('timelineLabel');
+  var headerActions = document.querySelector('.header-actions');
+  var defaultTopic = document.body.getAttribute('data-default-topic') || '';
+  var defaultTopicId = document.body.getAttribute('data-default-topic-id') || '';
 
   if (!chatArea || !messageList || !messageInput || !sendButton || !uploadButton || !fileUploadInput || !statusTime || !timelineLabel) {
     console.error('Chat UI failed to initialize.');
@@ -30,7 +33,14 @@
     activeFlowStepId: null,
     flowAnswers: {},
     thinkingMessageId: null,
-    currentTopicId: inferTopicIdFromRouteEntry(initialRouteState.entry)
+    currentTopicId: inferTopicIdFromRouteEntry(initialRouteState.entry) || defaultTopicId || null
+  };
+
+  var authState = {
+    isLoggedIn: Boolean(headerActions && headerActions.querySelector('.header-user')),
+    isMenuOpen: false,
+    isLoading: false,
+    loginTimeoutId: null
   };
 
   function getInitialRouteState() {
@@ -47,10 +57,125 @@
     };
   }
 
+  function getLoginButtonMarkup() {
+    return '<button class="login-button' + (authState.isLoading ? ' is-loading' : '') + '" type="button" data-auth-action="login"' + (authState.isLoading ? ' disabled aria-busy="true"' : '') + '>' + (authState.isLoading ? '登入中...' : '登入') + '</button>';
+  }
+
+  function getUserMenuMarkup() {
+    return '' +
+      '<div class="header-user-menu">' +
+        '<button class="header-user header-user-trigger" type="button" data-auth-action="toggle-menu" aria-haspopup="menu" aria-expanded="false" aria-label="已登入用戶選單">' +
+          '<img class="header-user-avatar" src="./assets/media/icons/chiikawa_icon.png" alt="已登入用戶" />' +
+          '<span class="header-user-verified" aria-hidden="true">' +
+            '<svg width="8" height="8" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+              '<path d="M2.5 6.2 4.8 8.4 9.5 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' +
+            '</svg>' +
+          '</span>' +
+        '</button>' +
+        '<div class="header-user-dropdown" role="menu" hidden>' +
+          '<button class="header-user-dropdown-item" type="button" data-auth-action="logout" role="menuitem">登出</button>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function setUserMenuOpen(isOpen) {
+    var trigger;
+    var dropdown;
+
+    authState.isMenuOpen = Boolean(isOpen && authState.isLoggedIn);
+
+    if (!headerActions) {
+      return;
+    }
+
+    trigger = headerActions.querySelector('.header-user-trigger');
+    dropdown = headerActions.querySelector('.header-user-dropdown');
+
+    if (trigger) {
+      trigger.setAttribute('aria-expanded', authState.isMenuOpen ? 'true' : 'false');
+    }
+
+    if (dropdown) {
+      dropdown.hidden = !authState.isMenuOpen;
+    }
+  }
+
+  function renderAuthControl() {
+    if (!headerActions) {
+      return;
+    }
+
+    headerActions.innerHTML = authState.isLoggedIn ? getUserMenuMarkup() : getLoginButtonMarkup();
+    setUserMenuOpen(false);
+  }
+
+  function beginLoginLoading() {
+    if (authState.isLoading || authState.isLoggedIn) {
+      return;
+    }
+
+    authState.isLoading = true;
+    renderAuthControl();
+
+    authState.loginTimeoutId = window.setTimeout(function () {
+      authState.isLoading = false;
+      authState.loginTimeoutId = null;
+      authState.isLoggedIn = true;
+      renderAuthControl();
+    }, 3000);
+  }
+
+  function initializeAuthControl() {
+    if (!headerActions) {
+      return;
+    }
+
+    renderAuthControl();
+
+    headerActions.addEventListener('click', function (event) {
+      var actionTarget = event.target.closest('[data-auth-action]');
+      var action;
+
+      if (!actionTarget) {
+        return;
+      }
+
+      action = actionTarget.getAttribute('data-auth-action');
+
+      if (action === 'login') {
+        beginLoginLoading();
+        return;
+      }
+
+      if (action === 'toggle-menu') {
+        setUserMenuOpen(!authState.isMenuOpen);
+        return;
+      }
+
+      if (action === 'logout') {
+        authState.isLoading = false;
+        authState.isLoggedIn = false;
+        renderAuthControl();
+      }
+    });
+
+    document.addEventListener('click', function (event) {
+      if (!authState.isMenuOpen || headerActions.contains(event.target)) {
+        return;
+      }
+
+      setUserMenuOpen(false);
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && authState.isMenuOpen) {
+        setUserMenuOpen(false);
+      }
+    });
+  }
+
   function inferTopicIdFromRouteEntry(entry) {
     switch (entry) {
-      case 'video-loan':
-        return 'loan-flow';
       case 'video-account-opening':
         return 'account-opening-flow';
       case 'video-fx-hedging':
@@ -858,7 +983,7 @@
         '<div class="image-card">' +
           '<img src="' + escapeHtml(message.content) + '" alt="HSBC Content" referrerpolicy="no-referrer">' +
           '<div class="image-caption">' +
-            '<strong>HSBC SME 專屬資訊</strong>' +
+            '<strong>滙豐萬事屋資訊</strong>' +
             '<span>點擊查看詳情及條款</span>' +
           '</div>' +
         '</div>';
@@ -1057,20 +1182,23 @@
   function consumeInitialRouteParams() {
     var params = new URLSearchParams(window.location.search);
     var hasEntry = params.has('entry');
-    var topic = params.get('topic');
+    var queryTopic = params.get('topic');
     var nextUrl;
 
-    if (!topic && !hasEntry) {
+    if (!queryTopic && !hasEntry) {
       return;
     }
 
-    if (topic) {
-      sendMessage(topic);
+    if (queryTopic) {
       params.delete('topic');
     }
 
     if (hasEntry) {
       params.delete('entry');
+    }
+
+    if (!queryTopic && !hasEntry) {
+      return;
     }
 
     nextUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '') + window.location.hash;
@@ -1119,6 +1247,10 @@
   });
 
   window.addEventListener('beforeunload', function () {
+    if (authState.loginTimeoutId) {
+      window.clearTimeout(authState.loginTimeoutId);
+    }
+
     state.timeouts.forEach(function (timeoutId) {
       window.clearTimeout(timeoutId);
     });
@@ -1126,6 +1258,7 @@
 
   updateTimeElements();
   window.setInterval(updateTimeElements, 1000);
+  initializeAuthControl();
   renderMessages();
   setComposerState();
   consumeInitialRouteParams();

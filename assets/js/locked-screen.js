@@ -98,7 +98,7 @@
 
     var notification = activeGesture.notification;
     var deltaX = event.clientX - activeGesture.startX;
-    var target = notification.getAttribute('data-target') || './index.html';
+    var target = notification.getAttribute('data-target') || './account-opening.html';
 
     activeGesture = null;
 
@@ -123,7 +123,7 @@
   function handleKeyDown(event) {
     if (event.key === 'ArrowRight' || event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      navigateToTarget(event.currentTarget.getAttribute('data-target') || './index.html');
+      navigateToTarget(event.currentTarget.getAttribute('data-target') || './account-opening.html');
     }
   }
 

@@ -8,6 +8,11 @@
 
   var navigationStateKey = 'hsbc-presenter-navigation-open';
   var featuredTopicOrder = ['account-opening-flow', 'fx-hedging-flow', 'mainland-branch-flow'];
+  var topicPageById = {
+    'account-opening-flow': 'account-opening.html',
+    'fx-hedging-flow': 'fx-hedging.html',
+    'mainland-branch-flow': 'mainland-branch.html'
+  };
   var topicDemoScripts = {
     'account-opening-flow': [
       { kind: 'text', value: '開戶' },
@@ -52,14 +57,28 @@
       path: 'locked-screen.html',
       kicker: 'Entry',
       title: 'Lock Screen',
-      description: 'Start the demo from the black wallpaper notification view.'
+      description: '從鎖屏通知進入已登入的外匯對沖示範。'
     },
     {
-      id: 'assistant-chat',
-      path: 'index.html',
-      kicker: 'Conversation',
-      title: 'Assistant Chat',
-      description: 'Open the HSBC SME assistant with guided flows, summary confirmation, and animated reply states.'
+      id: 'assistant-account-opening',
+      path: 'account-opening.html',
+      kicker: 'Demo 01',
+      title: '開戶',
+      description: '未登入狀態的開戶示範頁。'
+    },
+    {
+      id: 'assistant-fx-hedging',
+      path: 'fx-hedging.html',
+      kicker: 'Demo 02',
+      title: '外匯對沖',
+      description: '已登入狀態的外匯對沖示範頁。'
+    },
+    {
+      id: 'assistant-mainland-branch',
+      path: 'mainland-branch.html',
+      kicker: 'Demo 03',
+      title: '拓展內地分店',
+      description: '已登入狀態的內地分店拓展示範頁。'
     }
   ];
   var videoPages = [
@@ -165,7 +184,7 @@
         copy: lastIntro && lastIntro.content
           ? lastIntro.content
           : 'Open the guided conversation flow for this topic.',
-        href: getPageHref('index.html', 'topic=' + encodeURIComponent(starter))
+        href: getPageHref(topicPageById[topicId] || 'account-opening.html')
       };
     }).filter(function (topic) {
       return topic.featuredIndex !== -1;
