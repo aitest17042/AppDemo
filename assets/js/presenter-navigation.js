@@ -9,9 +9,9 @@
   var navigationStateKey = 'hsbc-presenter-navigation-open';
   var featuredTopicOrder = ['account-opening-flow', 'fx-hedging-flow', 'mainland-branch-flow'];
   var topicPageById = {
-    'account-opening-flow': 'account-opening.html',
-    'fx-hedging-flow': 'fx-hedging.html',
-    'mainland-branch-flow': 'mainland-branch.html'
+    'account-opening-flow': 'app_account-opening.html',
+    'fx-hedging-flow': 'app_fx-hedging.html',
+    'mainland-branch-flow': 'app_mainland-branch.html'
   };
   var topicDemoScripts = {
     'account-opening-flow': [
@@ -25,19 +25,12 @@
       { kind: 'text', value: 'e-sign' }
     ],
     'fx-hedging-flow': [
-      { kind: 'text', value: '外匯對沖' },
-      { kind: 'text', value: '美元' },
-      { kind: 'text', value: '主要是付款' },
-      { kind: 'text', value: '每月都有' },
-      { kind: 'text', value: '50萬至500萬' },
-      { kind: 'text', value: '想先比較不同工具' },
-      { kind: 'text', value: '未來3個月' },
-      { kind: 'text', value: '希望保留部分升值機會' },
-      { kind: 'text', value: '已持有匯豐商業戶口' },
-      { kind: 'text', value: '已有交易單據及發票' },
-      { kind: 'text', value: '未來 3 個月每月都有美元付款，希望先鎖定部分匯率' },
-      { kind: 'upload', value: '', label: '上傳發票 / 訂單 / 明細' },
-      { kind: 'text', value: '確認並比較外匯工具' }
+      { kind: 'text', value: 'ok' },
+      { kind: 'text', value: '進行交易' },
+      { kind: 'text', value: '同意' },
+      { kind: 'text', value: '直接做' },
+      { kind: 'text', value: '確認' },
+      { kind: 'text', value: '查閱交易記錄' }
     ],
     'mainland-branch-flow': [
       { kind: 'text', value: '拓展內地分店' },
@@ -53,28 +46,28 @@
   var demoPages = [
     {
       id: 'lock-screen',
-      path: 'locked-screen.html',
+      path: 'loks_account-opening.html',
       kicker: 'Entry',
       title: 'Lock Screen',
       description: '從鎖屏通知進入已登入的外匯對沖示範。'
     },
     {
       id: 'assistant-account-opening',
-      path: 'account-opening.html',
+      path: 'app_account-opening.html',
       kicker: 'Demo 01',
       title: '開戶',
       description: '未登入狀態的開戶示範頁。'
     },
     {
       id: 'assistant-fx-hedging',
-      path: 'fx-hedging.html',
+      path: 'app_fx-hedging.html',
       kicker: 'Demo 02',
       title: '外匯對沖',
-      description: '已登入狀態的外匯對沖示範頁。'
+      description: '已登入狀態的外匯對沖示範頁，包含分析、優惠推廣與交易確認。'
     },
     {
       id: 'assistant-mainland-branch',
-      path: 'mainland-branch.html',
+      path: 'app_mainland-branch.html',
       kicker: 'Demo 03',
       title: '拓展內地分店',
       description: '已登入狀態的內地分店拓展示範頁。'
@@ -83,7 +76,7 @@
   var videoPages = [
     {
       id: 'feature-demo-account-opening',
-      path: 'v1.html',
+      path: 'vid_v1.html',
       kicker: 'Feature 01',
       title: '基本功能及外部 API 連結',
       description: '以開戶 flow 示範基本對話、文件上傳與證件分析。',
@@ -91,15 +84,15 @@
     },
     {
       id: 'feature-demo-fx-hedging',
-      path: 'v2.html',
+      path: 'vid_v2.html',
       kicker: 'Feature 02',
       title: '用戶行為分析及軟性產品推廣',
-      description: '以外匯對沖 flow 示範行為分析與軟性產品推廣。',
+      description: '以外匯對沖 flow 示範行為分析、優惠推廣與交易引導。',
       topicLabel: '外匯對沖'
     },
     {
       id: 'feature-demo-mainland-expansion',
-      path: 'v3.html',
+      path: 'vid_v3.html',
       kicker: 'Feature 03',
       title: '諮詢功能及大數據分析',
       description: '以拓展內地分店 flow 示範諮詢功能及大數據分析。',
@@ -107,7 +100,7 @@
     },
     {
       id: 'video-mainland-expansion',
-      path: 'v4.html',
+      path: 'vid_v4.html',
       kicker: 'Video 04',
       title: 'Mainland Branch Expansion Film',
       description: 'Original standalone cinematic playback for the branch expansion journey.',
@@ -183,7 +176,7 @@
         copy: lastIntro && lastIntro.content
           ? lastIntro.content
           : 'Open the guided conversation flow for this topic.',
-        href: getPageHref(topicPageById[topicId] || 'account-opening.html')
+        href: getPageHref(topicPageById[topicId] || 'app_account-opening.html')
       };
     }).filter(function (topic) {
       return topic.featuredIndex !== -1;

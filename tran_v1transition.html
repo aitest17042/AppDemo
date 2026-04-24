@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>創業念頭</title>
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+    <style>
+      .story-transition-page .story-shell {
+        min-height: 100vh;
+      }
+
+      .transition-plain {
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 32px;
+        padding: 48px 24px;
+      }
+
+      .transition-line {
+        margin: 0;
+        min-height: 3.8em;
+        max-width: 16em;
+        text-align: center;
+        font-size: clamp(2rem, 4.5vw, 3.5rem);
+        line-height: 1.75;
+        letter-spacing: 0.06em;
+        font-weight: 500;
+        color: inherit;
+        text-wrap: balance;
+      }
+
+      .transition-caret {
+        display: inline-block;
+        width: 0.08em;
+        height: 0.9em;
+        margin-left: 0.14em;
+        background: currentColor;
+        vertical-align: -0.08em;
+        animation: transition-caret-blink 0.9s steps(1, end) infinite;
+      }
+
+      .thought-bubble {
+        position: relative;
+        display: none;
+        align-items: center;
+        gap: 18px;
+        padding: 28px 34px;
+        border: 0;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.97);
+        box-shadow: 0 24px 80px rgba(112, 72, 40, 0.18);
+        transform: translateY(16px) scale(0.96);
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      .thought-bubble.is-visible {
+        display: inline-flex;
+        animation: bubble-rise 0.65s cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
+      }
+
+      .thought-bubble::before,
+      .thought-bubble::after {
+        content: "";
+        position: absolute;
+        background: rgba(255, 255, 255, 0.97);
+        border-radius: 50%;
+        box-shadow: 0 12px 36px rgba(112, 72, 40, 0.12);
+      }
+
+      .thought-bubble::before {
+        width: 28px;
+        height: 28px;
+        left: 18%;
+        bottom: -18px;
+      }
+
+      .thought-bubble::after {
+        width: 16px;
+        height: 16px;
+        left: 13%;
+        bottom: -34px;
+      }
+
+      .thought-logo {
+        width: 52px;
+        height: 52px;
+        object-fit: contain;
+        flex: 0 0 auto;
+      }
+
+      .thought-copy {
+        margin: 0;
+        min-height: 1.6em;
+        font-size: clamp(1.4rem, 2.8vw, 2rem);
+        line-height: 1.4;
+        color: #db0011;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+      }
+
+      @keyframes transition-caret-blink {
+        0%, 49% {
+          opacity: 1;
+        }
+
+        50%, 100% {
+          opacity: 0;
+        }
+      }
+
+      @keyframes bubble-rise {
+        from {
+          opacity: 0;
+          transform: translateY(16px) scale(0.96);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+    </style>
+  </head>
+  <body class="story-page story-transition-page" data-page-id="story-v1-transition" data-page-title="創業念頭">
+    <div class="story-shell">
+      <section class="story-plain transition-plain" aria-label="創業念頭">
+        <h1 class="transition-line" id="transitionLine" aria-live="polite"></h1>
+        <button class="thought-bubble" id="thoughtBubble" type="button" aria-label="滙豐萬事屋" aria-live="polite">
+          <img class="thought-logo" src="./assets/media/icons/hsbc_logo.png" alt="HSBC Logo" />
+          <p class="thought-copy" id="thoughtCopy"></p>
+        </button>
+      </section>
+    </div>
+    <script>
+      (function () {
+        var lineNode = document.getElementById('transitionLine');
+        var bubbleNode = document.getElementById('thoughtBubble');
+        var thoughtCopyNode = document.getElementById('thoughtCopy');
+        var introText = '我最近被人炒咗，有個開公司嘅諗法，要點做。。。';
+        var bubbleText = '滙豐萬事屋？';
+        var introIndex = 0;
+        var bubbleIndex = 0;
+        var introReady = false;
+        var bubbleShown = false;
+
+        function renderIntro() {
+          if (introIndex < introText.length) {
+            lineNode.textContent += introText.charAt(introIndex);
+            introIndex += 1;
+            window.setTimeout(renderIntro, 85);
+            return;
+          }
+
+          introReady = true;
+          lineNode.innerHTML = lineNode.textContent + '<span class="transition-caret" aria-hidden="true"></span>';
+        }
+
+        function renderBubbleText() {
+          if (bubbleIndex >= bubbleText.length) {
+            return;
+          }
+
+          thoughtCopyNode.textContent += bubbleText.charAt(bubbleIndex);
+          bubbleIndex += 1;
+          window.setTimeout(renderBubbleText, 100);
+        }
+
+        function revealBubble() {
+          if (!introReady || bubbleShown) {
+            return;
+          }
+
+          bubbleShown = true;
+          bubbleNode.classList.add('is-visible');
+          renderBubbleText();
+        }
+
+        document.addEventListener('click', function (event) {
+          if (bubbleShown && bubbleNode.contains(event.target)) {
+            return;
+          }
+
+          revealBubble();
+        });
+
+        document.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter' || event.key === ' ') {
+            if (bubbleShown && document.activeElement === bubbleNode) {
+              return;
+            }
+
+            revealBubble();
+          }
+        });
+
+        bubbleNode.addEventListener('click', function () {
+          if (!bubbleShown) {
+            return;
+          }
+
+          window.location.href = './app_account-opening.html';
+        });
+
+        renderIntro();
+      }());
+    </script>
+    <script defer src="./assets/js/presenter-display.js"></script>
+  </body>
+</html>

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>創業念頭過場</title>
+    <title>兩天後</title>
     <link rel="stylesheet" href="./assets/css/styles.css" />
     <style>
       .story-transition-page .story-shell {
@@ -43,12 +43,12 @@
         animation: transition-caret-blink 0.9s steps(1, end) infinite;
       }
 
-      .thought-bubble {
+      .message-bubble {
         position: relative;
         display: none;
         align-items: center;
-        gap: 18px;
-        padding: 28px 34px;
+        gap: 16px;
+        padding: 22px 28px;
         border: 0;
         border-radius: 999px;
         background: rgba(255, 255, 255, 0.97);
@@ -58,13 +58,13 @@
         cursor: pointer;
       }
 
-      .thought-bubble.is-visible {
+      .message-bubble.is-visible {
         display: inline-flex;
         animation: bubble-rise 0.65s cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
       }
 
-      .thought-bubble::before,
-      .thought-bubble::after {
+      .message-bubble::before,
+      .message-bubble::after {
         content: "";
         position: absolute;
         background: rgba(255, 255, 255, 0.97);
@@ -72,31 +72,31 @@
         box-shadow: 0 12px 36px rgba(112, 72, 40, 0.12);
       }
 
-      .thought-bubble::before {
+      .message-bubble::before {
         width: 28px;
         height: 28px;
         left: 18%;
         bottom: -18px;
       }
 
-      .thought-bubble::after {
+      .message-bubble::after {
         width: 16px;
         height: 16px;
         left: 13%;
         bottom: -34px;
       }
 
-      .thought-logo {
+      .message-logo {
         width: 52px;
         height: 52px;
         object-fit: contain;
         flex: 0 0 auto;
       }
 
-      .thought-copy {
+      .message-copy {
         margin: 0;
         min-height: 1.6em;
-        font-size: clamp(1.4rem, 2.8vw, 2rem);
+        font-size: clamp(1.2rem, 2.4vw, 1.6rem);
         line-height: 1.4;
         color: #db0011;
         font-weight: 600;
@@ -126,37 +126,37 @@
       }
     </style>
   </head>
-  <body class="story-page story-transition-page" data-page-id="story-v1-transition" data-page-title="創業念頭過場">
-    <div class="story-shell">
-      <section class="story-plain transition-plain" aria-label="創業念頭過場">
+  <body class="story-page story-page-transition" data-page-id="story-two-days-later" data-page-title="兩天後">
+    <div class="story-shell story-shell-centered">
+      <section class="story-plain transition-plain" aria-label="Two days later transition">
         <h1 class="transition-line" id="transitionLine" aria-live="polite"></h1>
-        <button class="thought-bubble" id="thoughtBubble" type="button" aria-label="滙豐萬事屋" aria-live="polite">
-          <img class="thought-logo" src="./assets/media/icons/hsbc_logo.png" alt="HSBC Logo" />
-          <p class="thought-copy" id="thoughtCopy"></p>
+        <button class="message-bubble" id="messageBubble" type="button" aria-label="你有一則新訊息" aria-live="polite">
+          <img class="message-logo" src="./assets/media/icons/hsbc_logo.png" alt="HSBC Logo" />
+          <p class="message-copy" id="messageCopy"></p>
         </button>
       </section>
     </div>
     <script>
       (function () {
         var lineNode = document.getElementById('transitionLine');
-        var bubbleNode = document.getElementById('thoughtBubble');
-        var thoughtCopyNode = document.getElementById('thoughtCopy');
-        var introText = '我最近被人炒咗，有個開公司嘅諗法，要點做。。。';
-        var bubbleText = '滙豐萬事屋？';
-        var introIndex = 0;
+        var bubbleNode = document.getElementById('messageBubble');
+        var bubbleCopyNode = document.getElementById('messageCopy');
+        var lineText = '兩天後。。。';
+        var bubbleText = '你有一則新訊息';
+        var lineIndex = 0;
         var bubbleIndex = 0;
-        var introReady = false;
+        var lineReady = false;
         var bubbleShown = false;
 
-        function renderIntro() {
-          if (introIndex < introText.length) {
-            lineNode.textContent += introText.charAt(introIndex);
-            introIndex += 1;
-            window.setTimeout(renderIntro, 85);
+        function renderLine() {
+          if (lineIndex < lineText.length) {
+            lineNode.textContent += lineText.charAt(lineIndex);
+            lineIndex += 1;
+            window.setTimeout(renderLine, 90);
             return;
           }
 
-          introReady = true;
+          lineReady = true;
           lineNode.innerHTML = lineNode.textContent + '<span class="transition-caret" aria-hidden="true"></span>';
         }
 
@@ -165,13 +165,13 @@
             return;
           }
 
-          thoughtCopyNode.textContent += bubbleText.charAt(bubbleIndex);
+          bubbleCopyNode.textContent += bubbleText.charAt(bubbleIndex);
           bubbleIndex += 1;
-          window.setTimeout(renderBubbleText, 100);
+          window.setTimeout(renderBubbleText, 85);
         }
 
         function revealBubble() {
-          if (!introReady || bubbleShown) {
+          if (!lineReady || bubbleShown) {
             return;
           }
 
@@ -203,10 +203,10 @@
             return;
           }
 
-          window.location.href = './account-opening.html';
+          window.location.href = './loks_account-opening.html';
         });
 
-        renderIntro();
+        renderLine();
       }());
     </script>
     <script defer src="./assets/js/presenter-display.js"></script>

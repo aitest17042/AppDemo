@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>故事開始</title>
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+    <style>
+      .story-typing-page .story-shell {
+        min-height: 100vh;
+      }
+
+      .story-typing-page .story-plain {
+        display: flex;
+        min-height: 100vh;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 24px;
+      }
+
+      .typing-line {
+        margin: 0;
+        min-height: 3.8em;
+        max-width: 16em;
+        text-align: center;
+        font-size: clamp(2rem, 4.5vw, 3.5rem);
+        line-height: 1.75;
+        letter-spacing: 0.06em;
+        font-weight: 500;
+        color: inherit;
+        text-wrap: balance;
+      }
+
+      .typing-caret {
+        display: inline-block;
+        width: 0.08em;
+        height: 0.9em;
+        margin-left: 0.14em;
+        background: currentColor;
+        vertical-align: -0.08em;
+        animation: typing-caret-blink 0.9s steps(1, end) infinite;
+      }
+
+      @keyframes typing-caret-blink {
+        0%, 49% {
+          opacity: 1;
+        }
+
+        50%, 100% {
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body class="story-page story-typing-page" data-page-id="story-home" data-page-title="故事開始">
+    <div class="story-shell">
+      <section class="story-plain" aria-label="Opening story page">
+        <h1 class="typing-line" id="typingLine" aria-live="polite"></h1>
+      </section>
+    </div>
+    <script>
+      (function () {
+        var lineNode = document.getElementById('typingLine');
+        var lineText = '小白的創業旅程';
+        var lineIndex = 0;
+
+        function renderLine() {
+          if (lineIndex < lineText.length) {
+            lineNode.textContent += lineText.charAt(lineIndex);
+            lineIndex += 1;
+            window.setTimeout(renderLine, 85);
+            return;
+          }
+
+          lineNode.innerHTML = lineNode.textContent + '<span class="typing-caret" aria-hidden="true"></span>';
+        }
+
+        renderLine();
+      }());
+    </script>
+    <script defer src="./assets/js/presenter-display.js"></script>
+  </body>
+</html>

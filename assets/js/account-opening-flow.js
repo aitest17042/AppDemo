@@ -91,15 +91,7 @@ window.HSBCFlowModules.accountOpening = [
                 },
                 {
                   type: 'text',
-                  content: '請先準備您的身分證明文件：香港身份證（HKID）或護照。'
-                },
-                {
-                  type: 'text',
-                  content: '請在光線充足的位置，拍攝一張自拍照：您本人清晰入鏡，並同時手持該身分證明文件，文件上的姓名及證件號碼需清晰可見。'
-                },
-                {
-                  type: 'text',
-                  content: '完成後請上載該相片，我會立即進行核對。'
+                  content: '請先準備您的身分證明文件：香港身份證（HKID）或護照。以及一張您本人清晰入鏡的自拍照'
                 }
               ],
               nextStepId: 'account-supporting-upload'
@@ -176,7 +168,7 @@ window.HSBCFlowModules.accountOpening = [
           responseDelayMs: 0,
           prompt: {
             type: 'text',
-            content: '請輸入「e-sign」完成電子簽署。'
+            content: '請完成電子簽署（e-sign）。'
           },
           routes: [
             {

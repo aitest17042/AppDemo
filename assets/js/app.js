@@ -334,6 +334,9 @@
       sender: message.sender,
       type: message.type,
       content: message.content,
+      imageTitle: typeof message.imageTitle === 'string' ? message.imageTitle : '',
+      imageSubtitle: typeof message.imageSubtitle === 'string' ? message.imageSubtitle : '',
+      imageAlt: typeof message.imageAlt === 'string' ? message.imageAlt : '',
       actions: Array.isArray(message.actions) ? message.actions.slice() : [],
       files: Array.isArray(message.files)
         ? message.files.map(function (file) {
@@ -719,6 +722,9 @@
     return {
       type: response.type,
       content: interpolateTemplate(response.content, flowDefinition),
+      imageTitle: interpolateTemplate(response.imageTitle, flowDefinition),
+      imageSubtitle: interpolateTemplate(response.imageSubtitle, flowDefinition),
+      imageAlt: interpolateTemplate(response.imageAlt, flowDefinition),
       delayMs: typeof response.delayMs === 'number' ? response.delayMs : null,
       actions: Array.isArray(response.actions)
         ? response.actions.map(function (action) {
@@ -1256,10 +1262,10 @@
     } else if (message.type === 'image') {
       bubble.innerHTML =
         '<div class="image-card">' +
-          '<img src="' + escapeHtml(message.content) + '" alt="HSBC Content" referrerpolicy="no-referrer">' +
+          '<img src="' + escapeHtml(message.content) + '" alt="' + escapeHtml(message.imageAlt || 'HSBC Content') + '" referrerpolicy="no-referrer">' +
           '<div class="image-caption">' +
-            '<strong>滙豐萬事屋資訊</strong>' +
-            '<span>點擊查看詳情及條款</span>' +
+            '<strong>' + escapeHtml(message.imageTitle || '滙豐萬事屋資訊') + '</strong>' +
+            '<span>' + escapeHtml(message.imageSubtitle || '點擊查看詳情及條款') + '</span>' +
           '</div>' +
         '</div>';
     } else if (message.type === 'file-preview') {
@@ -1455,6 +1461,9 @@
             sender: 'ai',
             type: response.type,
             content: response.content,
+            imageTitle: response.imageTitle || '',
+            imageSubtitle: response.imageSubtitle || '',
+            imageAlt: response.imageAlt || '',
             actions: response.actions || []
           });
           renderMessages();
