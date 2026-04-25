@@ -21,6 +21,18 @@
         </main>
       </div>
     </div>
+    <script src="assets/js/video-sequence-navigation.js"></script>
+    <script>
+      (function () {
+        var navigation = window.HSBCVideoSequenceNavigation;
+
+        if (!navigation) {
+          return;
+        }
+
+        navigation.init({ nextPath: 'tran_v1transition.html' });
+      }());
+    </script>
     <script defer src="assets/js/presenter-display.js"></script>
   </body>
 </html>

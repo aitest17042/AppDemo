@@ -33,11 +33,12 @@
       { kind: 'text', value: '查閱交易記錄' }
     ],
     'mainland-branch-flow': [
-      { kind: 'text', value: '拓展內地分店' },
+      { kind: 'text', value: '最近生意幾好，您有什麼建議嗎？' },
       { kind: 'text', value: '同意' },
-      { kind: 'text', value: '查看方案 1：大灣區試點店（Top Choice）' },
-      { kind: 'text', value: '查看方案 2：合資經營分店' },
-      { kind: 'text', value: '查看方案 3：加盟／品牌授權模式' }
+      { kind: 'text', value: '大灣區試點店（Top Choice）' },
+      { kind: 'text', value: '立即開立內地戶口' },
+      { kind: 'text', value: '授權' },
+      { kind: 'text', value: '瀏覽 HSBC Verified Partner' }
     ]
   };
 
@@ -105,6 +106,14 @@
       title: 'Mainland Branch Expansion Film',
       description: 'Original standalone cinematic playback for the branch expansion journey.',
       topicLabel: '拓展內地分店'
+    },
+    {
+      id: 'video-dry-run-demo',
+      path: 'vid_v7.html',
+      kicker: 'Video 05',
+      title: 'Dry Run Demo Reel',
+      description: '以實際乾跑畫面整理成的 app demo 影片。',
+      topicLabel: '綜合流程'
     }
   ];
   var allPages = demoPages.concat(videoPages);

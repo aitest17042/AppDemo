@@ -112,6 +112,16 @@
     };
   }
 
+  function getInitialMessagePayloads(config) {
+    if (Array.isArray(config)) {
+      return config.map(function (message) {
+        return getInitialMessagePayload(message);
+      });
+    }
+
+    return [getInitialMessagePayload(config)];
+  }
+
   function getInitialMessageConfig(pageId, topicId) {
     if (pageId && appData.initialMessagesByPageId && appData.initialMessagesByPageId[pageId]) {
       return appData.initialMessagesByPageId[pageId];
@@ -129,11 +139,11 @@
     var initialFlowId = document.body.getAttribute('data-initial-flow-id') || '';
     var initialStepId = document.body.getAttribute('data-initial-step-id') || '';
     var initialTopicId = document.body.getAttribute('data-initial-topic-id') || initialFlowId || null;
-    var initialMessage = getInitialMessagePayload(getInitialMessageConfig(pageId, initialTopicId));
+    var initialMessages = getInitialMessagePayloads(getInitialMessageConfig(pageId, initialTopicId));
 
     return {
       entry: pageId,
-      initialMessage: initialMessage,
+      initialMessages: initialMessages,
       initialFlowId: initialFlowId || null,
       initialStepId: initialStepId || null,
       initialTopicId: initialTopicId,
@@ -147,6 +157,18 @@
       sender: typeof message.sender === 'string' ? message.sender : 'ai',
       type: typeof message.type === 'string' ? message.type : 'text',
       content: typeof message.content === 'string' ? message.content : '',
+      cardHeading: typeof message.cardHeading === 'string' ? message.cardHeading : '',
+      cardCategory: typeof message.cardCategory === 'string' ? message.cardCategory : '',
+      partnerCards: Array.isArray(message.partnerCards)
+        ? message.partnerCards.map(function (card) {
+            return {
+              href: typeof card.href === 'string' ? card.href : '',
+              logo: typeof card.logo === 'string' ? card.logo : '',
+              name: typeof card.name === 'string' ? card.name : '',
+              rating: typeof card.rating === 'string' ? card.rating : ''
+            };
+          })
+        : [],
       actions: Array.isArray(message.actions) ? message.actions.slice() : [],
       actionPresentation: typeof message.actionPresentation === 'string' ? message.actionPresentation : '',
       files: Array.isArray(message.files)
@@ -158,7 +180,9 @@
   }
 
   function buildInitialMessages(routeState) {
-    var messages = [createAssistantMessage(routeState.initialMessage)];
+    var messages = routeState.initialMessages.map(function (message) {
+      return createAssistantMessage(message);
+    });
     var flowDefinition;
     var promptResponses;
 
@@ -170,13 +194,8 @@
     promptResponses = getStepPromptResponses(flowDefinition, routeState.initialStepId);
 
     return messages.concat(promptResponses.map(function (response) {
-      return createAssistantMessage({
-        sender: 'ai',
-        type: response.type,
-        content: response.content,
-        actions: response.actions || [],
-        actionPresentation: response.actionPresentation || ''
-      });
+      response.sender = 'ai';
+      return createAssistantMessage(response);
     }));
   }
 
@@ -197,14 +216,9 @@
     }
 
     messages.forEach(function (message) {
-      state.messages.push(createAssistantMessage({
-        id: createMessageId(),
-        sender: 'ai',
-        type: message.type,
-        content: message.content,
-        actions: message.actions || [],
-        actionPresentation: message.actionPresentation || ''
-      }));
+      message.id = createMessageId();
+      message.sender = 'ai';
+      state.messages.push(createAssistantMessage(message));
     });
 
     renderMessages();
@@ -429,6 +443,18 @@
       sender: message.sender,
       type: message.type,
       content: message.content,
+      cardHeading: typeof message.cardHeading === 'string' ? message.cardHeading : '',
+      cardCategory: typeof message.cardCategory === 'string' ? message.cardCategory : '',
+      partnerCards: Array.isArray(message.partnerCards)
+        ? message.partnerCards.map(function (card) {
+            return {
+              href: typeof card.href === 'string' ? card.href : '',
+              logo: typeof card.logo === 'string' ? card.logo : '',
+              name: typeof card.name === 'string' ? card.name : '',
+              rating: typeof card.rating === 'string' ? card.rating : ''
+            };
+          })
+        : [],
       imageTitle: typeof message.imageTitle === 'string' ? message.imageTitle : '',
       imageSubtitle: typeof message.imageSubtitle === 'string' ? message.imageSubtitle : '',
       imageAlt: typeof message.imageAlt === 'string' ? message.imageAlt : '',
@@ -829,6 +855,18 @@
     return {
       type: response.type,
       content: interpolateTemplate(response.content, flowDefinition),
+      cardHeading: interpolateTemplate(response.cardHeading, flowDefinition),
+      cardCategory: interpolateTemplate(response.cardCategory, flowDefinition),
+      partnerCards: Array.isArray(response.partnerCards)
+        ? response.partnerCards.map(function (card) {
+            return {
+              href: interpolateTemplate(card.href, flowDefinition),
+              logo: interpolateTemplate(card.logo, flowDefinition),
+              name: interpolateTemplate(card.name, flowDefinition),
+              rating: interpolateTemplate(card.rating, flowDefinition)
+            };
+          })
+        : [],
       imageTitle: interpolateTemplate(response.imageTitle, flowDefinition),
       imageSubtitle: interpolateTemplate(response.imageSubtitle, flowDefinition),
       imageAlt: interpolateTemplate(response.imageAlt, flowDefinition),
@@ -900,6 +938,17 @@
       {
         type: step.prompt.type || 'text',
         content: interpolateTemplate(step.prompt.content, flowDefinition),
+        cardHeading: interpolateTemplate(step.prompt.cardHeading, flowDefinition),
+        cardCategory: interpolateTemplate(step.prompt.cardCategory, flowDefinition),
+        partnerCards: Array.isArray(step.prompt.partnerCards)
+          ? step.prompt.partnerCards.map(function (card) {
+              return {
+                logo: interpolateTemplate(card.logo, flowDefinition),
+                name: interpolateTemplate(card.name, flowDefinition),
+                rating: interpolateTemplate(card.rating, flowDefinition)
+              };
+            })
+          : [],
         actionPresentation: typeof step.prompt.actionPresentation === 'string' ? step.prompt.actionPresentation : '',
         actions: promptActions.map(function (action) {
           return interpolateTemplate(action, flowDefinition);
@@ -962,6 +1011,50 @@
     }
 
     return '';
+  }
+
+  function getLatestAssistantReplayMessage() {
+    var index;
+    var message;
+
+    for (index = state.messages.length - 1; index >= 0; index -= 1) {
+      message = state.messages[index];
+
+      if (!message || message.sender !== 'ai' || message.type === 'thinking') {
+        continue;
+      }
+
+      return createAssistantMessage({
+        sender: 'ai',
+        type: message.type,
+        content: message.content,
+        cardHeading: message.cardHeading || '',
+        cardCategory: message.cardCategory || '',
+        partnerCards: message.partnerCards || [],
+        actions: message.actions || [],
+        actionPresentation: message.actionPresentation || '',
+        files: message.files || []
+      });
+    }
+
+    return null;
+  }
+
+  function getInvalidKeywordResponses() {
+    var lastAssistantMessage = getLatestAssistantReplayMessage();
+    var responses = [
+      {
+        type: 'text',
+        content: '抱歉，我不懂您的意思。',
+        actions: []
+      }
+    ];
+
+    if (lastAssistantMessage) {
+      responses.push(lastAssistantMessage);
+    }
+
+    return responses;
   }
 
   function dispatchNavigationState() {
@@ -1333,9 +1426,7 @@
         return transitionResponses.length > 0 ? transitionResponses : getDefaultResponses();
       }
 
-      setActiveFlow(null, null);
-      setCurrentTopic(null);
-      return getDefaultResponses();
+      return getInvalidKeywordResponses();
     }
 
     contextFreeResponse = getContextFreeResponseForInput(input);
@@ -1374,6 +1465,33 @@
     if (message.type === 'thinking') {
       bubble.className += ' thinking-bubble';
       bubble.innerHTML = (message.content ? '<p>' + escapeHtml(message.content) + '</p>' : '') + createThinkingDots();
+    } else if (message.type === 'partner-carousel') {
+      bubble.className += ' partner-carousel-bubble';
+      bubble.innerHTML =
+        '<div class="partner-carousel-header">' +
+          '<strong>' + escapeHtml(message.cardHeading || 'HSBC Verified Partner') + '</strong>' +
+          '<span>' + escapeHtml(message.cardCategory || '') + '</span>' +
+        '</div>' +
+        '<div class="partner-carousel-track">' +
+          (Array.isArray(message.partnerCards) ? message.partnerCards.map(function (card) {
+            var tagName = card.href ? 'button' : 'article';
+            var openTag = card.href
+              ? '<button class="partner-card partner-card-button" type="button" data-link-target="' + escapeHtml(card.href || '') + '">'
+              : '<article class="partner-card">';
+            var closeTag = card.href ? '</button>' : '</article>';
+
+            return '' +
+              openTag +
+                '<div class="partner-card-logo-wrap">' +
+                  '<img class="partner-card-logo" src="' + escapeHtml(card.logo || '') + '" alt="' + escapeHtml((card.name || 'Verified Partner') + ' logo') + '">' +
+                '</div>' +
+                '<div class="partner-card-body">' +
+                  '<strong>' + escapeHtml(card.name || '') + '</strong>' +
+                  '<span>' + escapeHtml(card.rating || '') + '</span>' +
+                '</div>' +
+              closeTag;
+          }).join('') : '') +
+        '</div>';
     } else if (message.type === 'image') {
       bubble.innerHTML =
         '<div class="image-card">' +
@@ -1579,17 +1697,9 @@
             removeThinkingMessage();
           }
 
-          state.messages.push({
-            id: createMessageId(),
-            sender: 'ai',
-            type: response.type,
-            content: response.content,
-            imageTitle: response.imageTitle || '',
-            imageSubtitle: response.imageSubtitle || '',
-            imageAlt: response.imageAlt || '',
-            actionPresentation: response.actionPresentation || '',
-            actions: response.actions || []
-          });
+          response.id = createMessageId();
+          response.sender = 'ai';
+          state.messages.push(createAssistantMessage(response));
           renderMessages();
         }, cumulativeDelay);
 
@@ -1706,7 +1816,13 @@
   });
 
   messageList.addEventListener('click', function (event) {
+    var linkTarget = event.target.closest('[data-link-target]');
     var actionButton = event.target.closest('[data-action]');
+
+    if (linkTarget) {
+      window.location.href = linkTarget.getAttribute('data-link-target') || '';
+      return;
+    }
 
     if (!actionButton) {
       return;

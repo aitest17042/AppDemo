@@ -22,6 +22,9 @@
         margin: 0;
         min-height: 3.8em;
         max-width: 16em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         text-align: center;
         font-size: clamp(2rem, 4.5vw, 3.5rem);
         line-height: 1.75;
@@ -29,6 +32,30 @@
         font-weight: 500;
         color: inherit;
         text-wrap: balance;
+      }
+
+      .home-action {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        min-width: 210px;
+        padding: 18px 28px;
+        border: 0;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #db0011 0%, #ff6a57 100%);
+        color: #ffffff;
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        box-shadow: 0 22px 60px rgba(219, 0, 17, 0.28);
+        transform: translateY(12px) scale(0.95);
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      .home-action.is-visible {
+        display: inline-flex;
+        animation: home-action-rise 0.55s cubic-bezier(0.2, 0.9, 0.2, 1) forwards, home-action-pulse 2.2s ease-in-out 0.55s infinite;
       }
 
       .typing-caret {
@@ -50,30 +77,82 @@
           opacity: 0;
         }
       }
+
+      @keyframes home-action-rise {
+        from {
+          opacity: 0;
+          transform: translateY(12px) scale(0.95);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes home-action-pulse {
+        0%, 100% {
+          box-shadow: 0 22px 60px rgba(219, 0, 17, 0.28);
+        }
+
+        50% {
+          box-shadow: 0 26px 72px rgba(219, 0, 17, 0.4);
+        }
+      }
     </style>
   </head>
   <body class="story-page story-typing-page" data-page-id="story-home" data-page-title="故事開始">
     <div class="story-shell">
-      <section class="story-plain" aria-label="Opening story page">
+      <section class="story-plain" aria-label="Opening story page" style="flex-direction: column; gap: 28px;">
         <h1 class="typing-line" id="typingLine" aria-live="polite"></h1>
+        <button class="home-action" id="homeAction" type="button">了解更多</button>
       </section>
     </div>
+    <script src="./assets/js/story-transition.js"></script>
     <script>
       (function () {
         var lineNode = document.getElementById('typingLine');
-        var lineText = '小白的創業旅程';
-        var lineIndex = 0;
+        var actionNode = document.getElementById('homeAction');
+        var storyTransition = window.HSBCStoryTransition;
+        var lineText = '「今日發生了一件很傷心的事。。。」';
+        var lineReady = false;
+        var actionShown = false;
+        var lineParts;
 
         function renderLine() {
-          if (lineIndex < lineText.length) {
-            lineNode.textContent += lineText.charAt(lineIndex);
-            lineIndex += 1;
-            window.setTimeout(renderLine, 85);
+          if (!storyTransition) {
             return;
           }
 
-          lineNode.innerHTML = lineNode.textContent + '<span class="typing-caret" aria-hidden="true"></span>';
+          lineParts = storyTransition.ensureLineStructure(lineNode, 'typing-caret');
+          storyTransition.typeCharacters(lineParts.textNode, lineText, 85, function () {
+            lineReady = true;
+          });
         }
+
+        function revealAction() {
+          if (!lineReady || actionShown) {
+            return;
+          }
+
+          actionShown = true;
+          actionNode.classList.add('is-visible');
+        }
+
+        if (storyTransition) {
+          storyTransition.bindAdvanceTriggers({
+            guardNode: actionNode,
+            onAdvance: revealAction
+          });
+        }
+
+        actionNode.addEventListener('click', function () {
+          if (!actionShown) {
+            return;
+          }
+
+          window.location.href = './vid_v1.html';
+        });
 
         renderLine();
       }());

@@ -11,7 +11,7 @@ window.HSBCFlowModules.fxHedging = [
       introResponses: [
         {
           type: 'thinking',
-          content: '正在分析你的交易記錄'
+          content: '正在分析您的交易記錄'
         },
         {
           type: 'text',
@@ -36,7 +36,7 @@ window.HSBCFlowModules.fxHedging = [
           id: 'fx-trade-intent',
           prompt: {
             type: 'text',
-            content: '你想交易外匯對沖嗎？'
+            content: '您想交易外匯對沖嗎？'
           },
           choices: [
             {

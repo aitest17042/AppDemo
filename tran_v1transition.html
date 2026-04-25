@@ -24,6 +24,9 @@
         margin: 0;
         min-height: 3.8em;
         max-width: 16em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         text-align: center;
         font-size: clamp(2rem, 4.5vw, 3.5rem);
         line-height: 1.75;
@@ -48,6 +51,7 @@
         display: none;
         align-items: center;
         gap: 18px;
+        width: min(88vw, 420px);
         padding: 28px 34px;
         border: 0;
         border-radius: 999px;
@@ -96,6 +100,7 @@
       .thought-copy {
         margin: 0;
         min-height: 1.6em;
+        width: 100%;
         font-size: clamp(1.4rem, 2.8vw, 2rem);
         line-height: 1.4;
         color: #db0011;
@@ -136,12 +141,14 @@
         </button>
       </section>
     </div>
+    <script src="./assets/js/story-transition.js"></script>
     <script>
       (function () {
         var lineNode = document.getElementById('transitionLine');
         var bubbleNode = document.getElementById('thoughtBubble');
         var thoughtCopyNode = document.getElementById('thoughtCopy');
-        var introText = '我最近被人炒咗，我唔想再做社畜啦，不如開公司啦，但係要點做。。。';
+        var storyTransition = window.HSBCStoryTransition;
+        var introText = '「我最近被人炒咗，我唔想再做社畜啦，不如開公司啦，但係要點做。。。」';
         var bubbleText = '滙豐萬事屋？';
         var introIndex = 0;
         var bubbleIndex = 0;
@@ -149,25 +156,24 @@
         var bubbleShown = false;
 
         function renderIntro() {
-          if (introIndex < introText.length) {
-            lineNode.textContent += introText.charAt(introIndex);
-            introIndex += 1;
-            window.setTimeout(renderIntro, 85);
+          if (!storyTransition) {
             return;
           }
 
-          introReady = true;
-          lineNode.innerHTML = lineNode.textContent + '<span class="transition-caret" aria-hidden="true"></span>';
+          var lineParts = storyTransition.ensureLineStructure(lineNode, 'transition-caret');
+
+          storyTransition.typeCharacters(lineParts.textNode, introText, 85, function () {
+            introReady = true;
+          });
         }
 
         function renderBubbleText() {
-          if (bubbleIndex >= bubbleText.length) {
+          if (!storyTransition) {
             return;
           }
 
-          thoughtCopyNode.textContent += bubbleText.charAt(bubbleIndex);
-          bubbleIndex += 1;
-          window.setTimeout(renderBubbleText, 100);
+          thoughtCopyNode.textContent = '';
+          storyTransition.typeCharacters(thoughtCopyNode, bubbleText, 100);
         }
 
         function revealBubble() {
@@ -180,23 +186,12 @@
           renderBubbleText();
         }
 
-        document.addEventListener('click', function (event) {
-          if (bubbleShown && bubbleNode.contains(event.target)) {
-            return;
-          }
-
-          revealBubble();
-        });
-
-        document.addEventListener('keydown', function (event) {
-          if (event.key === 'Enter' || event.key === ' ') {
-            if (bubbleShown && document.activeElement === bubbleNode) {
-              return;
-            }
-
-            revealBubble();
-          }
-        });
+        if (storyTransition) {
+          storyTransition.bindAdvanceTriggers({
+            guardNode: bubbleNode,
+            onAdvance: revealBubble
+          });
+        }
 
         bubbleNode.addEventListener('click', function () {
           if (!bubbleShown) {

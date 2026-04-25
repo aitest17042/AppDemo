@@ -4,14 +4,14 @@ window.HSBCFlowModuleConfigs = window.HSBCFlowModuleConfigs || {};
 window.HSBCFlowModules.mainlandBranch = [
   {
     trigger: '拓展內地分店',
-    keywords: ['內地分店', '國內開分店', '開分店', '內地擴張'],
+    keywords: ['建議', '內地分店', '國內開分店', '開分店', '內地擴張'],
     topicId: 'mainland-branch-flow',
     flow: {
       id: 'mainland-branch-flow',
       introResponses: [
         {
           type: 'text',
-          content: '明白，我可以為您提供內地開設餐廳的一般性準備建議；另外，在您同意下，我亦可參考您在本行的歷史收支與交易行為特徵，例如收款渠道分佈、付款週期、幣種使用及現金流穩定性等，為您模擬最可能適合您的幾個方案選項，並列出每個選項的注意事項與文件準備方向。'
+          content: '明白，根據分析了您的帳戶，我建議您可以考慮向新市場拓展；\n\n另外，在您同意下，我亦可參考您在本行的歷史收支與交易行為特徵，例如收款渠道分佈、付款週期、幣種使用及現金流穩定性等，為您模擬最可能適合您的幾個方案選項，並列出每個選項的注意事項與文件準備方向。'
         }
       ],
       startStepId: 'mainland-branch-consent',
@@ -37,9 +37,10 @@ window.HSBCFlowModules.mainlandBranch = [
                 },
                 {
                   type: 'text',
-                  content: '我已附上三個方案供您逐一查看，您可按以下按鈕打開方案詳情。',
-                  actions: ['查看方案 1：大灣區試點店（Top Choice）', '查看方案 2：合資經營分店', '查看方案 3：加盟／品牌授權模式']
-                }
+                  content: '我已附上三個方案供您逐一查看，您可點擊並查看方案詳情。',
+                  actionPresentation: 'direct-reply',
+                  actions: ['大灣區試點店（Top Choice）', '合資經營分店', '加盟／品牌授權模式']
+                },
               ],
               clearFlow: true
             },
@@ -66,12 +67,12 @@ window.HSBCFlowModules.mainlandBranch = [
   },
   {
     trigger: '查看方案 1：大灣區試點店（Top Choice）',
-    keywords: ['查看方案 1', '方案 1', '大灣區試點店', 'top choice'],
+    keywords: ['查看方案 1', '方案 1', '大灣區試點店', '大灣區試點店（top choice）', 'top choice'],
     topicId: 'mainland-branch-flow',
     responses: [
       {
         type: 'text',
-        content: '方案 1｜大灣區試點店（Top Choice）：較適合已有穩定香港餐飲營運、希望先以一間內地試點店測試客流與供應鏈安排的企業。'
+        content: '大灣區試點店（Top Choice）：較適合已有穩定香港餐飲營運、希望先以一間內地試點店測試客流與供應鏈安排的企業。'
       },
       {
         type: 'text',
@@ -80,9 +81,84 @@ window.HSBCFlowModules.mainlandBranch = [
       {
         type: 'text',
         content: '文件準備方向：香港公司註冊及商業登記文件、董事及實益擁有人身份證明、最近營運流水或管理帳、開店商業計劃、門店預算、意向租約或選址資料、主要供應商名單。',
-        actions: ['查看方案 2：合資經營分店', '查看方案 3：加盟／品牌授權模式', '返回三個方案總覽']
+        actions: ['立即開立內地戶口', '返回三個方案總覽']
       }
     ]
+  },
+  {
+    trigger: '開立內地戶口',
+    keywords: ['開立內地戶口', '立即開立內地戶口', '內地戶口'],
+    topicId: 'mainland-branch-flow',
+    flow: {
+      id: 'mainland-account-opening-flow',
+      startStepId: 'mainland-account-authorization',
+      steps: [
+        {
+          id: 'mainland-account-authorization',
+          prompt: {
+            type: 'text',
+            content: '請授權我們將您的資料給滙豐（中國），審核完畢後可直接開通內地戶口。',
+            actionPresentation: 'direct-reply',
+            actions: ['授權']
+          },
+          routes: [
+            {
+              action: '授權',
+              keywords: ['授權', '同意', '可以', '好'],
+              responses: [
+                {
+                  type: 'text',
+                  content: '已遞交您的資料，當開戶步驟完成後我們會再發送訊息及電郵給您，請留意。'
+                }
+              ],
+              nextStepId: 'mainland-verified-partner-offer'
+            }
+          ]
+        },
+        {
+          id: 'mainland-verified-partner-offer',
+          prompt: {
+            type: 'text',
+            content: '在這期間，建議您瀏覽 HSBC Verified Partner 以準備您的拓展。',
+            actions: ['瀏覽 HSBC Verified Partner']
+          },
+          routes: [
+            {
+              action: '瀏覽 HSBC Verified Partner',
+              keywords: ['瀏覽 hsbc verified partner', 'hsbc verified partner', '瀏覽 verified partner', 'verified partner'],
+              responses: [
+                {
+                  type: 'partner-carousel',
+                  cardHeading: 'HSBC Verified Partner',
+                  cardCategory: '餐飲業',
+                  partnerCards: [
+                    {
+                      href: './tran_one-year-later.html',
+                      logo: './assets/media/icons/nailong_logo.png',
+                      name: '奶龙国际',
+                      rating: '100分/5分'
+                    },
+                    {
+                      href: './tran_one-year-later.html',
+                      logo: './assets/media/icons/yumchina_logo.png',
+                      name: '百胜中国',
+                      rating: '5分/5分'
+                    },
+                    {
+                      href: './tran_one-year-later.html',
+                      logo: './assets/media/icons/bolex_logo.png',
+                      name: '上海宝立食品科技股份有限公司',
+                      rating: '100分/5分'
+                    }
+                  ]
+                }
+              ],
+              clearFlow: true
+            }
+          ]
+        }
+      ]
+    }
   },
   {
     trigger: '查看方案 2：合資經營分店',
@@ -91,7 +167,7 @@ window.HSBCFlowModules.mainlandBranch = [
     responses: [
       {
         type: 'text',
-        content: '方案 2｜合資經營分店：較適合已找到內地合作方、希望借助本地團隊加快選址、招募與營運落地的企業。'
+        content: '合資經營分店：較適合已找到內地合作方、希望借助本地團隊加快選址、招募與營運落地的企業。'
       },
       {
         type: 'text',
@@ -100,7 +176,7 @@ window.HSBCFlowModules.mainlandBranch = [
       {
         type: 'text',
         content: '文件準備方向：合作方背景資料與 KYC 文件、合作框架或 term sheet、預計股權架構、投資金額與注資時間表、收益分配模型、品牌授權與內控安排。',
-        actions: ['查看方案 1：大灣區試點店（Top Choice）', '查看方案 3：加盟／品牌授權模式', '返回三個方案總覽']
+        actions: ['大灣區試點店（Top Choice）', '合資經營分店', '加盟／品牌授權模式']
       }
     ]
   },
@@ -111,7 +187,7 @@ window.HSBCFlowModules.mainlandBranch = [
     responses: [
       {
         type: 'text',
-        content: '方案 3｜加盟／品牌授權模式：較適合希望以較輕資產方式拓展，並把部分門店投資與日常營運交由合作方承擔的企業。'
+        content: '加盟／品牌授權模式：較適合希望以較輕資產方式拓展，並把部分門店投資與日常營運交由合作方承擔的企業。'
       },
       {
         type: 'text',
@@ -120,7 +196,7 @@ window.HSBCFlowModules.mainlandBranch = [
       {
         type: 'text',
         content: '文件準備方向：商標或品牌權屬證明、加盟或授權合約草案、營運手冊、培訓安排、加盟費與持續服務費結算方式、門店審核與稽核框架。',
-        actions: ['查看方案 1：大灣區試點店（Top Choice）', '查看方案 2：合資經營分店', '返回三個方案總覽']
+        actions: ['大灣區試點店（Top Choice）', '合資經營分店', '加盟／品牌授權模式']
       }
     ]
   },
@@ -132,7 +208,7 @@ window.HSBCFlowModules.mainlandBranch = [
       {
         type: 'text',
         content: '目前較建議您先從方案 1 的試點店路線開始評估，再按實際合作資源與投資節奏比較另外兩個方案。',
-        actions: ['查看方案 1：大灣區試點店（Top Choice）', '查看方案 2：合資經營分店', '查看方案 3：加盟／品牌授權模式']
+        actions: ['大灣區試點店（Top Choice）', '合資經營分店', '加盟／品牌授權模式']
       }
     ]
   },
@@ -177,14 +253,14 @@ window.HSBCFlowModuleConfigs.mainlandBranch = {
       sender: 'ai',
       type: 'text',
       content: '您好！我是滙豐萬事屋。請問今日有什麼可以幫到您的企業？',
-      actions: ['我想過數。', '我要兌換外幣']
+      actions: ['我想過數。', '我要兌換外幣。']
     }
   },
   defaultResponses: [
     {
       type: 'text',
       content: '您好！我是滙豐萬事屋。請問今日有什麼可以幫到您的企業？',
-      actions: ['我想過數。', '我要兌換外幣']
+      actions: ['我想過數。', '我要兌換外幣。']
     }
   ]
 };

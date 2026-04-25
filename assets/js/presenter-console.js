@@ -57,11 +57,12 @@
       { kind: 'text', value: '查閱交易記錄' }
     ],
     'mainland-branch-flow': [
-      { kind: 'text', value: '拓展內地分店' },
+      { kind: 'text', value: '最近生意幾好，您有什麼建議嗎？' },
       { kind: 'text', value: '同意' },
-      { kind: 'text', value: '查看方案 1：大灣區試點店（Top Choice）' },
-      { kind: 'text', value: '查看方案 2：合資經營分店' },
-      { kind: 'text', value: '查看方案 3：加盟／品牌授權模式' }
+      { kind: 'text', value: '大灣區試點店（Top Choice）' },
+      { kind: 'text', value: '立即開立內地戶口' },
+      { kind: 'text', value: '授權' },
+      { kind: 'text', value: '瀏覽 HSBC Verified Partner' }
     ]
   };
   var presentSequence = [
@@ -77,10 +78,11 @@
     { order: 10, pageId: 'lock-screen-fx', path: 'loks_fx-hedging.html', title: 'FX Lock Screen', summary: '展示日圓風險提醒與外匯對沖入口。', kicker: 'Step 08' },
     { order: 11, pageId: 'assistant-fx-hedging', path: 'app_fx-hedging.html', title: 'app_fx-hedging.html', summary: '展示分析、優惠推廣、交易確認及查閱交易記錄。', kicker: 'Step 09' },
     { order: 12, pageId: 'feature-demo-mainland-expansion', path: 'vid_v3.html', title: 'vid_v3.html', summary: '進入內地分店拓展影片。', kicker: 'Step 10' },
-    { order: 13, pageId: 'assistant-mainland-branch', path: 'app_mainland-branch.html', title: 'app_mainland-branch.html', summary: '展示內地分店方案建議。', kicker: 'Step 11' },
-    { order: 14, pageId: 'video-mainland-expansion', path: 'vid_v4.html', title: 'vid_v4.html', summary: '播放拓展內地分店影片。', kicker: 'Step 12' },
-    { order: 15, pageId: 'story-ending', path: 'tran_ending.html', title: 'tran_ending.html', summary: '小白過上無憂無慮的生活。', kicker: 'Step 13' },
-    { order: 16, pageId: 'video-epilogue', path: 'vid_v5.html', title: 'vid_v5.html', summary: '暫時沿用 v4 作為收結後延伸影片。', kicker: 'Step 14' }
+    { order: 13, pageId: 'assistant-mainland-branch', path: 'app_mainland-branch.html', title: 'app_mainland-branch.html', summary: '展示內地分店建議、內地戶口授權與 Verified Partner 推薦。', kicker: 'Step 11' },
+    { order: 14, pageId: 'story-one-year-later', path: 'tran_one-year-later.html', title: 'tran_one-year-later.html', summary: '一年後的過場頁，帶入拉王（中國）成立一週年晚宴。', kicker: 'Step 12' },
+    { order: 15, pageId: 'video-mainland-expansion', path: 'vid_v4.html', title: 'vid_v4.html', summary: '播放拓展內地分店影片。', kicker: 'Step 13' },
+    { order: 16, pageId: 'story-ending', path: 'tran_ending.html', title: 'tran_ending.html', summary: '小白過上無憂無慮的生活。', kicker: 'Step 14' },
+    // dry run video 已移除
   ];
 
   if (!appRoot || !statusNode || !floatingPageNode || !floatingStepNode || !floatingSummaryNode || !floatingDetailNode || !sequenceListNode || !timerNode || !timerToggleButton || !timerResetButton || !prevStepButton || !nextStepButton || !knowledgeBase || !Array.isArray(knowledgeBase.knowledgeBase)) {

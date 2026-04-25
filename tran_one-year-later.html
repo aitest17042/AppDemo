@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>兩天後</title>
+    <title>一年後</title>
     <link rel="stylesheet" href="./assets/css/styles.css" />
     <style>
       .story-transition-page .story-shell {
@@ -46,66 +46,81 @@
         animation: transition-caret-blink 0.9s steps(1, end) infinite;
       }
 
-      .message-bubble {
+      .anniversary-button {
         position: relative;
         display: none;
         align-items: center;
         gap: 16px;
-        width: min(88vw, 400px);
-        padding: 22px 28px;
+        width: min(88vw, 460px);
+        padding: 20px 28px;
         border: 0;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.97);
-        box-shadow: 0 24px 80px rgba(112, 72, 40, 0.18);
+        border-radius: 28px;
+        background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,244,238,0.98) 100%);
+        box-shadow: 0 26px 84px rgba(112, 72, 40, 0.2);
         transform: translateY(16px) scale(0.96);
         opacity: 0;
         cursor: pointer;
+        overflow: hidden;
       }
 
-      .message-bubble.is-visible {
+      .anniversary-button.is-visible {
         display: inline-flex;
         animation: bubble-rise 0.65s cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
       }
 
-      .message-bubble::before,
-      .message-bubble::after {
-        content: "";
+      .anniversary-button::before,
+      .anniversary-button::after {
+        content: '';
         position: absolute;
-        background: rgba(255, 255, 255, 0.97);
-        border-radius: 50%;
-        box-shadow: 0 12px 36px rgba(112, 72, 40, 0.12);
+        inset: auto;
+        border-radius: 999px;
+        opacity: 0.6;
+        pointer-events: none;
       }
 
-      .message-bubble::before {
-        width: 28px;
-        height: 28px;
-        left: 18%;
-        bottom: -18px;
+      .anniversary-button::before {
+        width: 18px;
+        height: 18px;
+        top: 14px;
+        right: 18px;
+        background: #ffd166;
+        animation: float-spark 2.2s ease-in-out infinite;
       }
 
-      .message-bubble::after {
-        width: 16px;
-        height: 16px;
-        left: 13%;
-        bottom: -34px;
+      .anniversary-button::after {
+        width: 10px;
+        height: 10px;
+        bottom: 18px;
+        left: 20px;
+        background: #7bdff2;
+        animation: float-spark 2.4s ease-in-out 0.35s infinite;
       }
 
-      .message-logo {
-        width: 52px;
-        height: 52px;
+      .anniversary-mascot {
+        width: 62px;
+        height: 62px;
         object-fit: contain;
         flex: 0 0 auto;
+        animation: mascot-bob 2.4s ease-in-out infinite;
       }
 
-      .message-copy {
-        margin: 0;
-        min-height: 1.6em;
-        width: 100%;
-        font-size: clamp(1.2rem, 2.4vw, 1.6rem);
-        line-height: 1.4;
+      .anniversary-copy strong {
+        display: block;
         color: #db0011;
-        font-weight: 600;
+        font-size: clamp(1.1rem, 2.6vw, 1.45rem);
+        line-height: 1.35;
         letter-spacing: 0.04em;
+      }
+
+      .anniversary-copy span {
+        display: inline-flex;
+        margin-top: 10px;
+        padding: 9px 16px;
+        border-radius: 999px;
+        background: rgba(219, 0, 17, 0.1);
+        color: #db0011;
+        font-size: 0.95rem;
+        font-weight: 700;
       }
 
       @keyframes transition-caret-blink {
@@ -129,15 +144,40 @@
           transform: translateY(0) scale(1);
         }
       }
+
+      @keyframes mascot-bob {
+        0%, 100% {
+          transform: translateY(0) rotate(-2deg);
+        }
+
+        50% {
+          transform: translateY(-5px) rotate(2deg);
+        }
+      }
+
+      @keyframes float-spark {
+        0%, 100% {
+          transform: translateY(0) scale(1);
+          opacity: 0.55;
+        }
+
+        50% {
+          transform: translateY(-7px) scale(1.1);
+          opacity: 0.9;
+        }
+      }
     </style>
   </head>
-  <body class="story-page story-page-transition" data-page-id="story-two-days-later" data-page-title="兩天後">
+  <body class="story-page story-transition-page" data-page-id="story-one-year-later" data-page-title="一年後">
     <div class="story-shell story-shell-centered">
-      <section class="story-plain transition-plain" aria-label="Two days later transition">
+      <section class="story-plain transition-plain" aria-label="One year later transition">
         <h1 class="transition-line" id="transitionLine" aria-live="polite"></h1>
-        <button class="message-bubble" id="messageBubble" type="button" aria-label="您有一則新訊息" aria-live="polite">
-          <img class="message-logo" src="./assets/media/icons/hsbc_logo.png" alt="HSBC Logo" />
-          <p class="message-copy" id="messageCopy"></p>
+        <button class="anniversary-button" id="anniversaryButton" type="button" aria-label="點擊參加一週年晚宴">
+          <img class="anniversary-mascot" src="./assets/media/icons/chiikawa_icon.png" alt="Mascot" />
+          <div class="anniversary-copy">
+            <strong>拉王（中國）成立一週年晚宴</strong>
+            <span>點擊參加</span>
+          </div>
         </button>
       </section>
     </div>
@@ -145,13 +185,11 @@
     <script>
       (function () {
         var lineNode = document.getElementById('transitionLine');
-        var bubbleNode = document.getElementById('messageBubble');
-        var bubbleCopyNode = document.getElementById('messageCopy');
+        var buttonNode = document.getElementById('anniversaryButton');
         var storyTransition = window.HSBCStoryTransition;
-        var lineText = '兩天後。。。';
-        var bubbleText = '您有一則新訊息';
+        var lineText = '一年後。。。';
         var lineReady = false;
-        var bubbleShown = false;
+        var buttonShown = false;
 
         function renderLine() {
           if (!storyTransition) {
@@ -165,38 +203,28 @@
           });
         }
 
-        function renderBubbleText() {
-          if (!storyTransition) {
+        function revealButton() {
+          if (!lineReady || buttonShown) {
             return;
           }
 
-          bubbleCopyNode.textContent = '';
-          storyTransition.typeCharacters(bubbleCopyNode, bubbleText, 85);
-        }
-
-        function revealBubble() {
-          if (!lineReady || bubbleShown) {
-            return;
-          }
-
-          bubbleShown = true;
-          bubbleNode.classList.add('is-visible');
-          renderBubbleText();
+          buttonShown = true;
+          buttonNode.classList.add('is-visible');
         }
 
         if (storyTransition) {
           storyTransition.bindAdvanceTriggers({
-            guardNode: bubbleNode,
-            onAdvance: revealBubble
+            guardNode: buttonNode,
+            onAdvance: revealButton
           });
         }
 
-        bubbleNode.addEventListener('click', function () {
-          if (!bubbleShown) {
+        buttonNode.addEventListener('click', function () {
+          if (!buttonShown) {
             return;
           }
 
-          window.location.href = './loks_account-opening.html';
+          window.location.href = './vid_v4.html';
         });
 
         renderLine();

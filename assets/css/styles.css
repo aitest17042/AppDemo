@@ -1216,6 +1216,110 @@ a {
   margin-top: 2px;
 }
 
+.message-row.ai .message-bubble.partner-carousel-bubble {
+  max-width: min(92vw, 360px);
+  padding: 14px;
+  overflow: hidden;
+}
+
+.partner-carousel-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.partner-carousel-header strong {
+  color: var(--hsbc-red);
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.partner-carousel-header span {
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.partner-carousel-track {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scroll-snap-type: x proximity;
+}
+
+.partner-carousel-track::-webkit-scrollbar {
+  height: 6px;
+}
+
+.partner-carousel-track::-webkit-scrollbar-thumb {
+  background: rgba(219, 0, 17, 0.22);
+  border-radius: 999px;
+}
+
+.partner-card {
+  min-width: 176px;
+  scroll-snap-align: start;
+  border-radius: 18px;
+  border: 1px solid rgba(219, 0, 17, 0.1);
+  background: linear-gradient(180deg, #ffffff 0%, #fff8f8 100%);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
+.partner-card-button {
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.partner-card-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+  border-color: rgba(219, 0, 17, 0.2);
+}
+
+.partner-card-button:active {
+  transform: translateY(0);
+}
+
+.partner-card-logo-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 104px;
+  padding: 18px;
+  background: linear-gradient(180deg, rgba(219, 0, 17, 0.06) 0%, rgba(219, 0, 17, 0.01) 100%);
+}
+
+.partner-card-logo {
+  display: block;
+  max-width: 100%;
+  max-height: 68px;
+  object-fit: contain;
+}
+
+.partner-card-body {
+  padding: 14px 14px 16px;
+}
+
+.partner-card-body strong {
+  display: block;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.partner-card-body span {
+  display: block;
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .composer-file-input {
   display: none;
 }

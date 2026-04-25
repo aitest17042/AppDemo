@@ -1,4 +1,4 @@
-# HSBC SME Assistant
+# SME Assistant Demo
 
 This project is now a standalone HTML app.
 
