@@ -79,10 +79,8 @@
     { order: 11, pageId: 'assistant-fx-hedging', path: 'app_fx-hedging.html', title: 'app_fx-hedging.html', summary: '展示分析、優惠推廣、交易確認及查閱交易記錄。', kicker: 'Step 09' },
     { order: 12, pageId: 'feature-demo-mainland-expansion', path: 'vid_v3.html', title: 'vid_v3.html', summary: '進入內地分店拓展影片。', kicker: 'Step 10' },
     { order: 13, pageId: 'assistant-mainland-branch', path: 'app_mainland-branch.html', title: 'app_mainland-branch.html', summary: '展示內地分店建議、內地戶口授權與 Verified Partner 推薦。', kicker: 'Step 11' },
-    { order: 14, pageId: 'story-one-year-later', path: 'tran_one-year-later.html', title: 'tran_one-year-later.html', summary: '一年後的過場頁，帶入拉王（中國）成立一週年晚宴。', kicker: 'Step 12' },
-    { order: 15, pageId: 'video-mainland-expansion', path: 'vid_v4.html', title: 'vid_v4.html', summary: '播放拓展內地分店影片。', kicker: 'Step 13' },
-    { order: 16, pageId: 'video-epilogue', path: 'vid_v5.html', title: 'vid_v5.html', summary: '播放結尾影片，帶入故事完結頁。', kicker: 'Step 14' },
-    { order: 17, pageId: 'story-ending', path: 'tran_ending.html', title: 'tran_ending.html', summary: '小白過上無憂無慮的生活。', kicker: 'Step 15' }
+    { order: 14, pageId: 'video-mainland-expansion', path: 'vid_v4.html', title: 'vid_v4.html', summary: '播放拓展內地分店影片。', kicker: 'Step 12' },
+    { order: 15, pageId: 'story-ending', path: 'tran_ending.html', title: 'tran_ending.html', summary: '播放結尾影片並展示故事完結頁。', kicker: 'Step 13' }
   ];
 
   if (!appRoot || !statusNode || !floatingPageNode || !floatingStepNode || !floatingSummaryNode || !floatingDetailNode || !sequenceListNode || !timerNode || !timerToggleButton || !timerResetButton || !prevStepButton || !nextStepButton || !knowledgeBase || !Array.isArray(knowledgeBase.knowledgeBase)) {

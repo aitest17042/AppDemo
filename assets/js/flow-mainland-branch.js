@@ -133,19 +133,19 @@ window.HSBCFlowModules.mainlandBranch = [
                   cardCategory: '餐飲業',
                   partnerCards: [
                     {
-                      href: './tran_one-year-later.html',
+                      href: './vid_v4.html',
                       logo: './assets/media/icons/nailong_logo.png',
                       name: '奶龙国际',
                       rating: '100分/5分'
                     },
                     {
-                      href: './tran_one-year-later.html',
+                      href: './vid_v4.html',
                       logo: './assets/media/icons/yumchina_logo.png',
                       name: '百胜中国',
                       rating: '5分/5分'
                     },
                     {
-                      href: './tran_one-year-later.html',
+                      href: './vid_v4.html',
                       logo: './assets/media/icons/bolex_logo.png',
                       name: '上海宝立食品科技股份有限公司',
                       rating: '100分/5分'

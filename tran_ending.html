@@ -37,10 +37,12 @@
         text-wrap: balance;
       }
 
-      .typing-line-image {
-        width: min(220px, 48vw);
-        height: auto;
-        object-fit: contain;
+      .typing-line-video {
+        width: min(320px, 62vw);
+        max-height: 56vh;
+        border-radius: 24px;
+        object-fit: cover;
+        box-shadow: 0 26px 84px rgba(0, 0, 0, 0.28);
       }
 
       .typing-copy {
@@ -129,7 +131,7 @@
         var copyNode = document.getElementById('typingCopy');
         var thanksNode = document.getElementById('typingThanks');
         var storyTransition = window.HSBCStoryTransition;
-        var lineImagePath = './assets/media/icons/chiikawa_icon.png';
+        var lineImagePath = './assets/media/videos/v5.mp4';
         var copyText = '由創業起步、成功開戶，到管理匯率風險及規劃拓展，小白終於有更多時間專注做好生意，也對未來更有把握。';
         var thanksText = '「多謝你，滙豐萬事屋」';
 
@@ -148,7 +150,10 @@
         }
 
         function renderLine() {
-          lineNode.innerHTML = '<img class="typing-line-image" src="' + lineImagePath + '" alt="Chiikawa" />';
+          lineNode.innerHTML = '' +
+            '<video class="typing-line-video" autoplay muted loop playsinline preload="metadata" aria-label="Ending film">' +
+              '<source src="' + lineImagePath + '" type="video/mp4" />' +
+            '</video>';
           window.setTimeout(renderCopy, 220);
         }
 

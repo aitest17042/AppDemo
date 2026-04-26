@@ -107,14 +107,6 @@
       description: 'Original standalone cinematic playback for the branch expansion journey.',
       topicLabel: '拓展內地分店'
     },
-    {
-      id: 'video-epilogue',
-      path: 'vid_v5.html',
-      kicker: 'Video 05',
-      title: 'Ending Film',
-      description: '故事結尾影片，接續進入完結頁。',
-      topicLabel: '綜合流程'
-    }
   ];
   var allPages = demoPages.concat(videoPages);
 
