@@ -15,7 +15,7 @@
   };
   var topicDemoScripts = {
     'account-opening-start': [
-      { kind: 'text', value: '我最近被人炒咗，我唔想再做社畜啦，不如開公司啦，但係要點做' },
+      { kind: 'text', value: '我最近被人炒咗，我唔想再做社畜啦，我要做拉麵店老闆！但係要點做' },
       { kind: 'text', value: '未啊' },
       { kind: 'text', value: 'HK?' },
       { kind: 'text', value: '哦，好，授權' },
@@ -108,11 +108,11 @@
       topicLabel: '拓展內地分店'
     },
     {
-      id: 'video-dry-run-demo',
-      path: 'vid_v7.html',
+      id: 'video-epilogue',
+      path: 'vid_v5.html',
       kicker: 'Video 05',
-      title: 'Dry Run Demo Reel',
-      description: '以實際乾跑畫面整理成的 app demo 影片。',
+      title: 'Ending Film',
+      description: '故事結尾影片，接續進入完結頁。',
       topicLabel: '綜合流程'
     }
   ];

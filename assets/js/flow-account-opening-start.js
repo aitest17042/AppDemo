@@ -9,7 +9,7 @@ var hsbcAccountOpeningConfig = window.HSBCFlowModuleConfigs.accountOpening = win
 
 hsbcAccountOpeningStartEntries.push({
   trigger: '開戶 / Account Opening',
-  keywords: ['開立匯豐商業戶口', '開公司', '開戶', 'account', '銀行卡', '開帳戶'],
+  keywords: ['開立匯豐商業戶口', '開公司', '開戶', 'account', '銀行卡', '開帳戶','老闆'],
   topicId: 'account-opening-start',
   flow: {
     id: 'account-opening-start',

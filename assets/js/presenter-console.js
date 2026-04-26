@@ -35,7 +35,7 @@
   };
   var topicDemoScripts = {
     'account-opening-start': [
-      { kind: 'text', value: '我最近被人炒咗，我唔想再做社畜啦，不如開公司啦，但係要點做' },
+      { kind: 'text', value: '我最近被人炒咗，我唔想再做社畜啦，我要做拉麵店老闆！但係要點做' },
       { kind: 'text', value: '未啊' },
       { kind: 'text', value: 'HK?' },
       { kind: 'text', value: '哦，好，授權' },
@@ -81,8 +81,8 @@
     { order: 13, pageId: 'assistant-mainland-branch', path: 'app_mainland-branch.html', title: 'app_mainland-branch.html', summary: '展示內地分店建議、內地戶口授權與 Verified Partner 推薦。', kicker: 'Step 11' },
     { order: 14, pageId: 'story-one-year-later', path: 'tran_one-year-later.html', title: 'tran_one-year-later.html', summary: '一年後的過場頁，帶入拉王（中國）成立一週年晚宴。', kicker: 'Step 12' },
     { order: 15, pageId: 'video-mainland-expansion', path: 'vid_v4.html', title: 'vid_v4.html', summary: '播放拓展內地分店影片。', kicker: 'Step 13' },
-    { order: 16, pageId: 'story-ending', path: 'tran_ending.html', title: 'tran_ending.html', summary: '小白過上無憂無慮的生活。', kicker: 'Step 14' },
-    // dry run video 已移除
+    { order: 16, pageId: 'video-epilogue', path: 'vid_v5.html', title: 'vid_v5.html', summary: '播放結尾影片，帶入故事完結頁。', kicker: 'Step 14' },
+    { order: 17, pageId: 'story-ending', path: 'tran_ending.html', title: 'tran_ending.html', summary: '小白過上無憂無慮的生活。', kicker: 'Step 15' }
   ];
 
   if (!appRoot || !statusNode || !floatingPageNode || !floatingStepNode || !floatingSummaryNode || !floatingDetailNode || !sequenceListNode || !timerNode || !timerToggleButton || !timerResetButton || !prevStepButton || !nextStepButton || !knowledgeBase || !Array.isArray(knowledgeBase.knowledgeBase)) {
