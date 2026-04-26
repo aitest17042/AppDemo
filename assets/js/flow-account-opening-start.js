@@ -188,7 +188,7 @@ hsbcAccountOpeningStartEntries.push({
               },
               {
                 type: 'text',
-                content: '已成功遞交申請',
+                content: '已成功遞交申請，如成功批核，您在兩至三個工作日內將會收到確認通知，確認後可直接從「滙豐萬事屋」直接登入您的商業戶口。',
                 delayMs: 2000
               }
             ],

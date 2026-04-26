@@ -29,8 +29,7 @@
       { kind: 'text', value: '進行交易' },
       { kind: 'text', value: '同意' },
       { kind: 'text', value: '直接做' },
-      { kind: 'text', value: '確認' },
-      { kind: 'text', value: '查閱交易記錄' }
+      { kind: 'text', value: '確認' }
     ],
     'mainland-branch-flow': [
       { kind: 'text', value: '最近生意幾好，您有什麼建議嗎？' },
