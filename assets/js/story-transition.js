@@ -1,9 +1,16 @@
 (function () {
   function ensureLineStructure(lineNode, caretClassName) {
+    var contentNode;
     var textNode;
     var caretNode;
 
     lineNode.textContent = '';
+
+    contentNode = document.createElement('span');
+    contentNode.className = 'typing-run';
+    contentNode.style.display = 'inline';
+    contentNode.style.maxWidth = '100%';
+    contentNode.style.minWidth = '0';
 
     textNode = document.createElement('span');
     textNode.className = 'typing-text';
@@ -12,8 +19,9 @@
     caretNode.className = caretClassName || 'typing-caret';
     caretNode.setAttribute('aria-hidden', 'true');
 
-    lineNode.appendChild(textNode);
-    lineNode.appendChild(caretNode);
+    contentNode.appendChild(textNode);
+    contentNode.appendChild(caretNode);
+    lineNode.appendChild(contentNode);
 
     return {
       textNode: textNode,
@@ -46,6 +54,23 @@
     var activated = false;
     var guardNode = options && options.guardNode ? options.guardNode : null;
     var handler = options && typeof options.onAdvance === 'function' ? options.onAdvance : null;
+    var canAdvance = options && typeof options.canAdvance === 'function' ? options.canAdvance : null;
+
+    function tryAdvance() {
+      if (activated) {
+        return;
+      }
+
+      if (canAdvance && !canAdvance()) {
+        return;
+      }
+
+      if (handler() === false) {
+        return;
+      }
+
+      activated = true;
+    }
 
     if (!handler) {
       return;
@@ -56,12 +81,7 @@
         return;
       }
 
-      if (activated) {
-        return;
-      }
-
-      activated = true;
-      handler();
+      tryAdvance();
     });
 
     document.addEventListener('keydown', function (event) {
@@ -73,12 +93,7 @@
         return;
       }
 
-      if (activated) {
-        return;
-      }
-
-      activated = true;
-      handler();
+      tryAdvance();
     });
   }
 

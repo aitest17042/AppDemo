@@ -25,9 +25,7 @@
         min-height: 3.8em;
         width: min(16em, 100%);
         max-width: 16em;
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
+        display: block;
         margin-inline: auto;
         text-align: left;
         font-size: clamp(2rem, 4.5vw, 3.5rem);
@@ -181,12 +179,13 @@
 
         function revealBubble() {
           if (!introReady || bubbleShown) {
-            return;
+            return false;
           }
 
           bubbleShown = true;
           bubbleNode.classList.add('is-visible');
           renderBubbleText();
+          return true;
         }
 
         if (storyTransition) {
