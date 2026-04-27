@@ -765,8 +765,7 @@
         return [
           {
             type: 'text',
-            content: '目前此頁只支援商業戶口開立流程。您可直接開始開戶流程。',
-            actions: ['開立匯豐商業戶口']
+            actions: ['開立滙豐商業戶口']
           }
         ];
       case 'account-opening-complete':

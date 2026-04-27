@@ -9,7 +9,7 @@ var hsbcAccountOpeningConfig = window.HSBCFlowModuleConfigs.accountOpening = win
 
 hsbcAccountOpeningStartEntries.push({
   trigger: '開戶 / Account Opening',
-  keywords: ['開立匯豐商業戶口', '開公司', '開戶', 'account', '銀行卡', '開帳戶','老闆'],
+  keywords: ['開立滙豐商業戶口', '開公司', '開戶', 'account', '銀行卡', '開帳戶','老闆'],
   topicId: 'account-opening-start',
   flow: {
     id: 'account-opening-start',
@@ -204,7 +204,7 @@ hsbcAccountOpeningConfig.defaultResponsesByTopic['account-opening-start'] = [
   {
     type: 'text',
     content: '您好！我是滙豐萬事屋。請問今日有什麼可以幫到您的企業？',
-    actions: ['我想了解如何開立匯豐商業戶口。', '我是現有客戶，想要進行交易。']
+    actions: ['我想了解如何開立滙豐商業戶口。', '我是現有客戶，想要進行交易。']
   }
 ];
 
@@ -212,5 +212,5 @@ hsbcAccountOpeningConfig.initialMessagesByTopic['account-opening-start'] = {
   sender: 'ai',
   type: 'text',
   content: '您好！我是滙豐萬事屋。請問今日有什麼可以幫到您的企業？',
-  actions: ['我想了解如何開立匯豐商業戶口。', '我是現有客戶，想要進行交易。']
+  actions: ['我想了解如何開立滙豐商業戶口。', '我是現有客戶，想要進行交易。']
 };
