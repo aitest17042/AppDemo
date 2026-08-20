@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>滙豐萬事屋</title>
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body data-page-id="lock-screen-account-opening" data-page-title="開戶成功 Lock Screen">
+    <div class="workspace-layout" id="workspaceLayout">
+      <div class="app-shell">
+        <div class="phone-frame">
+          <div class="phone-screen lock-screen-screen">
+            <div class="status-bar lock-status-bar">
+              <div id="lockStatusTime">--:--</div>
+              <div class="status-icons">
+                <span class="icon" aria-hidden="true">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 10a6 6 0 1 0-12 0"></path>
+                    <path d="M14.31 6.47a3 3 0 0 0-4.62 0"></path>
+                    <path d="M13 10a1 1 0 0 0-2 0"></path>
+                  </svg>
+                </span>
+                <span class="icon" aria-hidden="true">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h.01"></path>
+                    <path d="M2 8.82a15 15 0 0 1 20 0"></path>
+                    <path d="M5 12.86a10 10 0 0 1 14 0"></path>
+                    <path d="M8.5 16.43a5 5 0 0 1 7 0"></path>
+                  </svg>
+                </span>
+                <span class="battery-group">
+                  <span class="battery-level">85</span>
+                  <span class="icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="7" width="18" height="10" rx="2"></rect>
+                      <path d="M22 11v2"></path>
+                    </svg>
+                  </span>
+                </span>
+              </div>
+            </div>
+
+            <div class="dynamic-island" aria-hidden="true"></div>
+
+            <main class="lock-screen-main">
+              <div class="lock-screen-top">
+                <div class="lock-date" id="lockDate">星期四, 4月23日</div>
+                <div class="lock-time" id="lockTime">--:--</div>
+              </div>
+
+              <div class="notification-stack">
+                <div class="lock-notification" data-target="./app_account-opening-complete.html" data-open-on-tap="true" tabindex="0" role="button" aria-label="Open account opening completion page">
+                  <div class="notification-swipe-indicator">向右滑動打開</div>
+                  <div class="notification-head">
+                    <div class="notification-app">
+                      <img src="assets/media/icons/hsbc_logo.png" alt="HSBC" class="notification-app-logo-img" aria-hidden="true" />
+                      <div>
+                        <div class="notification-app-name">滙豐萬事屋</div>
+                        <div class="notification-app-time">現在</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="notification-title">🎉 您已成功開立戶口</div>
+                  <div class="notification-body">點擊進入滙豐萬事屋，查看已完成項目與下一步安排。</div>
+                </div>
+
+                <div class="lock-notification" data-target="./app_account-opening-complete.html" data-open-on-tap="true" tabindex="0" role="button" aria-label="Open BR and CR update page">
+                  <div class="notification-swipe-indicator">向右滑動打開</div>
+                  <div class="notification-head">
+                    <div class="notification-app">
+                      <img src="assets/media/icons/hsbc_logo.png" alt="HSBC" class="notification-app-logo-img" aria-hidden="true" />
+                      <div>
+                        <div class="notification-app-name">滙豐萬事屋</div>
+                        <div class="notification-app-time">1 小時前</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="notification-title">📄 已收到 BR 及 CR</div>
+                  <div class="notification-body">公司註冊及商業登記文件已整理完成，點擊即可查看開戶後續資料與相關進度。</div>
+                </div>
+              </div>
+            </main>
+
+            <div class="home-indicator home-indicator-dark"><div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script defer src="./assets/js/presenter-display.js"></script>
+    <script defer src="./assets/js/locked-screen.js"></script>
+  </body>
+</html>

@@ -1,6 +1,9 @@
 # SME Assistant Demo
 
-This project is now a standalone HTML app.
+This project contains two standalone HTML demos.
+
+- `v1/` is the original presenter demo and includes the complete presentation sequence. It uses only `v1/assets` and `v1` pages.
+- `v2/` is the independent English account-opening demo. It uses only `v2/assets` and its numbered pages.
 
 ## Author
 
@@ -23,10 +26,14 @@ Any third-party images, illustrations, characters, audio, video, or other media,
 
 ## Run Locally
 
-Open `__presenter-console.html` directly in a browser if you want the standalone presenter control panel.
+Open `v1/__presenter-console.html` directly in a browser if you want the original standalone presenter control panel.
 
-Open `app_account-opening-start.html`, `app_account-opening-complete.html`, `app_fx-hedging.html`, `app_mainland-branch.html`, `loks_account-opening.html`, or `vid_v1.html` to `vid_v4.html` directly if you want to view a standalone display page.
+Open the relevant files under `v1/` to view the original presentation pages.
 
-Flow scripts now live under `assets/js/flow-account-opening-start.js`, `assets/js/flow-account-opening-complete.js`, `assets/js/flow-fx-hedging.js`, and `assets/js/flow-mainland-branch.js`.
+For the English account-opening demo, open `v2/01_account-country-selection.html` first, then use `v2/02_account-opening-start.html` and `v2/03_account-opening-complete.html`. Open `v2/04_presenter-console.html` to control that sequence.
+
+The v1 flow scripts live under `v1/assets/js/`. The v2 account-opening flow data lives under `v2/assets/js/account-opening-*-en.js`; its country document data is in `v2/assets/js/account-country-selection.js`.
+
+The v2 shared page configuration is in `v2/assets/js/app-setup.js`. It owns the shared brand, header labels, sign-in labels and composer placeholder used by each v2 display page.
 
 No build step, package manager, or local server is required.

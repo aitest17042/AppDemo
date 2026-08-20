@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HSBC NEX</title>
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body data-page-id="assistant-account-country-selection" data-page-title="Account Country Selection">
+    <div class="workspace-layout" id="workspaceLayout">
+      <div class="app-shell">
+        <div class="phone-frame">
+          <div class="phone-screen country-selection-screen">
+            <div class="status-bar">
+              <div id="statusTime">--:--</div>
+              <div class="status-icons">
+                <span class="icon" aria-hidden="true">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10a6 6 0 1 0-12 0"></path><path d="M14.31 6.47a3 3 0 0 0-4.62 0"></path><path d="M13 10a1 1 0 0 0-2 0"></path></svg>
+                </span>
+                <span class="icon" aria-hidden="true">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h.01"></path><path d="M2 8.82a15 15 0 0 1 20 0"></path><path d="M5 12.86a10 10 0 0 1 14 0"></path><path d="M8.5 16.43a5 5 0 0 1 7 0"></path></svg>
+                </span>
+                <span class="battery-group"><span class="battery-level">85</span><span class="icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="18" height="10" rx="2"></rect><path d="M22 11v2"></path></svg></span></span>
+              </div>
+            </div>
+            <div class="dynamic-island" aria-hidden="true"></div>
+            <header class="header country-selection-header">
+              <img class="app-logo" src="./assets/media/icons/hsbc_logo.png" alt="HSBC" />
+              <div class="header-copy"><h1><span class="app-name-with-status">HSBC NEX<span class="online-indicator" aria-label="Online"></span></span></h1></div>
+              <div class="header-actions"><button class="login-button" type="button" data-country-auth="login">Sign in</button></div>
+            </header>
+            <main class="country-selection-content">
+              <div class="country-selection-heading">
+                <p class="country-selection-eyebrow">Account opening</p>
+                <h2>Choose your account country</h2>
+                <p>Select the countries where you would like to open an account.</p>
+              </div>
+              <section class="kyc-passport-card" aria-label="Verified KYC document">
+                <span class="kyc-check" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"></path></svg></span>
+                <span><strong>KYC passport - Hong Kong</strong><small>Verified identity document</small></span>
+              </section>
+              <div class="country-list" id="countryList"></div>
+            </main>
+            <div class="home-indicator"><div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script defer src="./assets/js/app-setup.js"></script>
+    <script defer src="./assets/js/account-country-selection.js"></script>
+    <script defer src="./assets/js/presenter-display.js"></script>
+  </body>
+</html>

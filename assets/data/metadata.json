@@ -1,9 +1,0 @@
-{
-  "name": "滙豐中小企 AI 助手 (HSBC SME AI Assistant)",
-  "description": "一個專為中小企客戶設計的智能聊天助手界面，採用滙豐品牌色彩，支持靈活的問答對配置及圖片回覆。",
-  "author": "aitest17042",
-  "repository": "https://github.com/aitest17042/AppDemo",
-  "copyright": "Copyright (c) 2026 aitest17042. All rights reserved.",
-  "requestFramePermissions": [],
-  "majorCapabilities": []
-}
