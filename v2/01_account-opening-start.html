@@ -6,7 +6,7 @@
     <title>HSBC NEX</title>
     <link rel="stylesheet" href="./assets/css/styles.css" />
   </head>
-  <body data-page-id="assistant-account-opening-complete" data-page-title="Account Opening Complete" data-default-topic-id="account-opening-complete" data-initial-topic-id="account-opening-complete" data-initial-flow-id="account-opening-complete" data-initial-step-id="account-followup-openrice-offer" data-auto-login="true">
+  <body data-page-id="assistant-account-opening-start" data-page-title="Account Opening" data-default-topic="Account Opening" data-default-topic-id="account-opening-start" data-initial-topic-id="account-opening-start">
     <div class="workspace-layout" id="workspaceLayout">
       <div class="app-shell">
         <div class="phone-frame">
@@ -40,18 +40,24 @@
                 </span>
               </div>
             </div>
+
             <div class="dynamic-island" aria-hidden="true"></div>
+
             <header class="header">
               <img class="app-logo" src="./assets/media/icons/hsbc_logo.png" alt="HSBC NEX" />
               <div class="header-copy">
                 <h1><span class="app-name-with-status">HSBC NEX<span class="online-indicator" aria-label="Online"></span></span></h1>
               </div>
-              <div class="header-actions"></div>
+              <div class="header-actions">
+                <button class="login-button" type="button">Sign in</button>
+              </div>
             </header>
+
             <main class="chat-area" id="chatArea">
               <div class="timeline-label" id="timelineLabel">Today --:-- --</div>
               <div class="message-list" id="messageList"></div>
             </main>
+
             <footer class="composer">
               <input id="fileUploadInput" class="composer-file-input" type="file" hidden />
               <button id="uploadButton" class="upload-button" type="button" aria-label="Upload supporting files" hidden>
@@ -69,6 +75,7 @@
                 </svg>
               </button>
             </footer>
+
             <div class="home-indicator"><div></div></div>
           </div>
         </div>
@@ -76,8 +83,8 @@
     </div>
     <script defer src="./assets/js/app-setup.js"></script>
     <script defer src="./assets/js/account-opening-start-en.js"></script>
-    <script defer src="./assets/js/account-opening-complete-en.js"></script>
     <script defer src="./assets/js/knowledgeBase.js"></script>
     <script defer src="./assets/js/app.js"></script>
   </body>
 </html>
+

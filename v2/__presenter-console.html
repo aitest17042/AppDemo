@@ -8,30 +8,20 @@
   </head>
   <body class="v2-presenter-page" data-page-id="v2-presenter-console">
     <main class="v2-presenter-shell">
-      <header class="v2-presenter-header">
-        <div>
-          <p class="v2-presenter-kicker">Presenter Console</p>
-          <h1>Presenter Console</h1>
-          <p>Control the presentation from one place.</p>
+      <aside class="v2-presenter-now">
+        <div class="v2-presenter-now-header">
+          <p class="v2-presenter-section-label">Presentation guide</p>
+          <div class="v2-presenter-status" id="presenterStatus">No display connected</div>
         </div>
-        <div class="v2-presenter-status" id="presenterStatus">No display connected</div>
-      </header>
-      <section class="v2-presenter-layout">
         <div>
-          <p class="v2-presenter-section-label">Presentation sequence</p>
-          <div class="v2-presenter-sequence" id="presenterSequence"></div>
-        </div>
-        <aside class="v2-presenter-now">
-          <p class="v2-presenter-section-label">Now showing</p>
           <strong id="nowShowing">Nothing selected</strong>
           <p id="nowSummary">Open a display page to begin.</p>
           <div class="v2-presenter-flow-guide" id="nowFlowGuide"></div>
           <div class="v2-presenter-actions">
-            <button id="previousButton" type="button">Previous</button>
-            <button id="nextButton" type="button">Next</button>
+            <button id="openDisplayButton" type="button">Open Start display</button>
           </div>
-        </aside>
-      </section>
+        </div>
+      </aside>
     </main>
     <script defer src="./assets/js/app-setup.js"></script>
     <script defer src="./assets/js/v2-presenter-console.js"></script>

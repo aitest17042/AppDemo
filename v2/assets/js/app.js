@@ -43,7 +43,7 @@
   };
 
   var authState = {
-    isLoggedIn: document.body.getAttribute('data-auto-login') === 'true' || Boolean(headerActions && headerActions.querySelector('.header-user')),
+    isLoggedIn: document.body.getAttribute('data-auto-login') === 'true' || Boolean(headerActions && headerActions.querySelector('.header-user')) || isSessionSignedIn(),
     isMenuOpen: false,
     isLoading: false,
     loginTimeoutId: null
@@ -56,6 +56,77 @@
     handledCommandIds: Object.create(null),
     typingTimeoutIds: []
   };
+
+  function isSessionSignedIn() {
+    try {
+      return window.sessionStorage.getItem('hsbc-v2-signed-in') === 'true';
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function setSessionSignedIn(isSignedIn) {
+    try {
+      if (isSignedIn) {
+        window.sessionStorage.setItem('hsbc-v2-signed-in', 'true');
+      } else {
+        window.sessionStorage.removeItem('hsbc-v2-signed-in');
+      }
+    } catch (error) {
+      return;
+    }
+  }
+
+  function updateSignedInSuggestions() {
+    var hasUserMessage = state.messages.some(function (message) {
+      return message.sender === 'user';
+    });
+    var firstAssistantMessage;
+
+    if (!authState.isLoggedIn || hasUserMessage) {
+      return;
+    }
+
+    firstAssistantMessage = state.messages.find(function (message) {
+      return message.sender === 'ai' && message.type === 'text';
+    });
+
+    if (firstAssistantMessage) {
+      firstAssistantMessage.actions = ['My latest transaction', 'HKD to SGD current rate'];
+      renderMessages();
+    }
+  }
+
+  function resetSignedOutSuggestions() {
+    var firstAssistantMessage = state.messages.find(function (message) {
+      return message.sender === 'ai' && message.type === 'text';
+    });
+
+    if (firstAssistantMessage) {
+      firstAssistantMessage.actions = ['I want to open an HSBC business account.', 'I am an existing customer and want to make a transaction.'];
+      renderMessages();
+    }
+  }
+
+  function isUkAccountOpen() {
+    try {
+      return window.sessionStorage.getItem('hsbc-v2-uk-account-open') === 'true';
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function setUkAccountOpen(isOpen) {
+    try {
+      if (isOpen) {
+        window.sessionStorage.setItem('hsbc-v2-uk-account-open', 'true');
+      } else {
+        window.sessionStorage.removeItem('hsbc-v2-uk-account-open');
+      }
+    } catch (error) {
+      return;
+    }
+  }
 
   function getAllowedTopicIds() {
     var configured = (document.body.getAttribute('data-allowed-topic-ids') || '')
@@ -210,8 +281,49 @@
     return segments.length > 0 ? segments[segments.length - 1] : '';
   }
 
-  function isAccountOpeningCompleteEntry() {
-    return (document.body.getAttribute('data-page-id') || '') === 'assistant-account-opening-complete';
+  function saveConversationForCountryReturn() {
+    if (!window.sessionStorage || getCurrentPagePath() !== '01_account-opening-start.html') {
+      return;
+    }
+
+    try {
+      window.sessionStorage.setItem('hsbc-v2-start-chat', JSON.stringify({
+        messages: state.messages,
+        activeFlowId: state.activeFlowId,
+        activeFlowStepId: state.activeFlowStepId,
+        currentTopicId: state.currentTopicId,
+        flowAnswers: state.flowAnswers
+      }));
+    } catch (error) {
+      return;
+    }
+  }
+
+  function restoreConversationForCountryReturn() {
+    var snapshot;
+
+    if (!window.sessionStorage || getCurrentPagePath() !== '01_account-opening-start.html') {
+      return;
+    }
+
+    try {
+      snapshot = JSON.parse(window.sessionStorage.getItem('hsbc-v2-start-chat') || 'null');
+      window.sessionStorage.removeItem('hsbc-v2-start-chat');
+    } catch (error) {
+      return;
+    }
+
+    if (!snapshot || !Array.isArray(snapshot.messages)) {
+      return;
+    }
+
+    state.messages = snapshot.messages.map(function (message) {
+      return createAssistantMessage(message);
+    });
+    state.activeFlowId = snapshot.activeFlowId || null;
+    state.activeFlowStepId = snapshot.activeFlowStepId || null;
+    state.currentTopicId = snapshot.currentTopicId || null;
+    state.flowAnswers = snapshot.flowAnswers || {};
   }
 
   function appendAssistantMessages(messages) {
@@ -226,25 +338,6 @@
     });
 
     renderMessages();
-  }
-
-  function triggerFollowupLoginFlow() {
-    var flowDefinition;
-    var promptResponses;
-
-    if (!isAccountOpeningCompleteEntry() || state.activeFlowStepId || authState.isLoading || !authState.isLoggedIn) {
-      return;
-    }
-
-    flowDefinition = getFlowDefinition('account-opening-complete');
-    promptResponses = getStepPromptResponses(flowDefinition, 'account-followup-openrice-offer');
-
-    if (!flowDefinition || promptResponses.length === 0) {
-      return;
-    }
-
-    setActiveFlow('account-opening-complete', 'account-followup-openrice-offer');
-    appendAssistantMessages(promptResponses);
   }
 
   function getInitialActionConfig() {
@@ -317,6 +410,23 @@
         '<div class="header-user-dropdown" role="menu" hidden>' +
           '<button class="header-user-dropdown-item" type="button" data-auth-action="logout" role="menuitem">' + (appSetup.signOutLabel || 'Sign out') + '</button>' +
         '</div>' +
+      '</div>' +
+      '<button class="header-expand-trigger" type="button" data-auth-action="toggle-header-panel" aria-expanded="false" aria-label="Expand account menu">⌄</button>' +
+      '<div class="header-expand-panel" hidden>' +
+        '<div class="header-expand-option header-expand-country">' +
+          '<button class="header-expand-option-button" type="button">Country <span>HK</span></button>' +
+          '<div class="header-country-menu">' +
+            ['HK', 'SG', 'UK', 'UAE', 'IN', 'MY'].map(function (country) {
+              var isOpen = country === 'HK' || (country === 'UK' && isUkAccountOpen());
+              return '<button class="header-country-option' + (isOpen ? ' is-current' : '') + '" type="button" data-country-code="' + country + '"><span>' + country + '</span><span class="header-country-switch" role="switch" aria-checked="' + (isOpen ? 'true' : 'false') + '"><span></span></span></button>';
+            }).join('') +
+            '<div class="header-country-confirm" hidden><p>Using your existing passport, we can help you open a UK account directly.</p><div><button type="button" data-country-confirm="yes">Confirm</button><button type="button" data-country-confirm="no">Cancel</button></div></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="header-expand-option header-expand-products">' +
+          '<button class="header-expand-option-button" type="button">Products <span>⌄</span></button>' +
+          '<div class="header-products-menu"><button class="header-product-option" type="button" data-product-code="Borrow">Borrow</button><button class="header-product-option" type="button" data-product-code="Card">Card <span>⌄</span></button><div class="header-card-menu" hidden><button class="header-card-option" type="button" data-card-code="Credit card"><span>Credit card</span><span class="header-product-switch" role="switch" aria-checked="false"><span></span></span></button><button class="header-card-option" type="button" data-card-code="Debit card"><span>Debit card</span><span class="header-product-switch" role="switch" aria-checked="false"><span></span></span></button><div class="header-product-confirm" hidden><p></p><div><button type="button" data-product-confirm="yes">Confirm</button><button type="button" data-product-confirm="no">Cancel</button></div></div></div><button class="header-product-option" type="button" data-product-code="Investment">Investment</button><button class="header-product-option" type="button" data-product-code="Trade">Trade</button><button class="header-product-option" type="button" data-product-code="Other Products & Solutions">Other Products &amp; Solutions</button></div>' +
+        '</div>' +
       '</div>';
   }
 
@@ -349,6 +459,74 @@
 
     headerActions.innerHTML = authState.isLoggedIn ? getUserMenuMarkup() : getLoginButtonMarkup();
     setUserMenuOpen(false);
+    setupHeaderExpandPanel();
+  }
+
+  function setupHeaderExpandPanel() {
+    var panel = headerActions.querySelector('.header-expand-panel');
+    var countryOption = headerActions.querySelector('.header-expand-country');
+    var productsOption = headerActions.querySelector('.header-expand-products');
+    var countryMenu = headerActions.querySelector('.header-country-menu');
+    var productsMenu = headerActions.querySelector('.header-products-menu');
+    var commonMenu;
+
+    if (!panel || !countryOption || !productsOption || !countryMenu || !productsMenu || panel.querySelector('.header-common-submenu')) {
+      return;
+    }
+
+    function syncActiveCountryLabel() {
+      var label = headerActions.querySelector('.header-expand-country .header-expand-option-button span');
+      var activeCountries = Array.prototype.slice.call(headerActions.querySelectorAll('.header-country-option.is-current'))
+        .map(function (option) { return option.getAttribute('data-country-code'); });
+
+      if (label) {
+        label.textContent = activeCountries.join(', ');
+      }
+    }
+
+    commonMenu = document.createElement('div');
+    commonMenu.className = 'header-common-submenu';
+    commonMenu.appendChild(countryMenu);
+    productsOption.remove();
+    var selectProductButton = document.createElement('button');
+    selectProductButton.className = 'header-select-product';
+    selectProductButton.type = 'button';
+    selectProductButton.textContent = 'Select product';
+    countryMenu.appendChild(selectProductButton);
+    commonMenu.appendChild(productsMenu);
+    panel.appendChild(commonMenu);
+
+    productsMenu.querySelectorAll('.header-product-option').forEach(function (option) {
+      if (!option.querySelector('span')) {
+        option.insertAdjacentHTML('beforeend', '<span>⌄</span>');
+      }
+    });
+
+    var defaultDebitCard = productsMenu.querySelector('[data-card-code="Debit card"]');
+    if (defaultDebitCard) {
+      defaultDebitCard.classList.add('is-current');
+      defaultDebitCard.querySelector('.header-product-switch').setAttribute('aria-checked', 'true');
+    }
+
+    function moveSelectProductButton(countryCode) {
+      var selectedOption = countryMenu.querySelector('[data-country-code="' + countryCode + '"]');
+      if (selectedOption) {
+        selectedOption.insertAdjacentElement('afterend', selectProductButton);
+      }
+    }
+
+    moveSelectProductButton(countryMenu.querySelector('.header-country-option.is-current').getAttribute('data-country-code'));
+
+    countryOption.addEventListener('mouseenter', function () {
+      panel.classList.add('show-country-menu');
+      panel.classList.remove('show-products-menu');
+    });
+    countryOption.addEventListener('focusin', function () {
+      panel.classList.add('show-country-menu');
+      panel.classList.remove('show-products-menu');
+    });
+
+    syncActiveCountryLabel();
   }
 
   function beginLoginLoading() {
@@ -363,8 +541,9 @@
       authState.isLoading = false;
       authState.loginTimeoutId = null;
       authState.isLoggedIn = true;
+      setSessionSignedIn(true);
       renderAuthControl();
-      triggerFollowupLoginFlow();
+      updateSignedInSuggestions();
     }, 3000);
   }
 
@@ -377,7 +556,130 @@
 
     headerActions.addEventListener('click', function (event) {
       var actionTarget = event.target.closest('[data-auth-action]');
+      var countryOption = event.target.closest('.header-country-option');
+      var countryConfirm = event.target.closest('[data-country-confirm]');
+      var productOption = event.target.closest('.header-product-option');
+      var cardOption = event.target.closest('.header-card-option');
+      var productConfirm = event.target.closest('[data-product-confirm]');
+      var selectProductButton = event.target.closest('.header-select-product');
       var action;
+
+      if (selectProductButton) {
+        var expandPanel = headerActions.querySelector('.header-expand-panel');
+        var activeCountry = expandPanel.getAttribute('data-selected-country') || 'HK';
+        var selectedCountryOption = headerActions.querySelector('[data-country-code="' + activeCountry + '"]');
+        if (selectedCountryOption && selectedCountryOption.classList.contains('is-current')) {
+          expandPanel.classList.add('show-products-menu');
+          expandPanel.classList.remove('show-country-products');
+          headerActions.querySelector('.header-products-menu').setAttribute('data-country', activeCountry);
+        }
+        return;
+      }
+
+      if (productConfirm) {
+        var productConfirmBox = headerActions.querySelector('.header-product-confirm');
+        if (productConfirm.getAttribute('data-product-confirm') === 'yes') {
+          var pendingProduct = productConfirmBox.getAttribute('data-pending-product') || '';
+          productConfirmBox.hidden = true;
+          showThinkingMessage();
+          updateThinkingMessage({ content: 'verifying your data' });
+          var productVerificationTimeout = window.setTimeout(function () {
+            var selectedCard = headerActions.querySelector('[data-card-code="' + pendingProduct + '"]');
+            if (selectedCard) {
+              selectedCard.classList.add('is-current');
+              selectedCard.querySelector('.header-product-switch').setAttribute('aria-checked', 'true');
+            }
+            removeThinkingMessage();
+            state.messages.push(createAssistantMessage({ sender: 'ai', type: 'text', content: 'Your ' + pendingProduct + ' is opened.' }));
+            renderMessages();
+          }, 2000);
+          state.timeouts.push(productVerificationTimeout);
+        } else if (productConfirmBox) {
+          productConfirmBox.hidden = true;
+        }
+        return;
+      }
+
+      if (cardOption) {
+        var cardCode = cardOption.getAttribute('data-card-code') || '';
+        if (cardOption.classList.contains('is-current')) {
+          return;
+        }
+        var productConfirmBox = headerActions.querySelector('.header-product-confirm');
+        productConfirmBox.setAttribute('data-pending-product', cardCode);
+        productConfirmBox.querySelector('p').textContent = 'Using your existing passport, we can help you open a ' + cardCode + ' directly.';
+        cardOption.insertAdjacentElement('afterend', productConfirmBox);
+        productConfirmBox.hidden = false;
+        return;
+      }
+
+      if (productOption && productOption.getAttribute('data-product-code') === 'Card') {
+        var cardMenu = headerActions.querySelector('.header-card-menu');
+        cardMenu.hidden = false;
+        return;
+      }
+
+      if (countryConfirm) {
+        var countryConfirmBox = headerActions.querySelector('.header-country-confirm');
+        if (countryConfirm.getAttribute('data-country-confirm') === 'yes') {
+          var pendingCountry = countryConfirmBox.getAttribute('data-pending-country') || '';
+          countryConfirmBox.hidden = true;
+          showThinkingMessage();
+          updateThinkingMessage({ content: 'verifying your data' });
+          var verificationTimeout = window.setTimeout(function () {
+            if (pendingCountry === 'UK') {
+              setUkAccountOpen(true);
+            }
+            var selectedCountry = headerActions.querySelector('[data-country-code="' + pendingCountry + '"]');
+            if (selectedCountry) {
+              selectedCountry.classList.add('is-current');
+              selectedCountry.querySelector('.header-country-switch').setAttribute('aria-checked', 'true');
+            }
+            headerActions.querySelector('.header-expand-panel').classList.add('show-country-products');
+            var countryLabel = headerActions.querySelector('.header-expand-country .header-expand-option-button span');
+            if (countryLabel) {
+              countryLabel.textContent = Array.prototype.slice.call(headerActions.querySelectorAll('.header-country-option.is-current')).map(function (option) { return option.getAttribute('data-country-code'); }).join(', ');
+            }
+            removeThinkingMessage();
+            state.messages.push(createAssistantMessage({ sender: 'ai', type: 'text', content: 'Your ' + pendingCountry + ' account is opened.' }));
+            renderMessages();
+          }, 2000);
+          state.timeouts.push(verificationTimeout);
+        }
+        selectedCountry.insertAdjacentElement('afterend', headerActions.querySelector('.header-select-product'));
+        if (countryConfirmBox) {
+          countryConfirmBox.hidden = true;
+        }
+        return;
+      }
+
+      if (countryOption) {
+        var selectedCountryCode = countryOption.getAttribute('data-country-code') || '';
+        var countryConfirmBox = headerActions.querySelector('.header-country-confirm');
+        if (countryOption.classList.contains('is-current')) {
+          countryOption.insertAdjacentElement('afterend', headerActions.querySelector('.header-select-product'));
+          headerActions.querySelector('.header-expand-panel').setAttribute('data-selected-country', selectedCountryCode);
+          headerActions.querySelector('.header-expand-panel').classList.remove('show-products-menu', 'show-country-products');
+          return;
+        }
+        if (selectedCountryCode !== 'HK') {
+          countryConfirmBox.setAttribute('data-pending-country', selectedCountryCode);
+          countryConfirmBox.querySelector('p').textContent = 'Using your existing passport, we can help you open a ' + selectedCountryCode + ' account directly.';
+          countryOption.insertAdjacentElement('afterend', countryConfirmBox);
+          countryConfirmBox.hidden = false;
+          return;
+        }
+        countryOption.classList.add('is-current');
+        countryOption.querySelector('.header-country-switch').setAttribute('aria-checked', 'true');
+        countryOption.insertAdjacentElement('afterend', headerActions.querySelector('.header-select-product'));
+        headerActions.querySelector('.header-expand-panel').setAttribute('data-selected-country', selectedCountryCode);
+        headerActions.querySelector('.header-expand-panel').classList.remove('show-products-menu', 'show-country-products');
+        var countryLabel = headerActions.querySelector('.header-expand-country .header-expand-option-button span');
+        if (countryLabel) {
+          countryLabel.textContent = Array.prototype.slice.call(headerActions.querySelectorAll('.header-country-option.is-current')).map(function (option) { return option.getAttribute('data-country-code'); }).join(', ');
+        }
+        return;
+      }
 
       if (!actionTarget) {
         return;
@@ -395,16 +697,48 @@
         return;
       }
 
+      if (action === 'toggle-header-panel') {
+        var panel = headerActions.querySelector('.header-expand-panel');
+        var expandTrigger = headerActions.querySelector('.header-expand-trigger');
+        var isPanelOpen = panel && panel.hidden;
+
+        if (panel) {
+          panel.hidden = !isPanelOpen;
+          if (!isPanelOpen) {
+            panel.classList.remove('show-products-menu', 'show-country-products');
+          }
+        }
+        if (expandTrigger) {
+          expandTrigger.setAttribute('aria-expanded', String(Boolean(isPanelOpen)));
+        }
+        return;
+      }
+
       if (action === 'logout') {
         authState.isLoading = false;
         authState.isLoggedIn = false;
+        setSessionSignedIn(false);
+        setUkAccountOpen(false);
         renderAuthControl();
+        resetSignedOutSuggestions();
       }
     });
 
     document.addEventListener('click', function (event) {
       if (!authState.isMenuOpen || headerActions.contains(event.target)) {
-        return;
+        if (headerActions.contains(event.target)) {
+          return;
+        }
+      }
+
+      var panel = headerActions.querySelector('.header-expand-panel');
+      var expandTrigger = headerActions.querySelector('.header-expand-trigger');
+      if (panel && !panel.hidden) {
+        panel.hidden = true;
+        panel.classList.remove('show-products-menu', 'show-country-products');
+        if (expandTrigger) {
+          expandTrigger.setAttribute('aria-expanded', 'false');
+        }
       }
 
       setUserMenuOpen(false);
@@ -770,14 +1104,6 @@
           {
             type: 'text',
             actions: ['Open an HSBC business account']
-          }
-        ];
-      case 'account-opening-complete':
-        return [
-          {
-            type: 'text',
-            content: 'This page supports post-account-opening services. Please sign in to view your account details.',
-            actions: []
           }
         ];
       case 'fx-hedging-flow':
@@ -1435,20 +1761,6 @@
       return transitionResponses;
     }
 
-    knowledgeEntry = getKnowledgeEntryForInput(input);
-
-    if (knowledgeEntry) {
-      setCurrentTopic(getEntryTopicId(knowledgeEntry));
-
-      if (knowledgeEntry.flow && knowledgeEntry.flow.startStepId) {
-        setActiveFlow(knowledgeEntry.flow.id, knowledgeEntry.flow.startStepId);
-      } else {
-        setActiveFlow(null, null);
-      }
-
-      return getEntryResponses(knowledgeEntry);
-    }
-
     if (activeFlowStep) {
       matchedTransition = getMatchedFlowTransition(activeFlowStep, input);
 
@@ -1461,13 +1773,29 @@
           setActiveFlow(null, null);
         } else if (matchedTransition.nextStepId) {
           setActiveFlow(state.activeFlowId, matchedTransition.nextStepId);
-          transitionResponses = transitionResponses.concat(getStepPromptResponses(activeFlowDefinition, matchedTransition.nextStepId));
+          if (!matchedTransition.skipNextPromptResponses) {
+            transitionResponses = transitionResponses.concat(getStepPromptResponses(activeFlowDefinition, matchedTransition.nextStepId));
+          }
         }
 
         return transitionResponses.length > 0 ? transitionResponses : getDefaultResponses();
       }
 
       return getInvalidKeywordResponses();
+    }
+
+    knowledgeEntry = getKnowledgeEntryForInput(input);
+
+    if (knowledgeEntry) {
+      setCurrentTopic(getEntryTopicId(knowledgeEntry));
+      
+      if (knowledgeEntry.flow && knowledgeEntry.flow.startStepId) {
+        setActiveFlow(knowledgeEntry.flow.id, knowledgeEntry.flow.startStepId);
+      } else {
+        setActiveFlow(null, null);
+      }
+
+      return getEntryResponses(knowledgeEntry);
     }
 
     contextFreeResponse = getContextFreeResponseForInput(input);
@@ -1543,8 +1871,6 @@
       '<div class="ios-permission-icon" aria-hidden="true">&#128276;</div>' +
       '<div class="ios-permission-copy">' +
         '<strong>' + escapeHtml(message.content || 'Notification access requested') + '</strong>' +
-        '<span>' + escapeHtml(message.cardHeading || 'Stay up to date') + '</span>' +
-        '<small>' + escapeHtml(message.cardCategory || 'Notifications') + '</small>' +
       '</div>' +
       '<div class="ios-permission-actions">' +
         (Array.isArray(message.actions) ? message.actions.map(function (action) {
@@ -1563,9 +1889,16 @@
     var bubble = document.createElement('div');
     bubble.className = 'message-bubble';
 
-    if (message.type === 'thinking') {
-      bubble.className += ' thinking-bubble';
-      bubble.innerHTML = (message.content ? '<p>' + escapeHtml(message.content) + '</p>' : '') + createThinkingDots();
+    if (message.type === 'verification-loading') {
+      bubble.className += ' thinking-bubble verification-thinking-bubble';
+      bubble.innerHTML = '<p>' + escapeHtml(message.content) + '</p><span class="verification-spinner" aria-label="Loading"></span>';
+    } else if (message.type === 'thinking') {
+      bubble.className += message.content.indexOf('verifying your data') === 0
+        ? ' thinking-bubble verification-thinking-bubble'
+        : ' thinking-bubble';
+      bubble.innerHTML = message.content.indexOf('verifying your data') === 0
+        ? '<p>' + escapeHtml(message.content) + '</p><span class="verification-spinner" aria-label="Loading"></span>'
+        : (message.content ? '<p>' + escapeHtml(message.content) + '</p>' : '') + createThinkingDots();
     } else if (message.type === 'partner-carousel') {
       bubble.className += ' partner-carousel-bubble';
       bubble.innerHTML =
@@ -1992,6 +2325,7 @@
     var actionButton = event.target.closest('.ios-permission-overlay [data-action]');
 
     if (actionButton) {
+      sendMessage(actionButton.getAttribute('data-action') || '');
       dismissPermissionPrompt();
     }
   });
@@ -2025,6 +2359,8 @@
   updateTimeElements();
   window.setInterval(updateTimeElements, 1000);
   initializeAuthControl();
+  updateSignedInSuggestions();
+  restoreConversationForCountryReturn();
   renderMessages();
   setComposerState();
   autoStartInitialAction();
