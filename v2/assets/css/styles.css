@@ -1779,9 +1779,9 @@ a {
   z-index: 20;
   display: grid;
   place-items: center;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(244, 247, 251, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   cursor: pointer;
 }
 
@@ -1795,18 +1795,18 @@ a {
   width: min(88vw, 320px);
   display: grid;
   place-items: center;
-  gap: 22px;
+  gap: 20px;
   text-align: center;
 }
 
 .passport-creation-title {
-  font-size: clamp(24px, 4vw, 36px);
-  line-height: 1.08;
-  letter-spacing: -0.05em;
+  font-size: clamp(21px, 3.6vw, 30px);
+  line-height: 1.12;
+  letter-spacing: 0;
   font-weight: 800;
   color: var(--hsbc-red);
   opacity: 0;
-  transform: translateY(18px);
+  transform: translateY(-8px);
   animation: passport-title-reveal 0.65s ease-out 0.2s forwards;
 }
 
@@ -1833,8 +1833,8 @@ a {
   padding: 18px 18px 14px;
   border-radius: 18px;
   border: 1px solid rgba(17, 24, 39, 0.08);
-  background: linear-gradient(180deg, #ffffff 0%, #f3f4f6 100%);
-  box-shadow: 0 24px 50px rgba(17, 24, 39, 0.12);
+  background: linear-gradient(180deg, #fffdf9 0%, #f1f3f6 100%);
+  box-shadow: 0 26px 54px rgba(17, 24, 39, 0.16);
   opacity: 0;
   transform-origin: center center;
   transform: translateY(18px) rotateX(20deg) scale(0.9);
@@ -1874,8 +1874,8 @@ a {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: #db0011;
-  border-color: rgba(121, 0, 10, 0.4);
+  background: #1b4687; /* Alternative cover color: #0e0e0f; */
+  border-color: rgba(14, 14, 15, 0.34);
   color: #ffffff;
   transform-origin: left center;
   backface-visibility: hidden;
@@ -1883,17 +1883,24 @@ a {
 }
 
 .passport-creation-cover::before {
-  background: linear-gradient(140deg, rgba(255, 255, 255, 0.2), transparent 45%);
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.18), transparent 45%);
 }
 
 .passport-creation-cover-label {
   position: relative;
   z-index: 1;
+  /* font-family: 'Gentium Plus', 'Gentium Book Plus', Georgia, 'Times New Roman', serif; */
+  font-family: "Helvetica Neue", Arial, sans-serif;
   font-size: 24px;
-  line-height: 0.98;
+  line-height: 1.06;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-align: center;
+}
+
+.passport-creation-cover-label span {
+  display: inline-block;
+  margin-top: 10px;
 }
 
 .passport-creation-page::before {

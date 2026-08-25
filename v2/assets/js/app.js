@@ -2508,7 +2508,7 @@
     var countryCode = (message && typeof message.countryCode === 'string' && message.countryCode) ? message.countryCode : 'HK';
     var variant = explicitVariant || getPassportAnimationVariant(countryCode);
     var isHongKong = countryCode.toUpperCase() === 'HK';
-    var accountType = isHongKong ? 'Domestic Account' : 'International Account';
+    var accountType = isHongKong ? 'Hong Kong Account' : 'Singapore Account';
     var passportTitle = isHongKong
       ? 'Congratulations!<br>Your NEX Passport is created'
       : 'Congratulations!<br>Your NEX Passport is updated';
@@ -2518,7 +2518,7 @@
         '<span class="passport-creation-stamp" aria-label="Stamped in ' + escapeHtml(countryCode) + '">' + escapeHtml(countryCode) + '</span>' +
       '</div>' +
       '<div class="passport-creation-page passport-creation-cover">' +
-        '<span class="passport-creation-cover-label">NEX<br>Passport</span>' +
+        '<span class="passport-creation-cover-label">NEX<br><span>PASSPORT</span></span>' +
       '</div>' +
     '</div>';
 

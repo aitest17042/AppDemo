@@ -12,8 +12,8 @@
         title: 'Start',
         summary: 'Begin the account-opening journey.',
         sessionOptions: [
-          { id: 'nex-passport', label: 'HK account opening', detail: 'Preview the Hong Kong account-opening passport animation.', countryCode: 'HK' },
-          { id: 'country-opening', label: 'Country account opening', detail: 'Preview the international account-opening animation with SG.', countryCode: 'SG' }
+          { id: 'nex-passport', label: 'HK account opening', detail: 'Preview the Domestic Account passport cover, page turn, and HK stamp.', countryCode: 'HK' },
+          { id: 'country-opening', label: 'Country account opening', detail: 'Preview the International Account passport cover, page turn, and SG stamp.', countryCode: 'SG' }
         ],
         guide: [
           { question: 'Start', column: 'common', flowId: 'account-opening-start', stepId: 'account-identity-upload', launchInput: 'I want to open', action: 'Press', value: 'I want to open' },
