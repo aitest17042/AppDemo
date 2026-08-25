@@ -18,7 +18,6 @@
   var timelineLabel = document.getElementById('timelineLabel');
   var headerActions = document.querySelector('.header-actions');
   var allowAllTopics = document.body.getAttribute('data-allow-all-topics') === 'true';
-  var defaultTopic = document.body.getAttribute('data-default-topic') || '';
   var defaultTopicId = document.body.getAttribute('data-default-topic-id') || '';
 
   if (!chatArea || !messageList || !phoneScreen || !messageInput || !sendButton || !uploadButton || !fileUploadInput || !statusTime || !timelineLabel) {
@@ -55,6 +54,9 @@
   var presenterState = {
     handledCommandIds: Object.create(null),
     typingTimeoutIds: []
+  };
+  var renderState = {
+    renderedKeys: []
   };
 
   function isSessionSignedIn() {
@@ -245,6 +247,17 @@
         : [],
       actions: Array.isArray(message.actions) ? message.actions.slice() : [],
       actionPresentation: typeof message.actionPresentation === 'string' ? message.actionPresentation : '',
+      countryOptions: Array.isArray(message.countryOptions)
+        ? message.countryOptions.map(function (countryCode) {
+            return String(countryCode || '').trim();
+          }).filter(Boolean)
+        : [],
+      selectedCountryCodes: message.selectedCountryCodes && typeof message.selectedCountryCodes === 'object'
+        ? Object.assign({}, message.selectedCountryCodes)
+        : {},
+      pendingCountryCode: typeof message.pendingCountryCode === 'string' ? message.pendingCountryCode : '',
+      countryCode: typeof message.countryCode === 'string' ? message.countryCode : '',
+      confirmTemplate: typeof message.confirmTemplate === 'string' ? message.confirmTemplate : '',
       files: Array.isArray(message.files)
         ? message.files.map(function (file) {
             return cloneUploadedFile(file);
@@ -529,7 +542,9 @@
     syncActiveCountryLabel();
   }
 
-  function beginLoginLoading() {
+  function beginLoginLoading(delayMs) {
+    var loadingDelay = typeof delayMs === 'number' && delayMs >= 0 ? delayMs : 3000;
+
     if (authState.isLoading || authState.isLoggedIn) {
       return;
     }
@@ -544,7 +559,7 @@
       setSessionSignedIn(true);
       renderAuthControl();
       updateSignedInSuggestions();
-    }, 3000);
+    }, loadingDelay);
   }
 
   function initializeAuthControl() {
@@ -635,6 +650,7 @@
               selectedCountry.classList.add('is-current');
               selectedCountry.querySelector('.header-country-switch').setAttribute('aria-checked', 'true');
             }
+            syncChatCountrySwitchStates(pendingCountry, true);
             headerActions.querySelector('.header-expand-panel').classList.add('show-country-products');
             var countryLabel = headerActions.querySelector('.header-expand-country .header-expand-option-button span');
             if (countryLabel) {
@@ -646,7 +662,11 @@
           }, 2000);
           state.timeouts.push(verificationTimeout);
         }
-        selectedCountry.insertAdjacentElement('afterend', headerActions.querySelector('.header-select-product'));
+        var selectedCountryCode = countryConfirmBox.getAttribute('data-pending-country') || '';
+        var selectedCountryOption = headerActions.querySelector('[data-country-code="' + selectedCountryCode + '"]');
+        if (selectedCountryOption) {
+          selectedCountryOption.insertAdjacentElement('afterend', headerActions.querySelector('.header-select-product'));
+        }
         if (countryConfirmBox) {
           countryConfirmBox.hidden = true;
         }
@@ -671,6 +691,7 @@
         }
         countryOption.classList.add('is-current');
         countryOption.querySelector('.header-country-switch').setAttribute('aria-checked', 'true');
+        syncChatCountrySwitchStates(selectedCountryCode, true);
         countryOption.insertAdjacentElement('afterend', headerActions.querySelector('.header-select-product'));
         headerActions.querySelector('.header-expand-panel').setAttribute('data-selected-country', selectedCountryCode);
         headerActions.querySelector('.header-expand-panel').classList.remove('show-products-menu', 'show-country-products');
@@ -688,7 +709,7 @@
       action = actionTarget.getAttribute('data-auth-action');
 
       if (action === 'login') {
-        beginLoginLoading();
+        beginLoginLoading(3000);
         return;
       }
 
@@ -797,6 +818,17 @@
       imageSubtitle: typeof message.imageSubtitle === 'string' ? message.imageSubtitle : '',
       imageAlt: typeof message.imageAlt === 'string' ? message.imageAlt : '',
       actions: Array.isArray(message.actions) ? message.actions.slice() : [],
+      countryOptions: Array.isArray(message.countryOptions)
+        ? message.countryOptions.map(function (countryCode) {
+            return String(countryCode || '').trim();
+          }).filter(Boolean)
+        : [],
+      selectedCountryCodes: message.selectedCountryCodes && typeof message.selectedCountryCodes === 'object'
+        ? Object.assign({}, message.selectedCountryCodes)
+        : {},
+      pendingCountryCode: typeof message.pendingCountryCode === 'string' ? message.pendingCountryCode : '',
+      countryCode: typeof message.countryCode === 'string' ? message.countryCode : '',
+      confirmTemplate: typeof message.confirmTemplate === 'string' ? message.confirmTemplate : '',
       files: Array.isArray(message.files)
         ? message.files.map(function (file) {
             return cloneUploadedFile(file);
@@ -916,6 +948,14 @@
       .replaceAll('>', '&gt;')
       .replaceAll('"', '&quot;')
       .replaceAll("'", '&#39;');
+  }
+
+  function getNexPassportBrandMarkup() {
+    return '<span class="nex-passport-token"><span class="nex-passport-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="3" width="14" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 7V17" stroke="currentColor" stroke-width="1.4"/><path d="M8.5 10.2C9.2 9.4 10.4 8.8 12 8.8C13.6 8.8 14.8 9.4 15.5 10.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M8.5 13.8C9.2 14.6 10.4 15.2 12 15.2C13.6 15.2 14.8 14.6 15.5 13.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span><span class="nex-passport-text">NEX Passport</span></span>';
+  }
+
+  function formatChatText(value) {
+    return escapeHtml(value).replace(/nex passport(?!\s+by\s+hsbc)/gi, getNexPassportBrandMarkup());
   }
 
   function formatFileSize(bytes) {
@@ -1199,6 +1239,17 @@
       imageTitle: interpolateTemplate(response.imageTitle, flowDefinition),
       imageSubtitle: interpolateTemplate(response.imageSubtitle, flowDefinition),
       imageAlt: interpolateTemplate(response.imageAlt, flowDefinition),
+      countryOptions: Array.isArray(response.countryOptions)
+        ? response.countryOptions.map(function (countryCode) {
+            return interpolateTemplate(countryCode, flowDefinition);
+          })
+        : [],
+      selectedCountryCodes: response.selectedCountryCodes && typeof response.selectedCountryCodes === 'object'
+        ? Object.assign({}, response.selectedCountryCodes)
+        : {},
+      pendingCountryCode: typeof response.pendingCountryCode === 'string' ? response.pendingCountryCode : '',
+      countryCode: typeof response.countryCode === 'string' ? response.countryCode : '',
+      confirmTemplate: typeof response.confirmTemplate === 'string' ? response.confirmTemplate : '',
       delayMs: typeof response.delayMs === 'number' ? response.delayMs : null,
       actionPresentation: typeof response.actionPresentation === 'string' ? response.actionPresentation : '',
       actions: Array.isArray(response.actions)
@@ -1319,7 +1370,7 @@
     if (inputMode === 'file') {
       return typeof step.uploadPlaceholder === 'string' && step.uploadPlaceholder
         ? step.uploadPlaceholder
-        : 'Use the upload button to add a sample document';
+        : 'Press "Upload" to add a sample document';
     }
 
     return step.prompt && typeof step.prompt.content === 'string' ? step.prompt.content : '';
@@ -1555,9 +1606,7 @@
     }
 
     if (command === 'trigger-upload') {
-      if (!uploadButton.hidden && !uploadButton.disabled) {
-        uploadButton.click();
-      }
+      fileUploadInput.click();
     }
   }
 
@@ -1628,7 +1677,7 @@
         return [
           {
             type: 'text',
-            content: 'Use the upload button below to add the sample document for this step.',
+            content: 'Please press "Upload" to add the document for this step.',
             actions: []
           }
         ];
@@ -1641,7 +1690,7 @@
           return [
             {
               type: 'text',
-              content: 'Enter the link or information for this step, or use the upload button to add a sample document.',
+              content: 'Enter the link or information for this step, or press "Upload" to add a document.',
               actions: []
             }
           ];
@@ -1655,7 +1704,7 @@
           return [
             {
               type: 'text',
-              content: 'Enter the link or information for this step, or use the upload button to add a sample document.',
+                content: 'Enter the link or information for this step, or press "Upload" to add a document.',
               actions: []
             }
           ];
@@ -1766,6 +1815,11 @@
 
       if (matchedTransition) {
         setFlowStepAnswer(state.activeFlowId, activeFlowStep.id, getTransitionAnswerLabel(matchedTransition, input));
+
+        if (matchedTransition.autoSignIn) {
+          beginLoginLoading(matchedTransition.autoSignInDelayMs);
+        }
+
         transitionResponses = cloneResponses(matchedTransition.responses, activeFlowDefinition);
 
         if (matchedTransition.clearFlow) {
@@ -1820,10 +1874,6 @@
     return '<span class="chevron" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></span>';
   }
 
-  function createThinkingDots() {
-    return '<span class="thinking-dots" aria-hidden="true"><span></span><span></span><span></span></span>';
-  }
-
   function createConversationSnapshot() {
     return {
       messages: JSON.parse(JSON.stringify(state.messages)),
@@ -1870,7 +1920,7 @@
     card.innerHTML =
       '<div class="ios-permission-icon" aria-hidden="true">&#128276;</div>' +
       '<div class="ios-permission-copy">' +
-        '<strong>' + escapeHtml(message.content || 'Notification access requested') + '</strong>' +
+        '<strong>' + formatChatText(message.content || 'Notification access requested') + '</strong>' +
       '</div>' +
       '<div class="ios-permission-actions">' +
         (Array.isArray(message.actions) ? message.actions.map(function (action) {
@@ -1882,6 +1932,313 @@
     return overlay;
   }
 
+  function getCountryOfferConfirmCopy(message, countryCode) {
+    var template = typeof message.confirmTemplate === 'string' && message.confirmTemplate
+      ? message.confirmTemplate
+      : 'Using your existing passport, we can help you open a {{country}} account directly.';
+
+    return template.replace('{{country}}', countryCode || '');
+  }
+
+  function isHeaderCountryOpen(countryCode) {
+    var countryOption;
+
+    if (!headerActions || !countryCode) {
+      return false;
+    }
+
+    countryOption = headerActions.querySelector('[data-country-code="' + countryCode + '"]');
+    return Boolean(countryOption && countryOption.classList.contains('is-current'));
+  }
+
+  function syncChatCountrySwitchStates(countryCode, isOn) {
+    var hasChanges = false;
+
+    if (!countryCode || countryCode === 'HK') {
+      return;
+    }
+
+    state.messages.forEach(function (message) {
+      if (!message || message.type !== 'country-switch-selector') {
+        return;
+      }
+
+      message.selectedCountryCodes = message.selectedCountryCodes && typeof message.selectedCountryCodes === 'object'
+        ? message.selectedCountryCodes
+        : {};
+
+      if (isOn && message.selectedCountryCodes[countryCode] !== true) {
+        message.selectedCountryCodes[countryCode] = true;
+        hasChanges = true;
+      }
+
+      if (!isOn && message.selectedCountryCodes[countryCode] === true) {
+        delete message.selectedCountryCodes[countryCode];
+        hasChanges = true;
+      }
+    });
+
+    if (hasChanges) {
+      renderMessages();
+    }
+  }
+
+  function syncHeaderCountrySwitchState(countryCode, isOn) {
+    var option;
+    var switchNode;
+    var countryLabel;
+
+    if (!headerActions || !countryCode) {
+      return;
+    }
+
+    option = headerActions.querySelector('[data-country-code="' + countryCode + '"]');
+
+    if (!option) {
+      return;
+    }
+
+    switchNode = option.querySelector('.header-country-switch');
+
+    if (isOn) {
+      option.classList.add('is-current');
+      if (switchNode) {
+        switchNode.setAttribute('aria-checked', 'true');
+      }
+      if (countryCode === 'UK') {
+        setUkAccountOpen(true);
+      }
+    } else {
+      option.classList.remove('is-current');
+      if (switchNode) {
+        switchNode.setAttribute('aria-checked', 'false');
+      }
+      if (countryCode === 'UK') {
+        setUkAccountOpen(false);
+      }
+    }
+
+    countryLabel = headerActions.querySelector('.header-expand-country .header-expand-option-button span');
+    if (countryLabel) {
+      countryLabel.textContent = Array.prototype.slice.call(headerActions.querySelectorAll('.header-country-option.is-current')).map(function (countryOption) { return countryOption.getAttribute('data-country-code'); }).join(', ');
+    }
+  }
+
+  function createCountrySwitchAnswerContent(message) {
+    var options = Array.isArray(message.countryOptions) ? message.countryOptions : [];
+    var selectedCountryCodes = message.selectedCountryCodes && typeof message.selectedCountryCodes === 'object'
+      ? message.selectedCountryCodes
+      : {};
+    var pendingCountryCode = typeof message.pendingCountryCode === 'string' ? message.pendingCountryCode : '';
+    var optionMarkup = options.map(function (countryCode) {
+      var isFixedOn = countryCode === 'HK';
+      var isCurrent = isFixedOn || selectedCountryCodes[countryCode] === true || isHeaderCountryOpen(countryCode);
+      var switchClassName = 'country-switch-answer-toggle' + (isCurrent ? ' is-current' : '') + (isFixedOn ? ' is-fixed-on' : '');
+      var promptCopy = getCountryOfferConfirmCopy(message, countryCode);
+      var confirmMarkup = pendingCountryCode === countryCode && !isFixedOn
+        ? '<div class="country-switch-answer-confirm"><p>' + formatChatText(promptCopy) + '</p><div><button type="button" data-country-offer-message-id="' + escapeHtml(message.id || '') + '" data-country-offer-confirm="yes">Confirm</button><button type="button" data-country-offer-message-id="' + escapeHtml(message.id || '') + '" data-country-offer-confirm="no">Cancel</button></div></div>'
+        : '';
+
+      return '' +
+        '<div class="country-switch-answer-item" data-country-offer-item="' + escapeHtml(countryCode) + '" data-country-offer-message-id="' + escapeHtml(message.id || '') + '">' +
+        '<div class="country-switch-answer-option">' +
+          '<span class="country-switch-answer-copy">' +
+            '<span class="country-switch-answer-code">' + escapeHtml(countryCode) + '</span>' +
+          '</span>' +
+          '<button class="' + switchClassName + '" type="button" data-country-offer-message-id="' + escapeHtml(message.id || '') + '" data-country-offer-switch="' + escapeHtml(countryCode) + '" role="switch" aria-checked="' + (isCurrent ? 'true' : 'false') + '"' + (isFixedOn ? ' disabled aria-disabled="true"' : '') + '><span></span></button>' +
+        '</div>' +
+        confirmMarkup +
+        '</div>';
+    }).join('');
+
+    return '<div class="country-switch-answer-box"><div class="country-switch-answer-list">' + optionMarkup + '</div></div>';
+  }
+
+  function getCountrySwitchMessageById(messageId) {
+    if (!messageId) {
+      return null;
+    }
+
+    return state.messages.find(function (message) {
+      return message.id === messageId && message.type === 'country-switch-selector';
+    }) || null;
+  }
+
+  function selectCountryOfferOption(messageId, countryCode) {
+    var message = getCountrySwitchMessageById(messageId);
+
+    if (!message || !countryCode || countryCode === 'HK' || (message.selectedCountryCodes && message.selectedCountryCodes[countryCode] === true)) {
+      return;
+    }
+
+    message.pendingCountryCode = countryCode;
+    renderMessages();
+  }
+
+  function confirmCountryOfferOption(messageId, decision) {
+    var message = getCountrySwitchMessageById(messageId);
+    var pendingCountryCode;
+
+    if (!message) {
+      return;
+    }
+
+    pendingCountryCode = message.pendingCountryCode || '';
+
+    if (decision === 'yes' && pendingCountryCode) {
+      queueCountryOfferPostConfirmSequence(pendingCountryCode);
+    }
+
+    message.pendingCountryCode = '';
+    renderMessages();
+  }
+
+  function appendAssistantMessage(message) {
+    var messageId = createMessageId();
+    var messageType = message && typeof message.type === 'string' ? message.type : '';
+    var shouldActivateCountry = Boolean(message && message.activateCountryOnShown && message.countryCode);
+    var activationCountryCode = shouldActivateCountry ? String(message.countryCode) : '';
+
+    message.id = messageId;
+    message.sender = 'ai';
+    state.messages.push(createAssistantMessage(message));
+    renderMessages();
+
+    if (shouldActivateCountry) {
+      syncChatCountrySwitchStates(activationCountryCode, true);
+      syncHeaderCountrySwitchState(activationCountryCode, true);
+    }
+
+    if (messageType === 'thinking') {
+      var dismissTimeoutId = window.setTimeout(function () {
+        var hasMessage = state.messages.some(function (item) {
+          return item && item.id === messageId && item.type === 'thinking';
+        });
+
+        if (!hasMessage) {
+          return;
+        }
+
+        state.messages = state.messages.filter(function (item) {
+          return !item || item.id !== messageId;
+        });
+        renderMessages();
+      }, 2000);
+
+      state.timeouts.push(dismissTimeoutId);
+    }
+  }
+
+  function queueAssistantMessages(messages) {
+    var cumulativeDelay = 0;
+
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return;
+    }
+
+    messages.forEach(function (message, index) {
+      var delayMs = typeof message.delayMs === 'number'
+        ? Math.max(0, message.delayMs)
+        : (index === 0 ? 0 : 800);
+
+      cumulativeDelay += delayMs;
+
+      var timeoutId = window.setTimeout(function () {
+        appendAssistantMessage(message);
+      }, cumulativeDelay);
+
+      state.timeouts.push(timeoutId);
+    });
+  }
+
+  function queueCountryOfferPostConfirmSequence(countryCode) {
+    if (!countryCode) {
+      return;
+    }
+
+    queueAssistantMessages([
+      { type: 'thinking', content: 'Checking your account data', delayMs: 0 },
+      { type: 'thinking', content: 'Analysing ' + countryCode + ' database', delayMs: 2000 },
+      {
+        type: 'country-open-consent',
+        content: 'The "Certificate of Incorporation" is needed to open a ' + countryCode + ' account. May I use your NEX Passport data to open one?',
+        countryCode: countryCode,
+        delayMs: 2000
+      }
+    ]);
+  }
+
+  function handleCountryConsentAction(messageId, decision) {
+    var message = state.messages.find(function (item) {
+      return item && item.id === messageId && item.type === 'country-open-consent';
+    });
+    var countryCode;
+    var normalizedDecision;
+
+    if (!message) {
+      return;
+    }
+
+    countryCode = message.countryCode || '';
+    normalizedDecision = normalizeInput(decision || '');
+
+    message.type = 'text';
+    message.actions = [];
+    message.actionPresentation = '';
+
+    state.messages.push(createAssistantMessage({
+      id: createMessageId(),
+      sender: 'user',
+      type: 'text',
+      content: decision,
+      actions: []
+    }));
+    renderMessages();
+
+    if (normalizedDecision !== 'yes' && normalizedDecision !== 'consent' && normalizedDecision !== 'confirm') {
+      queueAssistantMessages([
+        { type: 'text', content: 'Understood. We will pause opening the ' + countryCode + ' account for now.', delayMs: 400 }
+      ]);
+      return;
+    }
+
+    queueAssistantMessages([
+      { type: 'thinking', content: 'Creating Certificate of Incorporation', delayMs: 0 },
+      { type: 'text', content: 'Certificate of Incorporation created.', delayMs: 2000 },
+      { type: 'thinking', content: 'Opening ' + countryCode + ' account', delayMs: 2000 },
+      {
+        type: 'text',
+        content: 'Congratulations, your ' + countryCode + ' account is opened. Customer ID 1XXXXXXX',
+        countryCode: countryCode,
+        activateCountryOnShown: true,
+        delayMs: 2000
+      }
+    ]);
+  }
+
+  function clearCountryOfferPendingIfNeeded(excludedMessageId) {
+    var hasChanges = false;
+
+    state.messages.forEach(function (message) {
+      if (!message || message.type !== 'country-switch-selector') {
+        return;
+      }
+
+      if (excludedMessageId && message.id === excludedMessageId) {
+        return;
+      }
+
+      if (message.pendingCountryCode) {
+        message.pendingCountryCode = '';
+        hasChanges = true;
+      }
+    });
+
+    if (hasChanges) {
+      renderMessages();
+    }
+  }
+
   function renderMessage(message) {
     var row = document.createElement('div');
     row.className = 'message-row ' + message.sender;
@@ -1891,14 +2248,10 @@
 
     if (message.type === 'verification-loading') {
       bubble.className += ' thinking-bubble verification-thinking-bubble';
-      bubble.innerHTML = '<p>' + escapeHtml(message.content) + '</p><span class="verification-spinner" aria-label="Loading"></span>';
+      bubble.innerHTML = '<p>' + formatChatText(message.content) + '</p><span class="verification-spinner" aria-label="Loading"></span>';
     } else if (message.type === 'thinking') {
-      bubble.className += message.content.indexOf('verifying your data') === 0
-        ? ' thinking-bubble verification-thinking-bubble'
-        : ' thinking-bubble';
-      bubble.innerHTML = message.content.indexOf('verifying your data') === 0
-        ? '<p>' + escapeHtml(message.content) + '</p><span class="verification-spinner" aria-label="Loading"></span>'
-        : (message.content ? '<p>' + escapeHtml(message.content) + '</p>' : '') + createThinkingDots();
+      bubble.className += ' thinking-bubble verification-thinking-bubble';
+      bubble.innerHTML = '<p>' + formatChatText(message.content) + '</p><span class="verification-spinner" aria-label="Loading"></span>';
     } else if (message.type === 'partner-carousel') {
       bubble.className += ' partner-carousel-bubble';
       bubble.innerHTML =
@@ -1908,7 +2261,6 @@
         '</div>' +
         '<div class="partner-carousel-track">' +
           (Array.isArray(message.partnerCards) ? message.partnerCards.map(function (card) {
-            var tagName = card.href ? 'button' : 'article';
             var openTag = card.href
               ? '<button class="partner-card partner-card-button" type="button" data-link-target="' + escapeHtml(card.href || '') + '">'
               : '<article class="partner-card">';
@@ -1938,20 +2290,34 @@
     } else if (message.type === 'file-preview') {
       bubble.className += ' file-preview-bubble';
       bubble.appendChild(createFilePreviewContent(Array.isArray(message.files) ? message.files : []));
+    } else if (message.type === 'country-switch-selector') {
+      bubble.className += ' country-switch-answer-bubble';
+      bubble.innerHTML = '<p>' + formatChatText(message.content) + '</p>' + createCountrySwitchAnswerContent(message);
+    } else if (message.type === 'country-open-consent') {
+      bubble.innerHTML = '<p>' + formatChatText(message.content) + '</p>' +
+        '<div class="direct-reply-box">' +
+          '<button class="direct-reply-button" type="button" data-country-consent-message-id="' + escapeHtml(message.id || '') + '" data-country-consent-action="Yes"><span>Yes</span></button>' +
+          '<button class="direct-reply-button" type="button" data-country-consent-message-id="' + escapeHtml(message.id || '') + '" data-country-consent-action="Maybe Later"><span>Maybe Later</span></button>' +
+        '</div>';
     } else {
       var actionsMarkup = '';
-      var isDirectReply = message.actionPresentation === 'direct-reply';
+      var isSingleUploadAction = Array.isArray(message.actions) && message.actions.length === 1 && normalizeInput(message.actions[0]) === 'upload';
+      var isDirectReply = message.actionPresentation === 'direct-reply' || isSingleUploadAction;
 
       if (Array.isArray(message.actions) && message.actions.length > 0) {
-        actionsMarkup = isDirectReply
-          ? '<div class="direct-reply-box">' +
-              message.actions
-                .map(function (action) {
-                  return '<button class="direct-reply-button" type="button" data-action="' + escapeHtml(action) + '"><span>' + escapeHtml(action) + '</span></button>';
-                })
-                .join('') +
+        actionsMarkup = isSingleUploadAction
+          ? '<div class="answer-pill-box">' +
+              '<button class="answer-pill-button" type="button" data-action="' + escapeHtml(message.actions[0]) + '"><span>' + escapeHtml(message.actions[0]) + '</span></button>' +
             '</div>'
-          : '<div class="actions-box">' +
+          : (isDirectReply
+            ? '<div class="direct-reply-box">' +
+                message.actions
+                  .map(function (action) {
+                    return '<button class="direct-reply-button" type="button" data-action="' + escapeHtml(action) + '"><span>' + escapeHtml(action) + '</span></button>';
+                  })
+                  .join('') +
+              '</div>'
+            : '<div class="actions-box">' +
               '<div class="label">Please type your response or choose one of the following:</div>' +
               '<div class="action-list">' +
                 message.actions
@@ -1960,10 +2326,10 @@
                   })
                   .join('') +
               '</div>' +
-            '</div>';
+            '</div>');
       }
 
-      bubble.innerHTML = '<p>' + escapeHtml(message.content) + '</p>' + actionsMarkup;
+      bubble.innerHTML = '<p>' + formatChatText(message.content) + '</p>' + actionsMarkup;
     }
 
     if (message.sender === 'ai' && message.rewindSnapshot && message.type !== 'thinking') {
@@ -1996,15 +2362,9 @@
     chatArea.scrollTop = chatArea.scrollHeight;
   }
 
-  function renderMessages() {
+  function getRenderableMessages() {
     var permissionMessage = null;
-    var existingPermissionOverlay = phoneScreen.querySelector('.ios-permission-overlay');
-
-    if (existingPermissionOverlay) {
-      existingPermissionOverlay.remove();
-    }
-
-    messageList.innerHTML = '';
+    var renderableMessages = [];
 
     state.messages.forEach(function (message) {
       if (message.type === 'permission') {
@@ -2012,14 +2372,85 @@
         return;
       }
 
-      messageList.appendChild(renderMessage(message));
+      renderableMessages.push(message);
     });
+
+    return {
+      permissionMessage: permissionMessage,
+      renderableMessages: renderableMessages
+    };
+  }
+
+  function getMessageRenderKey(message) {
+    return JSON.stringify([
+      message && message.id ? message.id : '',
+      message && message.sender ? message.sender : '',
+      message && message.type ? message.type : '',
+      message && message.content ? message.content : '',
+      message && message.actionPresentation ? message.actionPresentation : '',
+      Array.isArray(message && message.actions) ? message.actions : [],
+      message && message.pendingCountryCode ? message.pendingCountryCode : '',
+      message && message.countryCode ? message.countryCode : '',
+      message && message.selectedCountryCodes ? message.selectedCountryCodes : {},
+      Array.isArray(message && message.files) ? message.files.map(function (file) {
+        return [file.name || '', file.size || 0, file.type || ''];
+      }) : []
+    ]);
+  }
+
+  function renderMessages() {
+    var payload = getRenderableMessages();
+    var permissionMessage = payload.permissionMessage;
+    var renderableMessages = payload.renderableMessages;
+    var nextKeys = renderableMessages.map(getMessageRenderKey);
+    var previousKeys = renderState.renderedKeys;
+    var canAppendOnly = previousKeys.length <= nextKeys.length;
+    var shouldFullRerender = false;
+    var hasDomUpdate = false;
+    var appendStartIndex;
+    var existingPermissionOverlay = phoneScreen.querySelector('.ios-permission-overlay');
+    var index;
+
+    if (existingPermissionOverlay) {
+      existingPermissionOverlay.remove();
+    }
+
+    if (canAppendOnly) {
+      for (index = 0; index < previousKeys.length; index += 1) {
+        if (previousKeys[index] !== nextKeys[index]) {
+          canAppendOnly = false;
+          break;
+        }
+      }
+    }
+
+    if (!canAppendOnly) {
+      shouldFullRerender = true;
+    }
+
+    if (shouldFullRerender) {
+      messageList.innerHTML = '';
+      renderableMessages.forEach(function (message) {
+        messageList.appendChild(renderMessage(message));
+      });
+      hasDomUpdate = true;
+    } else {
+      appendStartIndex = previousKeys.length;
+      for (index = appendStartIndex; index < renderableMessages.length; index += 1) {
+        messageList.appendChild(renderMessage(renderableMessages[index]));
+        hasDomUpdate = true;
+      }
+    }
+
+    renderState.renderedKeys = nextKeys;
 
     if (permissionMessage) {
       phoneScreen.appendChild(createPermissionOverlay(permissionMessage));
     }
 
-    scrollToLatest();
+    if (hasDomUpdate) {
+      scrollToLatest();
+    }
     setComposerState();
     dispatchNavigationState();
   }
@@ -2104,7 +2535,6 @@
     var activeStep = getActiveFlowStep();
     var inputMode = getStepInputMode(activeStep);
     var isFileStep = inputMode === 'file';
-    var allowsFileUpload = inputMode === 'file' || inputMode === 'text-or-file';
 
     if (isFileStep) {
       messageInput.value = '';
@@ -2114,7 +2544,7 @@
     messageInput.placeholder = isFileStep
       ? (activeStep && typeof activeStep.uploadPlaceholder === 'string'
         ? activeStep.uploadPlaceholder
-        : 'Use the upload button to add a document for this step.')
+        : 'Press "Upload" in the chat to add a document for this step.')
       : (activeStep && typeof activeStep.inputPlaceholder === 'string'
         ? activeStep.inputPlaceholder
         : (inputMode === 'text-or-file' && activeStep && typeof activeStep.uploadPlaceholder === 'string'
@@ -2125,8 +2555,8 @@
       messageInput.placeholder = activeStep.inputPlaceholder;
     }
 
-    uploadButton.hidden = !allowsFileUpload;
-    uploadButton.disabled = !allowsFileUpload;
+    uploadButton.hidden = true;
+    uploadButton.disabled = true;
     fileUploadInput.accept = activeStep && typeof activeStep.fileAccept === 'string' ? activeStep.fileAccept : '';
     fileUploadInput.multiple = !(activeStep && activeStep.fileMultiple === false);
     sendButton.disabled = isFileStep || messageInput.value.trim().length === 0;
@@ -2282,11 +2712,7 @@
   });
 
   uploadButton.addEventListener('click', function () {
-    if (uploadButton.disabled) {
-      return;
-    }
-
-    fileUploadInput.click();
+    return;
   });
 
   fileUploadInput.addEventListener('change', function (event) {
@@ -2308,17 +2734,72 @@
   messageList.addEventListener('click', function (event) {
     var linkTarget = event.target.closest('[data-link-target]');
     var actionButton = event.target.closest('[data-action]');
+    var countryItem = event.target.closest('[data-country-offer-item]');
+    var countrySwitchButton = event.target.closest('[data-country-offer-switch]');
+    var countryConfirmButton = event.target.closest('[data-country-offer-confirm]');
+    var countryConsentButton = event.target.closest('[data-country-consent-action]');
+    var actionText;
+    var messageId;
+    var countryCode;
+    var activeStep;
+    var inputMode;
 
     if (linkTarget) {
       window.location.href = linkTarget.getAttribute('data-link-target') || '';
       return;
     }
 
+    if (countrySwitchButton) {
+      messageId = countrySwitchButton.getAttribute('data-country-offer-message-id') || '';
+      clearCountryOfferPendingIfNeeded(messageId);
+      selectCountryOfferOption(messageId, countrySwitchButton.getAttribute('data-country-offer-switch') || '');
+      return;
+    }
+
+    if (countryConfirmButton) {
+      messageId = countryConfirmButton.getAttribute('data-country-offer-message-id') || '';
+      confirmCountryOfferOption(messageId, countryConfirmButton.getAttribute('data-country-offer-confirm') || '');
+      return;
+    }
+
+    if (countryItem) {
+      messageId = countryItem.getAttribute('data-country-offer-message-id') || '';
+      countryCode = countryItem.getAttribute('data-country-offer-item') || '';
+      clearCountryOfferPendingIfNeeded(messageId);
+      selectCountryOfferOption(messageId, countryCode);
+      return;
+    }
+
+    if (countryConsentButton) {
+      messageId = countryConsentButton.getAttribute('data-country-consent-message-id') || '';
+      handleCountryConsentAction(messageId, countryConsentButton.getAttribute('data-country-consent-action') || '');
+      return;
+    }
+
+    clearCountryOfferPendingIfNeeded('');
+
     if (!actionButton) {
       return;
     }
 
-    sendMessage(actionButton.getAttribute('data-action') || '');
+    actionText = (actionButton.getAttribute('data-action') || '').trim();
+    activeStep = getActiveFlowStep();
+    inputMode = getStepInputMode(activeStep);
+
+    if (inputMode === 'file' && normalizeInput(actionText) === 'upload') {
+      fileUploadInput.click();
+      return;
+    }
+
+    sendMessage(actionText);
+  });
+
+  document.addEventListener('click', function (event) {
+    if (event.target.closest('.country-switch-answer-box')) {
+      return;
+    }
+
+    clearCountryOfferPendingIfNeeded('');
   });
 
   phoneScreen.addEventListener('click', function (event) {

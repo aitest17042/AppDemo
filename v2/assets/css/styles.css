@@ -1337,7 +1337,6 @@ a {
 .message-row {
   display: flex;
   flex-direction: column;
-  animation: fade-slide 260ms ease-out;
 }
 
 .message-row.user {
@@ -1469,6 +1468,38 @@ a {
   margin: 0;
   font-weight: 500;
   white-space: pre-wrap;
+}
+
+.nex-passport-token {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(219, 0, 17, 0.2);
+  background: rgba(219, 0, 17, 0.06);
+  color: var(--hsbc-red);
+  vertical-align: baseline;
+}
+
+.nex-passport-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+}
+
+.nex-passport-icon svg {
+  display: block;
+}
+
+.nex-passport-text {
+  font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1;
 }
 
 .uploaded-file-preview {
@@ -1618,6 +1649,36 @@ a {
   transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
 }
 
+.answer-pill-box {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.answer-pill-button {
+  width: auto;
+  min-width: 88px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  background: rgba(249, 250, 251, 0.94);
+  color: var(--hsbc-red);
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.answer-pill-button:hover {
+  background: rgba(219, 0, 17, 0.05);
+  border-color: rgba(219, 0, 17, 0.2);
+}
+
+.answer-pill-button:active {
+  transform: scale(0.99);
+}
+
 .direct-reply-button:hover {
   background: rgba(219, 0, 17, 0.05);
   border-color: rgba(219, 0, 17, 0.16);
@@ -1678,6 +1739,139 @@ a {
 .action-button:hover .chevron {
   opacity: 1;
   transform: translateX(0);
+}
+
+.country-switch-answer-bubble {
+  min-width: min(92vw, 320px);
+}
+
+.country-switch-answer-box {
+  margin-top: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  background: rgba(249, 250, 251, 0.9);
+  overflow: hidden;
+}
+
+.country-switch-answer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.country-switch-answer-item {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.country-switch-answer-item:last-child {
+  border-bottom: 0;
+}
+
+.country-switch-answer-option {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 10px 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  color: #111827;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  gap: 10px;
+}
+
+.country-switch-answer-option:hover {
+  background: rgba(219, 0, 17, 0.04);
+}
+
+.country-switch-answer-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.country-switch-answer-code {
+  color: var(--hsbc-red);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.country-switch-answer-toggle {
+  border: 0;
+  width: 34px;
+  height: 20px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.2);
+  position: relative;
+  transition: background-color 180ms ease;
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.country-switch-answer-toggle span {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: transform 180ms ease;
+}
+
+.country-switch-answer-toggle.is-current {
+  background: #22c55e;
+}
+
+.country-switch-answer-toggle.is-current span {
+  transform: translateX(14px);
+}
+
+.country-switch-answer-toggle.is-fixed-on {
+  cursor: not-allowed;
+  opacity: 0.95;
+}
+
+.country-switch-answer-confirm {
+  border-top: 1px dashed rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.96);
+  padding: 10px 12px;
+}
+
+.country-switch-answer-confirm p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #1f2937;
+  text-align: center;
+  white-space: pre-line;
+}
+
+.country-switch-answer-confirm div {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  justify-content: center;
+}
+
+.country-switch-answer-confirm button {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+  color: #111827;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.country-switch-answer-confirm button[data-country-offer-confirm="yes"] {
+  border-color: rgba(219, 0, 17, 0.2);
+  color: var(--hsbc-red);
 }
 
 @keyframes thinking-pulse {

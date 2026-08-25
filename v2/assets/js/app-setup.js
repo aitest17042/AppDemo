@@ -13,26 +13,31 @@
         summary: 'Begin the account-opening journey.',
         guide: [
           { question: 'Start', column: 'common', flowId: 'account-opening-start', stepId: 'account-identity-upload', launchInput: 'I want to open', action: 'Press', value: 'I want to open' },
-          { question: 'Identity photo', column: 'common', flowId: 'account-opening-start', stepId: 'account-identity-upload', action: 'Use the upload button', detail: 'Upload a photo of yourself holding your ID.' },
+          { question: 'Identity photo', column: 'common', flowId: 'account-opening-start', stepId: 'account-identity-upload', action: 'Press', value: 'Upload', detail: 'In the chat answer box, press "Upload", then pick a photo of yourself holding your ID.' },
           { question: 'Verify identity', column: 'common', flowId: 'account-opening-start', stepId: 'account-identity-verified', action: 'Press one', values: ['Verify', 'Enter Manually'], detail: 'Review:\n- ID Type: China Resident Identity Card\n- ID No.: 110102200001018882\n- Name: 王小白' },
-          { question: 'Choose BR records', column: 'common', flowId: 'account-opening-start', stepId: 'account-br-selection', action: 'Press one', values: ['Harbour Peak Limited', 'Northstar Trading Limited', 'Southstar Trading Limited'], detail: 'Choose a company, then type "All" in the display console.' },
-          { question: 'Account complete', column: 'common', flowId: 'account-opening-start', stepId: 'account-br-selection', action: 'Wait', detail: 'Wait 1 second for verification, then 3 seconds while the accounts open.' },
-          { question: 'Sign in', column: 'common', flowId: 'account-opening-start', stepId: 'account-br-selection', action: 'Press one', values: ['Sign In', 'Maybe Later'] },
-          { question: 'International account follow-up', column: 'common', flowId: 'account-opening-start', stepId: 'account-br-selection', action: 'Wait', detail: 'After sign-in, NEX asks whether to open accounts in other countries.' }
+          { question: 'Choose BR records', column: 'common', flowId: 'account-opening-start', stepId: 'account-br-selection', action: 'Press one', values: ['Harbour Peak Limited', 'Northstar Trading Limited', 'Southstar Trading Limited'], detail: 'Choose any company to continue.' },
+          { question: 'Account complete', column: 'common', flowId: 'account-opening-start', stepId: 'account-br-selection', action: 'Wait', detail: 'Wait 1 second for verification and 3 seconds while the accounts open, then wait 5 seconds for the sign-in question.' },
+          { question: 'Sign in choice', column: 'common', flowId: 'account-opening-start', stepId: 'account-sign-in-choice', action: 'Press one', values: ['Sign In', 'Maybe Later'], detail: 'One dialog shows both the question and "Please choose an option to continue."' },
+          { question: 'Post sign-in analysis', column: 'common', flowId: 'account-opening-start', stepId: 'account-sign-in-choice', action: 'Wait', detail: 'If you press "Sign In", a persistent "Signed in." bubble appears before the 3-second "Analysing your data..." animation.' },
+          { question: 'International account follow-up', column: 'common', flowId: 'account-opening-start', stepId: 'account-other-country-offer', action: 'Press one', values: ['Yes', 'Maybe Later'], detail: 'If "Yes", a country switch answer box appears with HK fixed on. Pressing a switch expands confirmation under that row; after confirming, the app runs checking/analying messages and asks for consent to create Certificate of Incorporation.' }
         ],
         controls: [
           'Press "I want to open".',
-          'Upload a photo of yourself holding your ID.',
+          'In the chat answer box, press "Upload", then select the photo file.',
           'Review the ID details, then press "Verify".',
-          'Choose a BR record, then type "All" in the display console.',
-          'Wait 1 second for verification and 3 seconds for account opening.',
-          'Press "Sign In" or "Maybe Later".'
+          'Choose any BR record to continue.',
+          'Wait 1 second for verification, 3 seconds for account opening, then 5 seconds for the sign-in question.',
+          'Press "Sign In" or "Maybe Later" when prompted.',
+          'If you choose "Sign In", wait for "Signed in.", then the 3-second "Analysing your data..." animation, then choose "Yes" or "Maybe Later".',
+          'After choosing "Yes", use the country switch answer box. HK stays switched on, and each other country requires confirmation under its row before activation.',
+          'After confirmation, the app shows checking/analying messages, asks consent, then creates Certificate of Incorporation and opens the selected country account.'
         ],
         questions: [
           { question: 'Would you like to open an account?', startInput: 'I want to open', answers: ['I want to open'] },
           { question: 'Review identity and continue.', answers: ['Verify', 'Enter Manually', 'Cancel'] },
           { question: 'Which BR record would you like to open?', answers: ['Harbour Peak Limited', 'Northstar Trading Limited', 'Southstar Trading Limited'] },
-          { question: 'Your account is open.', answers: ['Sign In', 'Maybe Later'] }
+          { question: 'Would you like to sign in now?', answers: ['Sign In', 'Maybe Later'] },
+          { question: 'Open accounts in other countries?', answers: ['Yes', 'Maybe Later'] }
         ]
       }
   };
