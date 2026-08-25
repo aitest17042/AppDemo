@@ -1952,7 +1952,7 @@
                 .join('') +
             '</div>'
           : '<div class="actions-box">' +
-              '<div class="label">Try asking:</div>' +
+              '<div class="label">Please type your response or choose one of the following:</div>' +
               '<div class="action-list">' +
                 message.actions
                   .map(function (action) {

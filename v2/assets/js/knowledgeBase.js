@@ -85,14 +85,14 @@
       initialMessage: {
         sender: 'ai',
         type: 'text',
-        content: 'Hello. I am HSBC NEX. How can I help your business today?',
+        content: 'Hello. I am Nex Passport By HSBC. How can I help your business today?',
         actions: ['I want to open an HSBC business account.', 'I am an existing customer and want to make a transaction.']
       },
       initialMessagesByPageId: {
         'assistant-all-flows': {
           sender: 'ai',
           type: 'text',
-          content: 'Hello. I am HSBC NEX. How can I help your business today?',
+          content: 'Hello. I am Nex Passport By HSBC. How can I help your business today?',
           actions: ['I want to open an HSBC business account.', 'I am an existing customer and want to make a transaction.']
         }
       },
