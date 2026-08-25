@@ -12,7 +12,7 @@ This project contains two standalone HTML demos.
 
 ## Rights Notice
 
-Copyright (c) 2026 aitest17042. All rights reserved.
+Copyright (c) 2026 aitest24678. All rights reserved.
 
 This repository is published for demonstration and review purposes. No permission is granted to copy, redistribute, modify, rehost, or present this work as your own without prior written permission from the author.
 
