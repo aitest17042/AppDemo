@@ -435,7 +435,7 @@
               var isOpen = country === 'HK' || (country === 'UK' && isUkAccountOpen());
               return '<button class="header-country-option' + (isOpen ? ' is-current' : '') + '" type="button" data-country-code="' + country + '"><span>' + country + '</span><span class="header-country-switch" role="switch" aria-checked="' + (isOpen ? 'true' : 'false') + '"><span></span></span></button>';
             }).join('') +
-            '<div class="header-country-confirm" hidden><p>Using your existing passport, we can help you open a UK account directly.</p><div><button type="button" data-country-confirm="yes">Confirm</button><button type="button" data-country-confirm="no">Cancel</button></div></div>' +
+            '<div class="header-country-confirm" hidden><p>Using your NEX Passport, we can help you open a UK account directly.</p><div><button type="button" data-country-confirm="yes">Confirm</button><button type="button" data-country-confirm="no">Cancel</button></div></div>' +
           '</div>' +
         '</div>' +
         '<div class="header-expand-option header-expand-products">' +
@@ -599,7 +599,7 @@
           var pendingProduct = productConfirmBox.getAttribute('data-pending-product') || '';
           productConfirmBox.hidden = true;
           showThinkingMessage();
-          updateThinkingMessage({ content: 'verifying your data' });
+          updateThinkingMessage({ content: 'Verifying your data' });
           var productVerificationTimeout = window.setTimeout(function () {
             var selectedCard = headerActions.querySelector('[data-card-code="' + pendingProduct + '"]');
             if (selectedCard) {
@@ -624,7 +624,7 @@
         }
         var productConfirmBox = headerActions.querySelector('.header-product-confirm');
         productConfirmBox.setAttribute('data-pending-product', cardCode);
-        productConfirmBox.querySelector('p').textContent = 'Using your existing passport, we can help you open a ' + cardCode + ' directly.';
+        productConfirmBox.querySelector('p').textContent = 'Using your NEX Passport, we can help you open a ' + cardCode + ' directly.';
         cardOption.insertAdjacentElement('afterend', productConfirmBox);
         productConfirmBox.hidden = false;
         return;
@@ -686,7 +686,7 @@
         }
         if (selectedCountryCode !== 'HK') {
           countryConfirmBox.setAttribute('data-pending-country', selectedCountryCode);
-          countryConfirmBox.querySelector('p').textContent = 'Using your existing passport, we can help you open a ' + selectedCountryCode + ' account directly.';
+          countryConfirmBox.querySelector('p').textContent = 'Using your NEX Passport, we can help you open a ' + selectedCountryCode + ' account directly.';
           countryOption.insertAdjacentElement('afterend', countryConfirmBox);
           countryConfirmBox.hidden = false;
           return;
@@ -1978,7 +1978,7 @@
   function getCountryOfferConfirmCopy(message, countryCode) {
     var template = typeof message.confirmTemplate === 'string' && message.confirmTemplate
       ? message.confirmTemplate
-      : 'Using your existing passport, we can help you open a {{country}} account directly.';
+      : 'Using your NEX Passport, we can help you open a {{country}} account directly.';
 
     return template.replace('{{country}}', countryCode || '');
   }
@@ -2508,10 +2508,18 @@
     var countryCode = (message && typeof message.countryCode === 'string' && message.countryCode) ? message.countryCode : 'HK';
     var variant = explicitVariant || getPassportAnimationVariant(countryCode);
     var isHongKong = countryCode.toUpperCase() === 'HK';
-    var accountType = isHongKong ? 'Hong Kong Account' : 'Singapore Account';
+    var countryNames = {
+      HK: 'Hong Kong',
+      SG: 'Singapore',
+      UK: 'United Kingdom',
+      UAE: 'United Arab Emirates',
+      IN: 'India',
+      MY: 'Malaysia'
+    };
+    var accountType = (countryNames[countryCode.toUpperCase()] || countryCode.toUpperCase()) + ' Account';
     var passportTitle = isHongKong
       ? 'Congratulations!<br>Your NEX Passport is created'
-      : 'Congratulations!<br>Your NEX Passport is updated';
+      : 'Congratulations!<br>A new visa is added to your NEX Passport.';
     var passportPages = '<div class="passport-creation-book">' +
       '<div class="passport-creation-page passport-creation-country-page">' +
         '<span class="passport-creation-account-type">' + escapeHtml(accountType) + '</span>' +
