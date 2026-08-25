@@ -7,8 +7,8 @@ This project contains two standalone HTML demos.
 
 ## Author
 
-- Author: aitest17042
-- Repository: https://github.com/aitest17042/AppDemo
+- Author: aitest24678
+- Repository: https://github.com/aitest24678/AppDemo
 
 ## Rights Notice
 
