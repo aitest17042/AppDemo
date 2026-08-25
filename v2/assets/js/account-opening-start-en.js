@@ -16,8 +16,8 @@ accountOpeningEntriesEn.push({
     introResponses: [],
     startStepId: 'account-identity-upload',
     steps: [
-      { id: 'account-identity-upload', inputMode: 'file', uploadPlaceholder: 'Upload a photo of yourself holding your ID', fileAccept: '.png,.jpg,.jpeg,.pdf', responseDelayMs: 1800, prompt: { type: 'text', actionPresentation: 'direct-reply', content: 'Please upload a photo of yourself holding your ID.', actions: ['Upload'] }, captureResponses: [{ type: 'text', content: 'Thank you. Please confirm your identity.' }], nextStepId: 'account-identity-verified' },
-      { id: 'account-identity-verified', prompt: { type: 'text', actionPresentation: 'direct-reply', content: '- ID Type: China Resident Identity Card\n- ID No.: 110102200001018882\n- Name: 王小白\n\nPlease choose an option to continue.', actions: ['Verify','Enter Manually'] }, routes: [
+      { id: 'account-identity-upload', inputMode: 'file', uploadPlaceholder: 'Upload a photo of yourself holding your ID', fileAccept: '.png,.jpg,.jpeg,.pdf', responseDelayMs: 1800, prompt: { type: 'text', actionPresentation: 'direct-reply', content: 'Please upload a photo of yourself holding your ID.', actions: ['Upload'] }, captureResponses: [{ type: 'text', content: 'Thank you. Please verify your identity.' }], nextStepId: 'account-identity-verified' },
+      { id: 'account-identity-verified', prompt: { type: 'text', actionPresentation: 'direct-reply', content: '- ID Type: China Resident Identity Card\n- ID No.: 110102200001018882\n- Name: 王小白', actions: ['Verify','Enter Manually'] }, routes: [
         { action: 'Verify', exactKeywords: ['verify', 'verified'], keywords: ['verify', 'verified', 'confirm', 'yes'], responses: [
           { type: 'thinking', content: 'Verifying your data with trusted sources and government data repositories', delayMs: 2000 },
           { type: 'text', content: 'We identified the following Business Registrations (BR) under your name. Which one would you like to open?', actions: ['Harbour Peak Limited', 'Northstar Trading Limited', 'Southstar Trading Limited'], delayMs: 0 }
@@ -28,8 +28,9 @@ accountOpeningEntriesEn.push({
         { action: 'All', exactKeywords: ['all', 'harbour peak limited', 'northstar trading limited', 'southstar trading limited'], keywords: ['all', 'harbour peak limited', 'harbour peak', 'northstar trading limited', 'northstar trading', 'southstar trading limited', 'southstar trading'], responses: [
           { type: 'thinking', content: 'Verifying your data', delayMs: 1000 },
           { type: 'thinking', content: 'Opening Your Accounts', delayMs: 3000 },
-          { type: 'text', content: 'Congratulations, your HK account is opened. Customer ID 1XXXXXXX', delayMs: 5000 },
-          { type: 'text', actionPresentation: 'direct-reply', content: 'Would you like to sign in now to manage your account or continue later?\n\nPlease choose an option to continue.', actions: ['Sign In', 'Maybe Later'], delayMs: 0 }
+          { type: 'passport-creation', content: 'Your NEX Passport is created', delayMs: 5000 },
+          { type: 'text', content: 'Congratulations, your HK account is opened. Customer ID 1XXXXXXX', delayMs: 0 },
+          { type: 'text', actionPresentation: 'direct-reply', content: 'Would you like to sign in now to manage your account or continue later?\n\nPlease choose an option to continue.', actions: ['Sign In', 'Maybe Later'], delayMs: 0, delayAfterPassportCollapse: 5000 }
         ], nextStepId: 'account-sign-in-choice', skipNextPromptResponses: true }
       ] },
       { id: 'account-sign-in-choice', prompt: { type: 'text', actionPresentation: 'direct-reply', content: 'Would you like to sign in now to manage your account or continue later?\n\nPlease choose an option to continue.', actions: ['Sign In', 'Maybe Later'] }, routes: [

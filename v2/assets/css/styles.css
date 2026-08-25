@@ -1741,6 +1741,328 @@ a {
   transform: translateX(0);
 }
 
+.passport-creation-bubble {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  max-width: 100%;
+}
+
+.passport-collapsed-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(219, 0, 17, 0.15);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+}
+
+.passport-collapsed-box .nex-passport-token {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(219, 0, 17, 0.04);
+  border-color: rgba(219, 0, 17, 0.16);
+}
+
+.passport-collapsed-box .nex-passport-text {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+}
+
+.passport-creation-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+
+.passport-creation-overlay.is-collapsing {
+  pointer-events: none;
+  animation: passport-overlay-dismiss 650ms ease-in forwards;
+}
+
+.passport-creation-scene {
+  position: relative;
+  width: min(88vw, 320px);
+  display: grid;
+  place-items: center;
+  gap: 22px;
+  text-align: center;
+}
+
+.passport-creation-title {
+  font-size: clamp(24px, 4vw, 36px);
+  line-height: 1.08;
+  letter-spacing: -0.05em;
+  font-weight: 800;
+  color: var(--hsbc-red);
+  opacity: 0;
+  transform: translateY(18px);
+  animation: passport-title-reveal 0.65s ease-out 0.2s forwards;
+}
+
+.passport-creation-page-wrap {
+  position: relative;
+  width: min(70vw, 260px);
+  height: min(91vw, 312px);
+  display: grid;
+  place-items: center;
+  perspective: 1400px;
+}
+
+.passport-creation-book {
+  position: relative;
+  width: min(64vw, 220px);
+  aspect-ratio: 8.8 / 12.5;
+  transform-style: preserve-3d;
+}
+
+.passport-creation-page {
+  position: relative;
+  width: min(64vw, 220px);
+  aspect-ratio: 8.8 / 12.5;
+  padding: 18px 18px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  background: linear-gradient(180deg, #ffffff 0%, #f3f4f6 100%);
+  box-shadow: 0 24px 50px rgba(17, 24, 39, 0.12);
+  opacity: 0;
+  transform-origin: center center;
+  transform: translateY(18px) rotateX(20deg) scale(0.9);
+  animation: passport-page-create 5s ease-in-out forwards;
+}
+
+.passport-creation-book .passport-creation-page {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+}
+
+.passport-creation-country-page {
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  animation: passport-country-page-reveal 5s ease-in-out forwards;
+}
+
+.passport-creation-account-type {
+  position: absolute;
+  top: 22px;
+  left: 16px;
+  right: 16px;
+  z-index: 1;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-transform: uppercase;
+  color: rgba(17, 24, 39, 0.72);
+}
+
+.passport-creation-cover {
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: #db0011;
+  border-color: rgba(121, 0, 10, 0.4);
+  color: #ffffff;
+  transform-origin: left center;
+  backface-visibility: hidden;
+  animation: passport-cover-flip 5s ease-in-out forwards;
+}
+
+.passport-creation-cover::before {
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.2), transparent 45%);
+}
+
+.passport-creation-cover-label {
+  position: relative;
+  z-index: 1;
+  font-size: 24px;
+  line-height: 0.98;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.passport-creation-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  border: 1px solid rgba(17, 24, 39, 0.05);
+  background: linear-gradient(180deg, rgba(219, 0, 17, 0.02), rgba(255, 255, 255, 0.14));
+}
+
+.passport-creation-stamp {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  border: 5px solid rgba(219, 0, 17, 0.72);
+  color: rgba(219, 0, 17, 0.9);
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 3px rgba(219, 0, 17, 0.2), 0 10px 18px rgba(219, 0, 17, 0.16);
+  opacity: 0;
+  transform: scale(2.2) rotate(-12deg) translateZ(160px);
+  animation: passport-stamp-appear 1.2s cubic-bezier(0.16, 0.84, 0.25, 1) 2.7s forwards;
+}
+
+.passport-creation-stamp::before,
+.passport-creation-stamp::after {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border-radius: 50%;
+  border: 1px dashed rgba(219, 0, 17, 0.45);
+}
+
+.passport-creation-stamp::after {
+  inset: 22px;
+  border-style: solid;
+  border-color: rgba(219, 0, 17, 0.25);
+}
+
+.passport-creation-overlay.is-collapsing .passport-creation-book {
+  animation: passport-page-collapse-on-click 650ms ease-in forwards;
+}
+
+@keyframes passport-overlay-dismiss {
+  0%, 58% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes passport-title-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes passport-page-create {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) rotateX(22deg) scale(0.82);
+  }
+
+  16% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg) scale(1);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg) scale(1);
+  }
+
+  48% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg) scale(1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg) scale(1);
+  }
+}
+
+@keyframes passport-country-page-reveal {
+  0%, 28% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+
+  42%, 66% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes passport-cover-flip {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) rotateX(22deg) scale(0.82);
+  }
+
+  16%, 28% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0) rotateY(0) scale(1);
+  }
+
+  48% {
+    opacity: 1;
+    transform: translateY(0) rotateY(-172deg) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-64px, 22px) rotateY(-180deg) scale(0.52);
+  }
+}
+
+@keyframes passport-stamp-appear {
+  0% {
+    opacity: 0;
+    transform: scale(2.2) rotate(-12deg) translateZ(160px);
+  }
+
+  58% {
+    opacity: 1;
+    transform: scale(0.92) rotate(-8deg) translateZ(0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-8deg) translateZ(0);
+  }
+}
+
+@keyframes passport-page-collapse-on-click {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(var(--passport-collapse-x, -40px), var(--passport-collapse-y, 18px)) scale(var(--passport-collapse-scale, 0.56));
+  }
+}
+
 .country-switch-answer-bubble {
   min-width: min(92vw, 320px);
 }
@@ -3699,6 +4021,56 @@ a {
   padding: 13px;
   border-radius: 10px;
   background: #f5faf6;
+}
+
+.v2-presenter-session {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.v2-presenter-session-header {
+  margin-bottom: 10px;
+}
+
+.v2-presenter-session-options {
+  display: grid;
+  gap: 10px;
+}
+
+.v2-session-option {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #111827;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.v2-session-option.is-active {
+  border-color: rgba(219, 0, 17, 0.35);
+  box-shadow: 0 10px 24px rgba(219, 0, 17, 0.08);
+  background: rgba(255, 248, 249, 0.96);
+}
+
+.v2-session-option span {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.v2-session-option small {
+  font-size: 11px;
+  line-height: 1.4;
+  color: #6b7280;
 }
 
 .v2-presenter-flow-guide-heading {

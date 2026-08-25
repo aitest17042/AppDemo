@@ -11,6 +11,10 @@
         path: '01_account-opening-start.html',
         title: 'Start',
         summary: 'Begin the account-opening journey.',
+        sessionOptions: [
+          { id: 'nex-passport', label: 'HK account opening', detail: 'Preview the Hong Kong account-opening passport animation.', countryCode: 'HK' },
+          { id: 'country-opening', label: 'Country account opening', detail: 'Preview the international account-opening animation with SG.', countryCode: 'SG' }
+        ],
         guide: [
           { question: 'Start', column: 'common', flowId: 'account-opening-start', stepId: 'account-identity-upload', launchInput: 'I want to open', action: 'Press', value: 'I want to open' },
           { question: 'Identity photo', column: 'common', flowId: 'account-opening-start', stepId: 'account-identity-upload', action: 'Press', value: 'Upload', detail: 'In the chat answer box, press "Upload", then pick a photo of yourself holding your ID.' },
@@ -19,7 +23,7 @@
           { question: 'Account complete', column: 'common', flowId: 'account-opening-start', stepId: 'account-br-selection', action: 'Wait', detail: 'Wait 1 second for verification and 3 seconds while the accounts open, then wait 5 seconds for the sign-in question.' },
           { question: 'Sign in choice', column: 'common', flowId: 'account-opening-start', stepId: 'account-sign-in-choice', action: 'Press one', values: ['Sign In', 'Maybe Later'], detail: 'One dialog shows both the question and "Please choose an option to continue."' },
           { question: 'Post sign-in analysis', column: 'common', flowId: 'account-opening-start', stepId: 'account-sign-in-choice', action: 'Wait', detail: 'If you press "Sign In", a persistent "Signed in." bubble appears before the 3-second "Analysing your data..." animation.' },
-          { question: 'International account follow-up', column: 'common', flowId: 'account-opening-start', stepId: 'account-other-country-offer', action: 'Press one', values: ['Yes', 'Maybe Later'], detail: 'If "Yes", a country switch answer box appears with HK fixed on. Pressing a switch expands confirmation under that row; after confirming, the app runs checking/analying messages and asks for consent to create Certificate of Incorporation.' }
+          { question: 'International account follow-up', column: 'common', flowId: 'account-opening-start', stepId: 'account-other-country-offer', action: 'Press one', values: ['Yes', 'Maybe Later'], command: 'send-text', detail: 'For this demo, press "Yes" to show the country account selector.' }
         ],
         controls: [
           'Press "I want to open".',
