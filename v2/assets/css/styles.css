@@ -1773,6 +1773,27 @@ a {
   letter-spacing: 0.14em;
 }
 
+.credit-card-collapsed-box {
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+.credit-card-collapsed-icon {
+  width: 18px;
+  height: 12px;
+  border-radius: 3px;
+  background: linear-gradient(135deg, #d70016 0%, #b00013 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+}
+
+.credit-card-collapsed-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(17, 24, 39, 0.86);
+}
+
 .passport-creation-overlay {
   position: absolute;
   inset: 0;
@@ -1952,6 +1973,54 @@ a {
   animation: passport-page-collapse-on-click 650ms ease-in forwards;
 }
 
+.credit-card-creation-wrap {
+  width: min(70vw, 260px);
+  height: min(45vw, 170px);
+  display: grid;
+  place-items: center;
+}
+
+.credit-card-creation-card {
+  width: min(62vw, 228px);
+  aspect-ratio: 1.58 / 1;
+  border-radius: 18px;
+  position: relative;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.26), transparent 55%),
+    linear-gradient(135deg, #d70016 0%, #7f0016 100%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 28px 48px rgba(127, 0, 22, 0.35);
+  display: grid;
+  opacity: 0;
+  transform: scale(0.2);
+  animation: credit-card-grow 5s ease-in-out forwards;
+}
+
+.credit-card-chip {
+  position: absolute;
+  top: 55px;
+  left: 20px;
+  width: 28px;
+  height: 22px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #f6d47b, #caa24b);
+  box-shadow: inset 0 0 0 1px rgba(98, 69, 20, 0.28);
+}
+
+.credit-card-brand {
+  position: absolute;
+  right: 18px;
+  bottom: 16px;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.passport-creation-overlay.is-collapsing .credit-card-creation-card {
+  animation: credit-card-collapse-on-click 650ms ease-in forwards;
+}
+
 @keyframes passport-overlay-dismiss {
   0%, 58% {
     opacity: 1;
@@ -2067,6 +2136,35 @@ a {
   100% {
     opacity: 0;
     transform: translate(var(--passport-collapse-x, -40px), var(--passport-collapse-y, 18px)) scale(var(--passport-collapse-scale, 0.56));
+  }
+}
+
+@keyframes credit-card-grow {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+
+  18% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes credit-card-collapse-on-click {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.35);
   }
 }
 

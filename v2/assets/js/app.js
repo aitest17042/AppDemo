@@ -40,6 +40,7 @@
     thinkingMessageId: null,
     currentTopicId: initialRouteState.initialTopicId || defaultTopicId || null,
     passportAnimationTimeoutId: null,
+    passportAnimationAutoCollapseId: null,
     passportBlockedMessages: []
   };
 
@@ -607,6 +608,24 @@
               selectedCard.querySelector('.header-product-switch').setAttribute('aria-checked', 'true');
             }
             removeThinkingMessage();
+
+            if (normalizeInput(pendingProduct) === 'credit card') {
+              queueAssistantMessages([
+                {
+                  type: 'credit-card-creation',
+                  content: 'Congratulations! Your Credit card is opened.',
+                  autoCollapseMs: 5000,
+                  delayMs: 0
+                },
+                {
+                  type: 'text',
+                  content: 'Your ' + pendingProduct + ' is opened.',
+                  delayMs: 0
+                }
+              ]);
+              return;
+            }
+
             state.messages.push(createAssistantMessage({ sender: 'ai', type: 'text', content: 'Your ' + pendingProduct + ' is opened.' }));
             renderMessages();
           }, 2000);
@@ -2142,7 +2161,7 @@
     var shouldActivateCountry = Boolean(message && message.activateCountryOnShown && message.countryCode);
     var activationCountryCode = shouldActivateCountry ? String(message.countryCode) : '';
 
-    if (messageType !== 'passport-creation' && phoneScreen.querySelector('.passport-creation-overlay')) {
+    if (messageType !== 'passport-creation' && messageType !== 'credit-card-creation' && phoneScreen.querySelector('.passport-creation-overlay')) {
       state.passportBlockedMessages.push(message);
       return;
     }
@@ -2350,6 +2369,13 @@
         '<div class="passport-collapsed-box">' +
           getNexPassportBrandMarkup() +
         '</div>';
+    } else if (message.type === 'credit-card-creation') {
+      bubble.className += ' passport-creation-bubble';
+      bubble.innerHTML =
+        '<div class="passport-collapsed-box credit-card-collapsed-box">' +
+          '<span class="credit-card-collapsed-icon" aria-hidden="true"></span>' +
+          '<span class="credit-card-collapsed-label">Credit Card</span>' +
+        '</div>';
     } else if (message.type === 'country-switch-selector') {
       bubble.className += ' country-switch-answer-bubble';
       bubble.innerHTML = '<p>' + formatChatText(message.content) + '</p>' + createCountrySwitchAnswerContent(message);
@@ -2432,7 +2458,11 @@
       variant = 'nex-passport';
     }
 
-    if (normalizedCountryCode && normalizedCountryCode !== 'HK' && variant === 'nex-passport') {
+    if (normalizedCountryCode && normalizedCountryCode !== 'HK') {
+      if (variant === 'country-stamp' || variant === 'country-opening') {
+        return variant;
+      }
+
       return 'country-opening';
     }
 
@@ -2453,6 +2483,11 @@
     if (state.passportAnimationTimeoutId) {
       window.clearTimeout(state.passportAnimationTimeoutId);
       state.passportAnimationTimeoutId = null;
+    }
+
+    if (state.passportAnimationAutoCollapseId) {
+      window.clearTimeout(state.passportAnimationAutoCollapseId);
+      state.passportAnimationAutoCollapseId = null;
     }
 
     blockedMessages = state.passportBlockedMessages.splice(0);
@@ -2507,6 +2542,7 @@
     var overlay = phoneScreen.querySelector('.passport-creation-overlay');
     var countryCode = (message && typeof message.countryCode === 'string' && message.countryCode) ? message.countryCode : 'HK';
     var variant = explicitVariant || getPassportAnimationVariant(countryCode);
+    var isCreditCardVariant = variant === 'credit-card';
     var isHongKong = countryCode.toUpperCase() === 'HK';
     var countryNames = {
       HK: 'Hong Kong',
@@ -2517,9 +2553,11 @@
       MY: 'Malaysia'
     };
     var accountType = (countryNames[countryCode.toUpperCase()] || countryCode.toUpperCase()) + ' Account';
-    var passportTitle = isHongKong
-      ? 'Congratulations!<br>Your NEX Passport is created'
-      : 'Congratulations!<br>A new visa is added to your NEX Passport.';
+    var passportTitle = isCreditCardVariant
+      ? 'Congratulations!<br>Your Credit card is opened.'
+      : (isHongKong
+        ? 'Congratulations!<br>Your NEX Passport is created'
+        : 'Congratulations!<br>A new visa is added to your NEX Passport.');
     var passportPages = '<div class="passport-creation-book">' +
       '<div class="passport-creation-page passport-creation-country-page">' +
         '<span class="passport-creation-account-type">' + escapeHtml(accountType) + '</span>' +
@@ -2527,6 +2565,12 @@
       '</div>' +
       '<div class="passport-creation-page passport-creation-cover">' +
         '<span class="passport-creation-cover-label">NEX<br><span>PASSPORT</span></span>' +
+      '</div>' +
+    '</div>';
+    var creditCardVisual = '<div class="credit-card-creation-wrap">' +
+      '<div class="credit-card-creation-card" aria-label="Credit card opened animation">' +
+        '<span class="credit-card-chip" aria-hidden="true"></span>' +
+        '<span class="credit-card-brand" aria-hidden="true">HSBC</span>' +
       '</div>' +
     '</div>';
 
@@ -2539,15 +2583,23 @@
     overlay.innerHTML =
       '<div class="passport-creation-scene">' +
         '<div class="passport-creation-title">' + passportTitle + '</div>' +
-        '<div class="passport-creation-page-wrap">' +
-          passportPages +
-        '</div>' +
+        (isCreditCardVariant
+          ? creditCardVisual
+          : ('<div class="passport-creation-page-wrap">' +
+              passportPages +
+            '</div>')) +
       '</div>';
 
     phoneScreen.appendChild(overlay);
     overlay.addEventListener('click', function () {
       collapsePassportAnimationOverlay(overlay);
     });
+
+    if (message && typeof message.autoCollapseMs === 'number' && message.autoCollapseMs > 0) {
+      state.passportAnimationAutoCollapseId = window.setTimeout(function () {
+        collapsePassportAnimationOverlay(overlay);
+      }, message.autoCollapseMs);
+    }
   }
 
   function getRenderableMessages() {
@@ -2604,15 +2656,18 @@
     }
 
     if (state.messages.some(function (message) {
-      return message && message.type === 'passport-creation' && !message._passportOverlayShown;
+      return message && (message.type === 'passport-creation' || message.type === 'credit-card-creation') && !message._celebrationOverlayShown;
     })) {
       var latestPassportMessage = state.messages.filter(function (message) {
-        return message && message.type === 'passport-creation' && !message._passportOverlayShown;
+        return message && (message.type === 'passport-creation' || message.type === 'credit-card-creation') && !message._celebrationOverlayShown;
       }).slice(-1)[0] || null;
 
       if (latestPassportMessage) {
-        showPassportAnimationOverlay(latestPassportMessage, getPassportAnimationVariant(latestPassportMessage.countryCode));
-        latestPassportMessage._passportOverlayShown = true;
+        var celebrationVariant = latestPassportMessage.type === 'credit-card-creation'
+          ? 'credit-card'
+          : getPassportAnimationVariant(latestPassportMessage.countryCode);
+        showPassportAnimationOverlay(latestPassportMessage, celebrationVariant);
+        latestPassportMessage._celebrationOverlayShown = true;
       }
     }
 
@@ -2804,7 +2859,7 @@
             return;
           }
 
-          if (response.type !== 'passport-creation' && phoneScreen.querySelector('.passport-creation-overlay')) {
+          if (response.type !== 'passport-creation' && response.type !== 'credit-card-creation' && phoneScreen.querySelector('.passport-creation-overlay')) {
             response.rewindSnapshot = rewindSnapshot;
             state.passportBlockedMessages.push(response);
             return;

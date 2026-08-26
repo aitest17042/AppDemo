@@ -40,7 +40,7 @@
   }
 
   function setSessionVariant(variantId) {
-    var safeVariant = variantId === 'country-stamp' || variantId === 'country-opening' || variantId === 'nex-passport'
+    var safeVariant = variantId === 'country-stamp' || variantId === 'country-opening' || variantId === 'nex-passport' || variantId === 'credit-card'
       ? variantId
       : 'nex-passport';
 
