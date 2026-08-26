@@ -546,7 +546,7 @@
   }
 
   function beginLoginLoading(delayMs) {
-    var loadingDelay = typeof delayMs === 'number' && delayMs >= 0 ? delayMs : 3000;
+    var loadingDelay = typeof delayMs === 'number' && delayMs >= 0 ? delayMs : 1000;
 
     if (authState.isLoading || authState.isLoggedIn) {
       return;
@@ -730,7 +730,7 @@
       action = actionTarget.getAttribute('data-auth-action');
 
       if (action === 'login') {
-        beginLoginLoading(3000);
+        beginLoginLoading(1000);
         return;
       }
 
@@ -2271,7 +2271,7 @@
 
     queueAssistantMessages([
       { type: 'thinking', content: 'Creating Certificate of Incorporation', delayMs: 0 },
-      { type: 'text', content: 'Certificate of Incorporation created.', delayMs: 2000 },
+      { type: 'text', content: 'Certificate of Incorporation created.\nID: 16XXXXXXX', delayMs: 2000 },
       { type: 'thinking', content: 'Opening ' + countryCode + ' account', delayMs: 2000 },
       {
         type: 'passport-creation',

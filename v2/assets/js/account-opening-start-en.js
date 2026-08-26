@@ -30,14 +30,14 @@ accountOpeningEntriesEn.push({
           { type: 'thinking', content: 'Opening Your Accounts', delayMs: 3000 },
           { type: 'passport-creation', content: 'Your NEX Passport is created', delayMs: 5000 },
           { type: 'text', content: 'Congratulations, your HK account is opened. Customer ID 1XXXXXXX', delayMs: 0 },
-          { type: 'text', actionPresentation: 'direct-reply', content: 'Would you like to sign in now to manage your account or continue later?\n\nPlease choose an option to continue.', actions: ['Sign In', 'Maybe Later'], delayMs: 0, delayAfterPassportCollapse: 5000 }
+          { type: 'text', actionPresentation: 'direct-reply', content: 'Would you like to sign in now to manage your account or continue later?\n\nPlease choose an option to continue.', actions: ['Sign In', 'Maybe Later'], delayMs: 0, delayAfterPassportCollapse: 2000 }
         ], nextStepId: 'account-sign-in-choice', skipNextPromptResponses: true }
       ] },
       { id: 'account-sign-in-choice', prompt: { type: 'text', actionPresentation: 'direct-reply', content: 'Would you like to sign in now to manage your account or continue later?\n\nPlease choose an option to continue.', actions: ['Sign In', 'Maybe Later'] }, routes: [
-        { action: 'Sign In', exactKeywords: ['sign in'], keywords: ['sign in', 'signin', 'log in', 'login'], autoSignIn: true, autoSignInDelayMs: 3000, responses: [
-          { type: 'thinking', content: 'Signing in', delayMs: 3000 },
+        { action: 'Sign In', exactKeywords: ['sign in'], keywords: ['sign in', 'signin', 'log in', 'login'], autoSignIn: true, autoSignInDelayMs: 1000, responses: [
+          { type: 'thinking', content: 'Signing in', delayMs: 1000 },
           { type: 'text', content: 'Signed in.', delayMs: 0 },
-          { type: 'thinking', content: 'Analysing your data', delayMs: 3000 },
+          { type: 'thinking', content: 'Analysing your data', delayMs: 2000 },
           { type: 'text', content: 'We see you have active trading with foreign countries, would you like me to open accounts in other countries for you?', actions: ['Yes', 'Maybe Later'], delayMs: 0 }
         ], nextStepId: 'account-other-country-offer', skipNextPromptResponses: true },
         { action: 'Maybe Later', exactKeywords: ['maybe later'], keywords: ['maybe later', 'later'], responses: [
